@@ -1,0 +1,168 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if cliente %}
+        Editar Cliente 
+    {% else %}
+        Agregar Cliente
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/clientes.css' %}" />
+<style>
+	.cliente-form {
+		background: #fff;
+		padding: 2rem;
+		border-radius: 12px;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	}
+
+	.form-container {
+		background: white;
+		border-radius: 15px;
+		padding: 30px;
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+	}
+
+	.form-group {
+		margin-bottom: 20px;
+	}
+
+	.form-group label {
+		display: block;
+		color: #333;
+		font-weight: 600;
+		margin-bottom: 8px;
+	}
+
+	.form-group input[type="text"],
+	.form-group input[type="number"],
+	.form-group input[type="file"],
+	.form-group textarea,
+	.form-group select {
+		width: 100%;
+		padding: 12px;
+		border: 2px solid #e0e0e0;
+		border-radius: 8px;
+		font-size: 1em;
+		font-family: inherit;
+	}
+
+	.form-group textarea {
+		min-height: 120px;
+		resize: vertical;
+	}
+
+	.form-group input:focus,
+	.form-group textarea:focus,
+	.form-group select:focus {
+		outline: none;
+		border-color: #667eea;
+	}
+
+    .form-group.checkbox-field {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .form-group.checkbox-field label {
+        margin: 0;
+        order: 2;
+        font-weight: normal;
+    }
+
+    .form-group.checkbox-field input[type="checkbox"] {
+        width: auto;
+        order: 1;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+	
+
+	.btn {
+		display: inline-block;
+		padding: 0.7rem 1.4rem;
+		border-radius: 8px;
+		text-decoration: none;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.btn-primary {
+		background-color: #007bff;
+		color: #fff;
+		border: none;
+	}
+
+	.btn-secondary {
+		background-color: #ddd;
+		color: #333;
+	}
+
+	.btn-primary:hover {
+		background-color: #0069d9;
+	}
+
+	.btn-secondary:hover {
+		background-color: #ccc;
+	}
+
+	.errorlist {
+		color: #c00;
+		font-size: 0.9rem;
+		margin-top: 0.3rem;
+	}
+</style>
+{% endblock %} {% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>{% if cliente %} ✏️ Editar Cliente {% else %} ➕ Agregar Cliente {% endif %}</h1>
+		<a href="{% url 'clientes' %}" class="btn btn-secondary">← Volver</a>
+	</div>
+
+	<div class="form-container">
+		<form method="post" class="cliente-form">
+			{% csrf_token %}
+            
+            {% for field in form %}
+                {% if field.field.widget.input_type == 'checkbox' %}
+                    <!-- Renderizado especial para checkboxes -->
+                    <div class="form-group checkbox-field">
+                        {{ field }}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {% if field.errors %}
+                            <div class="errorlist">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }} {% if field.errors %}
+                        <div class="errorlist">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+			{% endfor %}
+
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary">💾 Guardar</button>
+				<a href="{% url 'clientes' %}" class="btn btn-secondary">Cancelar</a>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,39 @@
+@import url('style_admin.css');
+
+h4 {
+    display: flex;
+    justify-content: flex;
+    padding-left: 35%;
+    margin-left: 35%;
+}
+
+.style {
+    width: 30%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    color: white;
+}
+
+.contForm {
+    display: flex;
+    justify-content: space-around;
+}
+
+form {
+    color: white;
+}
+
+fieldset {
+    display: flex;
+    flex-direction: column;
+}
+
+textarea {
+    margin-bottom: 2rem;
+}
+
+legend{
+    background-color: rgb(153, 2, 2);
+    color: white;
+}

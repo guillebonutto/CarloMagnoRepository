@@ -1,0 +1,45 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Gestión de Colores{% endblock %}
+{%block extra_css %}
+<link rel="stylesheet" href="{% static 'css/colores.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>Gestión de Colores</h1>
+		<a href="{% url 'agregar_color' %}" class="btn btn-primary">+ Nuevo Color</a>
+	</div>
+
+	{% if colores %}
+	<div class="colors-grid">
+		{% for color in colores %}
+		<div class="color-card">
+			<div class="color-preview" style="background-color: {{ color.hex_code }};">🎨</div>
+			<div class="color-info">
+				<h3>{{ color.nombre }}</h3>
+				<span class="hex-code">{{ color.hex_code }}</span>
+				<p class="color-stats">📦 Usado en {{ color.productos.count }} productos</p>
+
+				<div class="actions">
+					<a href="/admin/productos/color/{{ color.id }}/change/" class="btn-edit"
+						>✏️ Editar</a
+					>
+					<a href="/admin/productos/color/{{ color.id }}/delete/" class="btn-delete"
+						>🗑️ Eliminar</a
+					>
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	{% else %}
+	<div class="empty-state">
+		<h2>No hay colores registrados</h2>
+	</div>
+	{% endif %}
+</div>
+{% load static %}
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

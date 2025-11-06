@@ -1,0 +1,15 @@
+@import url('style_admin.css');
+
+.products-table {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.product-img {
+    width: 50px;
+    height: 62.5px;
+    object-fit: cover;
+    border-radius: 5px;
+}

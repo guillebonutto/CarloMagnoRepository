@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+	<!DOCTYPE html>
+	<html lang="es">
+		<head>
+			<meta charset="UTF-8" />
+			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+			<title>{% block title %}{% endblock %}</title>
+			<link
+				href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+				rel="stylesheet"
+				integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+				crossorigin="anonymous"
+			/>
+			<link
+				rel="stylesheet"
+				href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+				integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+				crossorigin="anonymous"
+				referrerpolicy="no-referrer"
+			/>
+			{% block extra_css %}
+            {% endblock %}
+		</head>
+		<body>
+			<header>
+				<div class="sidebar">
+					<h2>🛍️ Carlo Magno</h2>
+					<nav>
+						<div class="iconoFontAwe {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+							<i class="fa-solid fa-home"></i>
+							<a href="{% url 'dashboard' %}">Inicio</a>
+						</div>
+						<h6>VENDER</h6>
+						<div class="menu-pedidos">
+							<div class="iconoFontAwe">
+								<i class="fa fa-list" aria-hidden="true"></i>
+								<a href="javascript:void(0)" class="main-link" id="toggle-pedidos"
+									>Pedidos ▾</a>
+							</div>
+							<div class="submenu-pedidos" id ="submenu-pedidos">
+								<a href="">🧾 Ver Pedidos</a>
+								<a href="">➕ Crear Pedido</a>
+							</div>
+						</div>
+						<div class="menu-catalogos">
+							<div class="iconoFontAwe">
+								<i class="fa fa-list" aria-hidden="true"></i>
+								<a href="javascript:void(0)" class="main-link" id="toggle-catalogos"
+									>Catálogo ▾</a
+								>
+							</div>
+							<div class="submenu-catalogos" id ="submenu-catalogos">
+								<a href="{% url 'admin_productos' %}" class="{% if request.resolver_match.url_name == 'admin_productos' %}active{% endif %}">📦 Productos</a>
+								<a href="{% url 'categorias' %}" class="{% if request.resolver_match.url_name == 'categorias' %}active{% endif %}">📁 Categorías</a>
+								<a href="{% url 'colores' %}" class="{% if request.resolver_match.url_name == 'colores' %}active{% endif %}">🎨 Colores</a>
+								<a href="{% url 'marcas' %}" class="{% if request.resolver_match.url_name == 'marcas' %}active{% endif %}">🏷️ Marcas y Proovedores</a>
+								<a href="{% url 'talles' %}" class="{% if request.resolver_match.url_name == 'talles' %}active{% endif %}">📏 Talles</a>
+								<a href="{% url 'stock' %}" class="{% if request.resolver_match.url_name == 'stock' %}active{% endif %}">📊 Stock</a>
+							</div>
+						</div>
+						<div class="menu-clientes">
+							<div class="iconoFontAwe">
+								<i class="fa-solid fa-user"></i>
+								<a href="javascript:void(0)" class="main-link" id="toggle-clientes"
+									>Clientes ▾</a
+								>
+							</div>
+							<div class="submenu-clientes" id="submenu-clientes">
+								<a href="{% url 'clientes' %}">📦 Clientes</a>
+								<a href="{% url 'direcciones' %}">📁 Direcciones</a>
+							</div>
+						</div>
+						<a href="/admin/" target="_blank">⚙️ Admin Django</a>
+						<a href="{% url 'home' %}">🏠 Ver sitio</a>
+					</nav>
+				</div>
+			</header>
+			<main>
+                {% block content %}{% endblock %}
+            </main>
+		</body>
+	</html>
+</html>

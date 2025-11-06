@@ -1,0 +1,81 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Dashboard - Panel deAdministración{% endblock %}
+{%block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>Bienvenido, {{ user.username }} 👋</h1>
+		<a href="{% url 'logout' %}" class="logout-btn">Cerrar Sesión</a>
+	</div>
+
+	<div class="stats-grid">
+		<div class="stat-card">
+			<div class="icon">👔</div>
+			<div class="number">{{ total_products }}</div>
+			<div class="label">Productos</div>
+		</div>
+
+		<div class="stat-card">
+			<div class="icon">📁</div>
+			<div class="number">{{ total_categories }}</div>
+			<div class="label">Categorías</div>
+		</div>
+
+		<div class="stat-card">
+			<div class="icon">🎨</div>
+			<div class="number">{{ total_colors }}</div>
+			<div class="label">Colores</div>
+		</div>
+
+		<div class="stat-card">
+			<div class="icon">🏷️</div>
+			<div class="number">{{ total_brands }}</div>
+			<div class="label">Marcas</div>
+		</div>
+
+		<div class="stat-card">
+			<div class="icon">⚠️</div>
+			<div class="number">{{ low_stock }}</div>
+			<div class="label">Stock Bajo</div>
+		</div>
+	</div>
+
+	<div class="recent-products">
+		<h2>Productos Recientes</h2>
+		{% for producto in recent_products %}
+		<div class="product-item">
+			{% if producto.imagen %}
+			<img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" />
+			{% else %}
+			<div
+				style="
+					width: 60px;
+					height: 75px;
+					background: #f0f0f0;
+					border-radius: 8px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					margin-right: 15px;
+				"
+			>
+				📦
+			</div>
+			{% endif %}
+			<div class="product-info">
+				<h3>{{ producto.nombre }}</h3>
+				<p>{{ producto.categoria.nombre }} - ${{ product.precio }}</p>
+			</div>
+		</div>
+		{% empty %}
+		<p style="text-align: center; color: #999">No hay productos aún</p>
+		{% endfor %}
+	</div>
+</div>
+{% load static %}
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

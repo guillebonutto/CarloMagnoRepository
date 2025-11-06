@@ -1,0 +1,113 @@
+.container {
+    display: flex;
+    justify-content: space-around;
+	margin: 0 auto;
+}
+
+.carrito {
+    display: none;
+    position: fixed;
+}
+
+.filters {
+	background: white;
+	padding: 25px;
+	border-radius: 15px;
+	box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+	margin: 30px 0px;
+}
+
+.filters h3 {
+	color: #333;
+	margin-bottom: 20px;
+	font-size: 1.3em;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.filter-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 20px;
+}
+
+.filter-group label {
+	font-weight: 600;
+	color: #555;
+	margin-right: 10px;
+	display: block;
+	width: 100%;
+	margin-bottom: 5px;
+}
+
+.filter-btn {
+	padding: 8px 18px;
+	border: 2px solid #667eea;
+	background: white;
+	color: #667eea;
+	border-radius: 25px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	font-weight: 600;
+	text-decoration: none;
+	display: inline-block;
+}
+
+.filter-btn:hover {
+	background: #667eea;
+	color: white;
+	transform: translateY(-2px);
+}
+
+.filter-btn.active {
+	background: #667eea;
+	color: white;
+}
+
+.clear-filters {
+	background: #f44336;
+	color: white;
+	border: none;
+	padding: 10px 25px;
+	border-radius: 25px;
+	cursor: pointer;
+	font-weight: 600;
+	transition: all 0.3s ease;
+}
+
+.clear-filters:hover {
+	background: #d32f2f;
+	transform: translateY(-2px);
+}
+
+.lista-productos {
+    margin: 3rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 50px;
+}
+
+.imgProducto {
+    margin: 3%;
+    width: 226px;
+}
+
+.producto-card{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white;
+    width: 15rem;
+}
+
+.producto-card .precio {
+    font-weight: bold;
+}
+
+.producto-card:hover {
+	transform: translateY(-10px);
+	box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}

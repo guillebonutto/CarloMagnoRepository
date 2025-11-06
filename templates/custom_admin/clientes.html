@@ -1,0 +1,75 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Gestión de Clientes{% endblock %}
+{%block extra_css %}
+<link rel="stylesheet" href="{% static 'css/clientes.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>Gestión de Clientes</h1>
+		<a href="{% url 'agregar_cliente' %}" class="btn btn-primary">+ Nuevo Cliente</a>
+	</div>
+
+	{% if clientes %}
+	<div class="customers-table">
+		<table>
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Tratamiento</th>
+					<th>Nombre</th>
+					<th>Apellidos</th>
+					<th>Email</th>
+					<th>Grupo</th>
+					<th>Ventas</th>
+					<th>Activado</th>
+					<th>Boletín</th>
+					<th>Ofertas</th>
+					<th>Registro</th>
+					<th>Última Visita</th>
+					<th>Acciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for cliente in clientes %}
+				<tr>
+					<td><strong>#{{ cliente.id }}</strong></td>
+					<td>{{ cliente.get_tratamiento_display }}</td>
+					<td>{{ cliente.nombre }}</td>
+					<td>{{ cliente.apellidos }}</td>
+					<td>{{ cliente.email }}</td>
+					<td>{{ cliente.grupo.nombre|default:"-" }}</td>
+					<td><strong>${{ cliente.ventas_totales }}</strong></td>
+					<td>
+						{% if cliente.activado %}
+						<span class="status-badge status-active">✓ Activo</span>
+						{% else %}
+						<span class="status-badge status-inactive">✗ Inactivo</span>
+						{% endif %}
+					</td>
+					<td class="checkbox-icon">{% if cliente.boletin %}✅{% else %}❌{% endif %}</td>
+					<td class="checkbox-icon">
+						{% if cliente.ofertas_asociados %}✅{% else %}❌{% endif %}
+					</td>
+					<td>{{ cliente.fecha_registro|date:"d/m/Y" }}</td>
+					<td>{{ cliente.ultima_visita|date:"d/m/Y H:i"|default:"-" }}</td>
+					<td>
+						<a href="{% url 'editar_customer' cliente.id %}" class="btn-edit">✏️</a>
+						<a href="{% url 'eliminar_customer' cliente.id %}" class="btn-delete">🗑️</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% else %}
+	<div class="empty-state">
+		<h2>No hay clientes registrados</h2>
+	</div>
+	{% endif %}
+</div>
+{% load static %}
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Gestión de Productos{% endblock %}
+{%block extra_css %}
+<link rel="stylesheet" href="{% static 'css/categorias.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>Gestión de Categorías</h1>
+		<a href="{% url 'agregar_categoria' %}" class="btn btn-primary">+ Nueva Categoría</a>
+	</div>
+
+	{% if categories %}
+	<div class="categories-grid">
+		{% for categoria in categories %}
+		<div class="category-card">
+			<h3>📁 {{ categoria.nombre }}</h3>
+			<p>{{ categoria.descripcion|default:"Sin descripción" }}</p>
+
+			<div class="category-stats">
+				<span class="stat">📦 {{ categoria.productos.count }} productos</span>
+			</div>
+
+			<div class="actions">
+				<a href="/admin/products/category/{{ categoria.id }}/change/" class="btn-edit"
+					>✏️ Editar</a
+				>
+				<a href="/admin/products/category/{{ categoria.id }}/delete/" class="btn-delete"
+					>🗑️ Eliminar</a
+				>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	{% else %}
+	<div class="empty-state">
+		<h2>No hay categorías registradas</h2>
+	</div>
+	{% endif %}
+</div>
+{% load static %}
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

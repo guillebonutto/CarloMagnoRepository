@@ -1,0 +1,54 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Gestión de Talles{% endblock %}
+{%block extra_css %}
+<link rel="stylesheet" href="{% static 'css/talles.css' %}" />
+{% endblock %}
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>Gestión de Talles</h1>
+		<a href="{% url 'agregar_talle' %}" class="btn btn-primary">+ Nuevo Talle</a>
+	</div>
+
+	{% if talles %}
+	<div class="talles-table">
+		<table>
+			<thead>
+				<tr>
+					<th>Abreviatura</th>
+					<th>Nombre Completo</th>
+					<th>Orden</th>
+					<th>En Productos</th>
+					<th>Acciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for talle in talles %}
+				<tr>
+					<td>
+						<span class="talle-badge">{{ talle.abbreviation }}</span>
+					</td>
+					<td><strong>{{ talle.nombre }}</strong></td>
+					<td>
+						<span class="order-badge">{{ talle.order }}</span>
+					</td>
+					<td>{{ talle.productos.count }} productos</td>
+					<td>
+						<a href="{% url 'editar_talle' talle.id %}" class="btn-edit">✏️ Editar</a>
+						<a href="{% url 'eliminar_talle' talle.id %}" class="btn-delete">🗑️ Eliminar</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% else %}
+	<div class="empty-state">
+		<h2>No hay talles registrados</h2>
+	</div>
+	{% endif %}
+</div>
+{% load static %}
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

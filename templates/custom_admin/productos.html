@@ -1,0 +1,80 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Gestión de Productos{% endblock %}
+{%block extra_css %}
+<link rel="stylesheet" href="{% static 'css/productos_admin.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>Gestión de Productos</h1>
+		<a href="{% url 'agregar_producto' %}" class="btn btn-primary">+ Nuevo Producto</a>
+	</div>
+	{% if productos %}
+	<div class="products-table">
+		<table>
+			<thead>
+				<tr>
+					<th>Imagen</th>
+					<th>Nombre</th>
+					<th>Categoría</th>
+					<th>Marca</th>
+					<th>Precio</th>
+					<th>Fecha</th>
+					<th>Acciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for producto in productos %}
+				<tr>
+					<td>
+						{% if producto.imagen %}
+						<img
+							src="{{ producto.imagen.url }}"
+							alt="{{ producto.nombre }}"
+							class="product-img"
+						/>
+						{% else %}
+						<div
+							style="
+								width: 50px;
+								height: 62.5px;
+								background: #f0f0f0;
+								border-radius: 5px;
+								display: flex;
+								align-items: center;
+								justify-content: center;
+							"
+						>
+							📦
+						</div>
+						{% endif %}
+					</td>
+					<td><strong>{{ producto.nombre }}</strong></td>
+					<td>{{ producto.categoria.nombre }}</td>
+					<td>{{ producto.marca.nombre|default:"Sin marca" }}</td>
+					<td><strong>${{ producto.precio }}</strong></td>
+					<td>{{ producto.created_at|date:"d/m/Y" }}</td>
+					<td>
+						<a href="/admin/productos/producto/{{ producto.id }}/change/" class="btn-edit"
+							>✏️ Editar</a
+						>
+						<a href="/admin/productos/producto/{{ producto.id }}/delete/" class="btn-delete"
+							>🗑️ Eliminar</a
+						>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% else %}
+	<div class="empty-state">
+		<h2>No hay productos registrados</h2>
+	</div>
+	{% endif %}
+</div>
+{% load static %}
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

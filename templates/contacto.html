@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Contacto - Carlo Magno{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}" />
+<link rel="stylesheet" href="{% static 'css/contacto.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div>
+	<h4>Registrate en nuestra página</h4>
+
+	<div class="contForm">
+		<div class="style">
+			<h5>Datos sobre nosotros</h5>
+			<address>Nuestro número <a href="tel: +549351466171">3516681071</a></address>
+			<address>Visitanos en nuestro local en <strong>Rivadavia 150 Local 2</strong></address>
+			<address>Nuestro mail <strong>Carlomagnocordoba@gmail.com</strong></address>
+		</div>
+
+		<form class="form formulario">
+			<fieldset>
+				<legend>Formulario</legend>
+				<label for="nombre">nomnbre</label>
+				<input type="nombre" name="nombre" id="nombre" />
+				<label for="number">numero</label>
+				<input type="number" name="number" id="number" />
+				<label for="email">mail</label>
+				<input type="email" name="email" id="email" />
+				<label for="comentario">comentario</label>
+				<textarea name="comentario" id="comentario"></textarea>
+
+				<input type="submit" value="Enviar" />
+			</fieldset>
+		</form>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/script.js' %}"></script>
+{% endblock %}

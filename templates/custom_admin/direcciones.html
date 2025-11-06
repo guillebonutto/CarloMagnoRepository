@@ -1,0 +1,78 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Gestión de Direcciones{% endblock %}
+{%block extra_css %}
+<link rel="stylesheet" href="{% static 'css/direcciones.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>Gestión de Direcciones</h1>
+		<a href="{% url 'agregar_direccion' %}" class="btn btn-primary">+ Nueva Dirección</a>
+	</div>
+
+	{% if direcciones %}
+	<div class="addresses-table">
+		<table>
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Cliente</th>
+					<th>Nombre</th>
+					<th>Apellidos</th>
+					<th>Dirección</th>
+					<th>Código Postal</th>
+					<th>Ciudad</th>
+					<th>País</th>
+					<th>Teléfono</th>
+					<th>Predeterminada</th>
+					<th>Acciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for direccion in direcciones %}
+				<tr>
+					<td><strong>#{{ direccion.id }}</strong></td>
+					<td>
+						<a
+							href="{% url 'edit_customer' direccion.cliente.id %}"
+							style="color: #667eea; text-decoration: none"
+						>
+							{{ direccion.cliente.nombre }} {{ direccion.cliente.apellidos }}
+						</a>
+					</td>
+					<td>{{ direccion.nombre }}</td>
+					<td>{{ direccion.apellidos }}</td>
+					<td>
+						<div class="address-text" title="{{ direccion.direccion }}">
+							{{ direccion.direccion }}
+						</div>
+					</td>
+					<td>{{ direccion.codigo_postal }}</td>
+					<td>{{ direccion.ciudad }}</td>
+					<td>{{ direccion.pais }}</td>
+					<td>{{ direccion.telefono|default:"-" }}</td>
+					<td>
+						{% if direccion.es_predeterminada %}
+						<span class="default-badge">★ Principal</span>
+						{% else %} - {% endif %}
+					</td>
+					<td>
+						<a href="{% url 'editar_direccion' direccion.id %}" class="btn-edit">✏️</a>
+						<a href="{% url 'eliminar_direccion' direccion.id %}" class="btn-delete">🗑️</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% else %}
+	<div class="empty-state">
+		<h2>No hay direcciones registradas</h2>
+	</div>
+	{% endif %}
+</div>
+{% load static %}
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

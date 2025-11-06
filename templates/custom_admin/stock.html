@@ -1,0 +1,72 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Gestión de Stock{% endblock %}
+{%block extra_css %}
+<link rel="stylesheet" href="{% static 'css/stock.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>Gestión de Stock</h1>
+		<a href="/admin/products/product/" class="btn btn-primary">Ver en Admin</a>
+	</div>
+
+	{% if stock_items %}
+	<div class="stock-table">
+		<table>
+			<thead>
+				<tr>
+					<th>Producto</th>
+					<th>Color</th>
+					<th>Talle</th>
+					<th>Stock</th>
+					<th>Estado</th>
+					<th>Acciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in stock_items %}
+				<tr>
+					<td><strong>{{ item.producto.nombre }}</strong></td>
+					<td>
+						<span class="color-badge">
+							<span
+								class="color-dot"
+								style="background-color: {{ item.color.hex_code }};"
+							></span>
+							{{ item.color.nombre }}
+						</span>
+					</td>
+					<td>
+						<span class="size-badge">{{ item.talle.abbreviation }}</span>
+					</td>
+					<td><strong>{{ item.stock }}</strong> unidades</td>
+					<td>
+						{% if item.stock == 0 %}
+						<span class="stock-status stock-out">❌ Sin stock</span>
+						{% elif item.stock < 5 %}
+						<span class="stock-status stock-low">⚠️ Stock bajo</span>
+						{% else %}
+						<span class="stock-status stock-available">✅ Disponible</span>
+						{% endif %}
+					</td>
+					<td>
+						<a href="/admin/products/productstock/{{ item.id }}/change/" class="btn-edit"
+							>✏️ Editar</a
+						>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% else %}
+	<div class="empty-state">
+		<h2>No hay stock registrado</h2>
+	</div>
+	{% endif %}
+</div>
+{% load static %}
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

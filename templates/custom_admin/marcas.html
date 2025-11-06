@@ -1,0 +1,53 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Gestión de Marcass{% endblock %}
+{%block extra_css %}
+<link rel="stylesheet" href="{% static 'css/marcas.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>Gestión de Marcas</h1>
+		<a href="{% url 'agregar_marca' %}" class="btn btn-primary">+ Nueva Marca</a>
+	</div>
+
+	{% if marcas %}
+	<div class="marca-grid">
+		{% for marca in marcas %}
+		<div class="marca-card">
+			<div class="marca-logo">
+				{% if marca.logo %}
+				<img src="{{ marca.logo.url }}" alt="{{ marca.nombre }}" />
+				{% else %}
+				<span class="marca-logo-placeholder">🏷️</span>
+				{% endif %}
+			</div>
+
+			<h3>{{ marca.nombre }}</h3>
+			<p>{{ marca.descripcion|default:"Sin descripción" }}</p>
+
+			{% if marca.website %}
+			<a href="{{ marca.website }}" target="_blank" class="marca-website"
+				>🔗 {{ marca.website }}</a
+			>
+			{% endif %}
+
+			<p class="marca-stats">📦 {{ marca.productos.count }} productos</p>
+
+			<div class="actions">
+				<a href="{% url 'editar_marca' marca.id %}" class="btn-edit">✏️ Editar</a>
+				<a href="{% url 'eliminar_marca' marca.id %}" class="btn-delete">🗑️ Eliminar</a>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	{% else %}
+	<div class="empty-state">
+		<h2>No hay marcas registradas</h2>
+	</div>
+	{% endif %}
+</div>
+{% load static %}
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

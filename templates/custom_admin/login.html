@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Panel de Administración</title>
+    {%block extra_css %}
+    <link rel="stylesheet" href="login.css">
+    {% endblock %}
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>🛍️ Carlo Magno</h1>
+            <p>Panel de Administración</p>
+        </div>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="username">👤 Usuario</label>
+                <input type="text" id="username" name="username" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password">🔒 Contraseña</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn-login">
+                Iniciar Sesión
+            </button>
+        </form>
+
+        <div class="back-link">
+            <a href="{% url 'home' %}">← Volver al sitio</a>
+        </div>
+    </div>
+</body>
+</html>

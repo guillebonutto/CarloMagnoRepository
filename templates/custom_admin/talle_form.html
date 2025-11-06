@@ -1,0 +1,55 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}{{title}}{% endblock %}
+{%block extra_css %}
+<link rel="stylesheet" href="{% static 'css/talle_form.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>{{ title }}</h1>
+	</div>
+
+	<div class="form-container">
+		<form method="POST">
+			{% csrf_token %}
+
+			<div class="form-group">
+				<label for="{{ form.abbreviation.id_for_label }}">Abreviatura del Talle *</label>
+				{{ form.abbreviation }}
+				<small>Ejemplo: XS, S, M, L, XL</small>
+				{{ form.abbreviation.errors }}
+			</div>
+
+			<div class="form-group">
+				<label for="{{ form.nombre.id_for_label }}">Nombre Completo *</label>
+				{{ form.nombre }}
+				<small>Ejemplo: Extra Small, Small, Medium, Large</small>
+				{{ form.nombre.errors }}
+			</div>
+
+			<div class="form-group">
+				<label for="{{ form.order.id_for_label }}">Orden de visualización</label>
+				{{ form.order }}
+				<small>Número para ordenar la lista de talles (menor = primero)</small>
+				{{ form.order.errors }}
+			</div>
+
+			<div class="size-preview">
+				<p style="color: #666; margin-bottom: 10px">Vista previa:</p>
+				<span class="size-preview-badge" id="size-preview">?</span>
+			</div>
+
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary">Guardar Talle</button>
+				<a href="{% url 'talles' %}" class="btn btn-secondary">Cancelar</a>
+			</div>
+		</form>
+	</div>
+</div>
+
+{% load static %}
+<script src="{% static 'js/talle_form.js' %}"></script>
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

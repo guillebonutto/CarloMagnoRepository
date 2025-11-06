@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Productos - Carlo Magno{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}" />
+<link rel="stylesheet" href="{% static 'css/producto.css' %}" />
+{% endblock %}
+<body>
+	{% block content %}
+	<div class="container">
+		<div class="filters">
+            <h3>🔍 Filtros</h3>
+            
+            <div class="filter-group">
+                <label>Categorías:</label>
+                <a href="{% url 'productos' %}" class="filter-btn {% if not selected_categoria %}active{% endif %}">
+                    Todas
+                </a>
+                {% for categoria in categorias %}
+                <a href="?categoria={{ categoria.id }}{% if selected_color %}&color={{ selected_color }}{% endif %}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+                    class="filter-btn {% if selected_categoria == categoria.id|stringformat:'s' %}active{% endif %}">
+                    {{ categoria.nombre }}
+                </a>
+                {% endfor %}
+            </div>
+
+            <div class="filter-group">
+                <label>Colores:</label>
+                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+                    class="filter-btn {% if not selected_color %}active{% endif %}">
+                    Todos
+                </a>
+                {% for color in colores %}
+                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}color={{ color.id }}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+                    class="filter-btn {% if selected_color == color.id|stringformat:'s' %}active{% endif %}"
+                    style="display: inline-flex; align-items: center; gap: 5px;">
+                    <span style="width: 15px; height: 15px; background: {{ color.hex_code }}; border-radius: 50%; border: 1px solid #ddd;"></span>
+                    {{ color.name }}
+                </a>
+                {% endfor %}
+            </div>
+
+            <div class="filter-group">
+                <label>Talles:</label>
+                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+                    class="filter-btn {% if not selected_talle %}active{% endif %}">
+                    Todos
+                </a>
+                {% for size in sizes %}
+                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}size={{ size.id }}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+                    class="filter-btn {% if selected_talle == size.id|stringformat:'s' %}active{% endif %}">
+                    {{ size.abbreviation }}
+                </a>
+                {% endfor %}
+            </div>
+
+            <div class="filter-group">
+                <label>Marcas:</label>
+                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}{% endif %}" 
+                    class="filter-btn {% if not selected_marca %}active{% endif %}">
+                    Todas
+                </a>
+                {% for marca in marcas %}
+                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}marca={{ marca.id }}" 
+                    class="filter-btn {% if selected_marca == marca.id|stringformat:'s' %}active{% endif %}">
+                    {{ marca.nombre }}
+                </a>
+                {% endfor %}
+            </div>
+
+            {% if selected_categoria or selected_color or selected_talle or selected_marca %}
+            <a href="{% url 'productos' %}" class="clear-filters">
+                Limpiar Filtros
+            </a>
+            {% endif %}
+        </div>
+		{% if productos %}
+        <div class="lista-productos">
+			{% for producto in productos %}
+            <div class="producto-card">
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-producto" />
+                <h2>{{ producto.nombre }}</h2>
+                <p class="precio">{{ producto.precio }}</p>
+                <a href="" class="btn btn-primary text-light">Añadir al carrito</a>
+            </div>
+			{% endfor %}
+		</div>
+		{% else %}
+		<div class="no-products">
+			<h2>No se encontraron productos</h2>
+			<p>
+				{% if selected_categoria %}No hay productos en esta categoría{% else %}Aún no hay
+				productos cargados{% endif %}
+			</p>
+			{% if selected_categoria %}
+			<a href="{% url 'productos' %}" class="clear-filters"> Ver todos los productos </a>
+			{% endif %}
+		</div>
+		{% endif %}
+
+		<!-- <div class="containerCards">
+
+            {% if productos %}
+            <div class="products-grid">
+                {% for producto in productos %}
+                <div class="product-card">
+                    {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-image">
+                    {% else %}
+                    <div class="product-image" style="display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999; font-size: 3em;">
+                        📦
+                    </div>
+                    {% endif %}
+
+                    <div class="product-info">
+                        <span class="product-category">{{ producto.categoria.nombre }}</span>
+                        <h2 class="product-name">{{ producto.nombre }}</h2>
+                        <p class="product-description">{{ producto.descripcion }}</p>
+
+                        {% with colores=producto.get_colores_disponibles %}
+                        {% if colores %}
+                        <div class="product-colors">
+                            <small style="width: 100%; color: #666; font-weight: 600;">Colores:</small>
+                            {% for color in colores %}
+                            <div class="color-dot" 
+                                style="background-color: {{ color.hex_code }}; {% if color.hex_code == '#FFFFFF' or color.hex_code == '#ffffff' %}border: 2px solid #ddd;{% endif %}"
+                                title="{{ color.nombre }}"></div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+
+                        {% with sizes=producto.get_talles_disponibles %}
+                        {% if talles %}
+                        <div class="producto-talles">
+                            <small style="width: 100%; color: #666; font-weight: 600;">Talles:</small>
+                            {% for size in sizes %}
+                            <span class="size-badge">{{ size }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-products">
+                <h2>No se encontraron productos</h2>
+                <p>{% if selected_categoria %}No hay productos en esta categoría{% else %}Aún no hay productos cargados{% endif %}</p>
+                {% if selected_categoria %}
+                <a href="{% url 'productos' %}" class="clear-filters">
+                    Ver todos los productos
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div> -->
+	</div>
+	{% endblock %}
+</body>
+
+<!-- <!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir y Ajustar Imágenes - Carlo Magno</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="producto.css">
+</head>
+
+<body>
+
+    <header class="d-flex justify-content-between px-3 py-2">
+        <h1 class="titulo">Carlo Magno</h1>
+
+        <nav class="navSoporte">
+            <a href="index.html">Inicio</a>
+
+            <a href="#">Producto</a>
+
+            <a href="contacto.html">Contacto</a>
+        </nav>
+
+    </header>
+    <main>
+        <div id="Venta">
+            <label for="catelogoria">Catelogoria</label>
+            <select name="catelogoria" id="filtro">
+                <option value="sacos">Sacos</option>
+                <option value="remeras">Remeras</option>
+                <option value="buzo">Buzo</option>
+                <option value="camisa">Camisa</option>
+                <option value="shins">Shins</option>
+            </select>
+
+            <label for="talle">Talle</label>
+            <select name="talle" id="talle">
+                <option value="s">S</option>
+                <option value="m">M</option>
+                <option value="l">L</option>
+                <option value="xl">XL</option>
+                <option value="xxl">XXL</option>
+
+            </select>
+            <label for="color">Color</label>
+            <select name="color" id="color">
+                <option value="rojo">Rojo</option>
+                <option value="negro">Negro</option>
+                <option value="blanco">Blanco</option>
+
+            </select>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
+    <script src="producto.js"></script>
+</body>
+
+</html> -->
