@@ -80,10 +80,10 @@ urlpatterns = [
     path('panel/direcciones/<int:pk>/eliminar/', admin_views.eliminar_direccion, name='eliminar_direccion'),
 
     # ========== AUTENTICACIÓN DE CLIENTES (NUEVO) ==========
-    # path('registro/', cliente_auth.registro_cliente, name='registro_cliente'),
-    # path('login/', cliente_auth.login_cliente, name='login_cliente'),
-    # path('logout/', cliente_auth.logout_cliente, name='logout_cliente'),
-    # path('perfil/', cliente_auth.perfil_cliente, name='perfil_cliente'),
+    path('registro/', cliente_auth.registro_cliente, name='registro_cliente'),
+    path('login/', cliente_auth.login_cliente, name='login_cliente'),
+    path('logout/', cliente_auth.logout_cliente, name='logout_cliente'),
+    path('perfil/', cliente_auth.perfil_cliente, name='perfil_cliente'),
     # path('perfil/editar/', cliente_auth.editar_perfil, name='editar_perfil'),
     # path('perfil/direccion/agregar/', cliente_auth.agregar_direccion, name='agregar_direccion'),
     # path('perfil/direccion/<int:direccion_id>/editar/', cliente_auth.editar_direccion, name='editar_direccion'),
