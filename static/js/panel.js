@@ -43,4 +43,20 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 		});
 	}
+
+	document.querySelectorAll('.color-box').forEach((box) => {
+		const checkbox = box.previousElementSibling;
+
+		// Inicializar estado visual según si ya está checkeado
+		if (checkbox.checked) {
+			box.classList.add('selected');
+		}
+
+		// Evento de clic
+		box.addEventListener('click', () => {
+			checkbox.checked = !checkbox.checked;
+			box.classList.toggle('selected', checkbox.checked);
+		});
+	});
 });
+

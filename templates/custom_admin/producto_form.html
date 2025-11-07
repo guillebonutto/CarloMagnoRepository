@@ -1,275 +1,83 @@
-<!DOCTYPE html>
-<html lang="es">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>{{ title }}</title>
-		<style>
-			* {
-				margin: 0;
-				padding: 0;
-				box-sizing: border-box;
-			}
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}{{title}}{% endblock %}
+{%block extra_css %}
+<link rel="stylesheet" href="{% static 'css/productos_admin.css' %}" />
+{% endblock %}
 
-			body {
-				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-				background: #f5f7fa;
-			}
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>{{ title }}</h1>
+	</div>
 
-			.sidebar {
-				position: fixed;
-				left: 0;
-				top: 0;
-				width: 250px;
-				height: 100vh;
-				background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-				padding: 20px;
-				color: white;
-			}
+	{% if messages %}
+	<div class="messages">
+		{% for message in messages %}
+		<div class="alert alert-{{ message.tags }}">{{ message }}</div>
+		{% endfor %}
+	</div>
+	{% endif %}
 
-			.sidebar h2 {
-				margin-bottom: 30px;
-				font-size: 1.5em;
-			}
+	<div class="form-container">
+		<form method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
 
-			.sidebar nav a {
-				display: block;
-				padding: 12px 15px;
-				color: white;
-				text-decoration: none;
-				border-radius: 8px;
-				margin-bottom: 5px;
-				transition: all 0.3s ease;
-			}
-
-			.sidebar nav a:hover {
-				background: rgba(255, 255, 255, 0.2);
-			}
-
-			.sidebar nav a.active {
-				background: rgba(255, 255, 255, 0.3);
-			}
-
-			.main-content {
-				margin-left: 250px;
-				padding: 30px;
-			}
-
-			.header {
-				background: white;
-				padding: 20px 30px;
-				border-radius: 15px;
-				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-				margin-bottom: 30px;
-			}
-
-			.header h1 {
-				color: #333;
-			}
-
-			.form-container {
-				background: white;
-				border-radius: 15px;
-				padding: 30px;
-				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-			}
-
-			.form-group {
-				margin-bottom: 20px;
-			}
-
-			.form-group label {
-				display: block;
-				color: #333;
-				font-weight: 600;
-				margin-bottom: 8px;
-			}
-
-			.form-group input[type="text"],
-			.form-group input[type="number"],
-			.form-group input[type="file"],
-			.form-group textarea,
-			.form-group select {
-				width: 100%;
-				padding: 12px;
-				border: 2px solid #e0e0e0;
-				border-radius: 8px;
-				font-size: 1em;
-				font-family: inherit;
-			}
-
-			.form-group textarea {
-				min-height: 120px;
-				resize: vertical;
-			}
-
-			.form-group input:focus,
-			.form-group textarea:focus,
-			.form-group select:focus {
-				outline: none;
-				border-color: #667eea;
-			}
-
-			.checkbox-group {
-				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-				gap: 10px;
-			}
-
-			.checkbox-group label {
-				display: flex;
-				align-items: center;
-				gap: 8px;
-				font-weight: normal;
-			}
-
-			.form-actions {
-				display: flex;
-				gap: 15px;
-				margin-top: 30px;
-			}
-
-			.btn {
-				padding: 12px 30px;
-				border: none;
-				border-radius: 8px;
-				font-size: 1em;
-				font-weight: 600;
-				cursor: pointer;
-				transition: all 0.3s ease;
-				text-decoration: none;
-				display: inline-block;
-			}
-
-			.btn-primary {
-				background: #667eea;
-				color: white;
-			}
-
-			.btn-primary:hover {
-				background: #5568d3;
-				transform: translateY(-2px);
-			}
-
-			.btn-secondary {
-				background: #6c757d;
-				color: white;
-			}
-
-			.btn-secondary:hover {
-				background: #5a6268;
-			}
-
-			.messages {
-				margin-bottom: 20px;
-			}
-
-			.alert {
-				padding: 15px;
-				border-radius: 10px;
-				margin-bottom: 10px;
-			}
-
-			.alert-error {
-				background: #ffebee;
-				color: #c62828;
-			}
-
-			.alert-success {
-				background: #e8f5e9;
-				color: #2e7d32;
-			}
-
-			.errorlist {
-				list-style: none;
-				color: #c62828;
-				margin-top: 5px;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="sidebar">
-			<h2>🛍️ Carlo Magno</h2>
-			<nav>
-				<a href="{% url 'dashboard' %}">📊 Dashboard</a>
-				<a href="{% url 'productos' %}" class="active">📦 Productos</a>
-				<a href="{% url 'categorias' %}">📁 Categorías</a>
-				<a href="{% url 'colores' %}">🎨 Colores</a>
-                <a href="{% url 'marcas' %}">🏷️ Marcas</a>
-                <a href="{% url 'talles' %}">📏 Talles</a>
-				<a href="{% url 'stock' %}">📊 Stock</a>
-				<a href="/admin/" target="_blank">⚙️ Admin Django</a>
-				<a href="{% url 'inicio' %}">🏠 Ver sitio</a>
-			</nav>
-		</div>
-
-		<div class="main-content">
-			<div class="header">
-				<h1>{{ title }}</h1>
+			<div class="form-group">
+				<label for="{{ form.nombre.id_for_label }}">Nombre del Producto *</label>
+				{{ form.nombre }} {{ form.nombre.errors }}
 			</div>
 
-			{% if messages %}
-			<div class="messages">
-				{% for message in messages %}
-				<div class="alert alert-{{ message.tags }}">{{ message }}</div>
-				{% endfor %}
+			<div class="form-group">
+				<label for="{{ form.descripcion.id_for_label }}">Descripción *</label>
+				{{ form.descripcion }} {{ form.descripcion.errors }}
 			</div>
-			{% endif %}
 
-			<div class="form-container">
-				<form method="POST" enctype="multipart/form-data">
-					{% csrf_token %}
-
-					<div class="form-group">
-						<label for="{{ form.nombre.id_for_label }}">Nombre del Producto *</label>
-						{{ form.nombre }} {{ form.nombre.errors }}
-					</div>
-
-					<div class="form-group">
-						<label for="{{ form.descripcion.id_for_label }}">Descripción *</label>
-						{{ form.descripcion }} {{ form.descripcion.errors }}
-					</div>
-
-					<div class="form-group">
-						<label for="{{ form.precio.id_for_label }}">Precio *</label>
-						{{ form.precio }} {{ form.precio.errors }}
-					</div>
-
-					<div class="form-group">
-						<label for="{{ form.categoria.id_for_label }}">Categoría *</label>
-						{{ form.categoria }} {{ form.categoria.errors }}
-					</div>
-
-					<div class="form-group">
-						<label for="{{ form.marcas.id_for_label }}">Marca</label>
-						{{ form.marca }} {{ form.marca.errors }}
-					</div>
-					
-					<div class="form-group">
-						<label for="{{ form.talle.id_for_label }}">Talle</label>
-						{{ form.talle }} {{ form.talle.errors }}
-					</div>
-
-					<div class="form-group">
-						<label>Colores Disponibles</label>
-						<div class="checkbox-group">{{ form.colores }}</div>
-						{{ form.colores.errors }}
-					</div>
-
-					<div class="form-group">
-						<label for="{{ form.imagen.id_for_label }}">Imagen del Producto</label>
-						{{ form.imagen }} {{ form.imagen.errors }}
-						<small style="color: #666"
-							>La imagen se redimensionará automáticamente a 450x563px</small
-						>
-					</div>
-
-					<div class="form-actions">
-						<button type="submit" class="btn btn-primary">{{ button_text }}</button>
-						<a href="{% url 'admin_productos' %}" class="btn btn-secondary">Cancelar</a>
-					</div>
-				</form>
+			<div class="form-group">
+				<label for="{{ form.precio.id_for_label }}">Precio *</label>
+				{{ form.precio }} {{ form.precio.errors }}
 			</div>
-		</div>
-	</body>
-</html>
+
+			<div class="form-group">
+				<label for="{{ form.categoria.id_for_label }}">Categoría *</label>
+				{{ form.categoria }} {{ form.categoria.errors }}
+			</div>
+
+			<div class="form-group">
+				<label for="{{ form.marcas.id_for_label }}">Marca</label>
+				{{ form.marca }} {{ form.marca.errors }}
+			</div>
+
+			<div class="form-group">
+				<label for="{{ form.talle.id_for_label }}">Talle</label>
+				{{ form.talle }} {{ form.talle.errors }}
+			</div>
+
+			<div class="form-group colores-container">
+				<label for="{{ form.colores.id_for_label }}">Colores Disponibles</label>
+				<div class="color-options">
+					{% for checkbox in form.colores %}
+						{{ checkbox.tag }}
+						<span class="color-box" style="background-color: {{ checkbox.choice_label|safe }};"></span>
+					{% endfor %}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="{{ form.imagen.id_for_label }}">Imagen del Producto</label>
+				{{ form.imagen }} {{ form.imagen.errors }}
+				<small style="color: #666"
+					>La imagen se redimensionará automáticamente a 450x563px</small
+				>
+			</div>
+
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary">{{ button_text }}</button>
+				<a href="{% url 'admin_productos' %}" class="btn btn-secondary">Cancelar</a>
+			</div>
+		</form>
+	</div>
+</div>
+{% load static %}
+<script src="{% static 'js/panel.js' %}"></script>
+{% endblock %}

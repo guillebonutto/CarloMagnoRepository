@@ -5,16 +5,17 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.forms import ModelForm
 from django import forms
-from products.models import Producto, Categoria, Color, Marca, Talle, Cliente, Direccion, ProductoStock
+from productos.models import Producto, Categoria, Color, Marca, Talle, Cliente, Direccion, ProductoStock
+from productos.forms import ProductoForm
 
 # Formularios
-class ProductForm(ModelForm):
-    class Meta:
-        model = Producto
-        fields = ['nombre', 'descripcion', 'precio', 'categoria', 'marca', 'talle', 'colores', 'imagen']
-        widgets = {
-            'colores': forms.CheckboxSelectMultiple(),
-        }
+# class ProductForm(ModelForm):
+#     class Meta:
+#         model = Producto
+#         fields = ['nombre', 'descripcion', 'precio', 'categoria', 'marca', 'talle', 'colores', 'imagen']
+#         widgets = {
+#             'colores': forms.CheckboxSelectMultiple(),
+#         }
 
 class CategoryForm(ModelForm):
     class Meta:
@@ -105,15 +106,15 @@ def cerrar_sesion(request):
 @login_required(login_url='login')
 def dashboard(request):
     if not request.user.is_staff:
-        return redirect('home')
+        return redirect('inicio')
     
     context = {
-        'total_products': Producto.objects.count(),
+        'total_productos': Producto.objects.count(),
         'total_categories': Categoria.objects.count(),
         'total_colores': Color.objects.count(),
         'total_marcas': Marca.objects.count(),
         'low_stock': ProductoStock.objects.filter(stock__lt=5).count(),
-        'recent_products': Producto.objects.order_by('-created_at')[:5],
+        'recent_productos': Producto.objects.order_by('-created_at')[:5],
     }
     return render(request, 'custom_admin/dashboard.html', context)
 
@@ -129,38 +130,38 @@ def productos(request):
 @login_required(login_url='login')
 def agregar_producto(request):
     if not request.user.is_staff:
-        return redirect('home')
+        return redirect('inicio')
     
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
+        form = ProductoForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, '✅ Producto creado exitosamente')
-            return redirect('productos')
+            return redirect('admin_productos')
     else:
-        form = ProductForm()
+        form = ProductoForm()
     
     return render(request, 'custom_admin/producto_form.html', {
         'form': form,
         'title': 'Agregar Producto',
-        'button_text': 'Crear Producto'
+        'button_text': 'Agregar Producto'
     })
 
 @login_required(login_url='login')
 def editar_producto(request, pk):
     if not request.user.is_staff:
-        return redirect('home')
+        return redirect('inicio')
     
     product = get_object_or_404(Producto, pk=pk)
     
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
+        form = ProductoForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             form.save()
             messages.success(request, '✅ Producto actualizado exitosamente')
-            return redirect('productos')
+            return redirect('admin_productos')
     else:
-        form = ProductForm(instance=product)
+        form = ProductoForm(instance=product)
     
     return render(request, 'custom_admin/producto_form.html', {
         'form': form,
@@ -178,7 +179,7 @@ def eliminar_producto(request, pk):
     if request.method == 'POST':
         producto.delete()
         messages.success(request, '✅ Producto eliminado exitosamente')
-        return redirect('productos')
+        return redirect('admin_productos')
     
     return render(request, 'custom_admin/confirm_eliminar.html', {
         'object': producto,
@@ -211,7 +212,7 @@ def agregar_categoria(request):
     return render(request, 'custom_admin/categoria_form.html', {
         'form': form,
         'title': 'Agregar Categoría',
-        'button_text': 'Crear Categoría'
+        'button_text': 'Agregar Categoría'
     })
 
 @login_required(login_url='login')
@@ -279,7 +280,7 @@ def agregar_color(request):
     return render(request, 'custom_admin/color_form.html', {
         'form': form,
         'title': 'Agregar Color',
-        'button_text': 'Crear Color'
+        'button_text': 'Agregar Color'
     })
 
 @login_required(login_url='login')
@@ -346,7 +347,7 @@ def agregar_marca(request):
     return render(request, 'custom_admin/marca_form.html', {
         'form': form,
         'title': 'Agregar Marca',
-        'button_text': 'Crear Marca'
+        'button_text': 'Agregar Marca'
     })
 
 @login_required(login_url='login')
@@ -414,7 +415,7 @@ def agregar_talle(request):
     return render(request, 'custom_admin/talle_form.html', {
         'form': form,
         'title': 'Agregar Talle',
-        'button_text': 'Crear Talle'
+        'button_text': 'Agregar Talle'
     })
 
 @login_required(login_url='login')
@@ -481,7 +482,7 @@ def agregar_cliente(request):
     return render(request, 'custom_admin/cliente_form.html', {
         'form': form,
         'title': 'Agregar Cliente',
-        'button_text': 'Crear Cliente'
+        'button_text': 'Agregar Cliente'
     })
 
 @login_required(login_url='login')
@@ -526,7 +527,7 @@ def eliminar_cliente(request, pk):
 @login_required(login_url='login')
 def direcciones(request):
     if not request.user.is_staff:
-        return redirect('home')
+        return redirect('inicio')
     
     direcciones = Direccion.objects.all()
     return render(request, 'custom_admin/direcciones.html', {'direcciones': direcciones})
@@ -534,7 +535,7 @@ def direcciones(request):
 @login_required(login_url='login')
 def agregar_direccion(request):
     if not request.user.is_staff:
-        return redirect('home')
+        return redirect('inicio')
     
     if request.method == 'POST':
         form = DireccionForm(request.POST)
@@ -547,8 +548,8 @@ def agregar_direccion(request):
     
     return render(request, 'custom_admin/direccion_form.html', {
         'form': form,
-        'title': 'Agregar Talle',
-        'button_text': 'Crear Talle'
+        'title': 'Agregar Dirección',
+        'button_text': 'Agregar Dirección'
     })
 
 @login_required(login_url='login')
@@ -581,11 +582,11 @@ def eliminar_direccion(request, pk):
     direccion = get_object_or_404(Direccion, pk=pk)
     
     if request.method == 'POST':
-        Talle.delete()
+        Direccion.delete()
         messages.success(request, '✅ Direccion eliminada exitosamente')
         return redirect('direcciones')
     
-    return render(request, 'custom_admin/confirmar_eliminar.html', {
+    return render(request, 'custom_admin/direccion.html', {
         'object': direcciones,
         'type': 'direccion'
     })

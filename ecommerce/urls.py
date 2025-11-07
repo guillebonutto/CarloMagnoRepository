@@ -19,11 +19,11 @@ from django.urls import path
 from django.shortcuts import redirect
 from django.conf import settings
 from django.conf.urls.static import static
-from products.views import producto_list, home, producto_detail
+from productos.views import producto_list, home, producto_detail
 from contact.views import contact
 from custom_admin import views as admin_views
-from products import cart_views
-from products import cliente_auth
+from productos import cart_views
+from productos import cliente_auth
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -40,54 +40,54 @@ urlpatterns = [
     # Productos
     path('panel/productos/', admin_views.productos, name='admin_productos'),
     path('panel/productos/agregar/', admin_views.agregar_producto, name='agregar_producto'),
-    path('panel/productos/<int:pk>/editarar/', admin_views.editar_producto, name='editar_producto'),
+    path('panel/productos/<int:pk>/editar/', admin_views.editar_producto, name='editar_producto'),
     path('panel/productos/<int:pk>/eliminar/', admin_views.eliminar_producto, name='eliminar_producto'),
     
     # Categorías
     path('panel/categorias/', admin_views.categorias, name='categorias'),
     path('panel/categorias/agregar/', admin_views.agregar_categoria, name='agregar_categoria'),
-    path('panel/categorias/<int:pk>/editarar/', admin_views.editar_categoria, name='editar_categoria'),
+    path('panel/categorias/<int:pk>/editar/', admin_views.editar_categoria, name='editar_categoria'),
     path('panel/categorias/<int:pk>/eliminar/', admin_views.eliminar_categoria, name='eliminar_categoria'),
     
     # Colores
     path('panel/colores/', admin_views.colores, name='colores'),
     path('panel/colores/agregar/', admin_views.agregar_color, name='agregar_color'),
-    path('panel/colores/<int:pk>/editarar/', admin_views.editar_color, name='editar_color'),
+    path('panel/colores/<int:pk>/editar/', admin_views.editar_color, name='editar_color'),
     path('panel/colores/<int:pk>/eliminar/', admin_views.eliminar_color, name='eliminar_color'),
     
     # Marcas
     path('panel/marcas/', admin_views.marcas, name='marcas'),
     path('panel/marcas/agregar/', admin_views.agregar_marca, name='agregar_marca'),
-    path('panel/marcas/<int:pk>/editarar/', admin_views.editar_marca, name='editar_marca'),
+    path('panel/marcas/<int:pk>/editar/', admin_views.editar_marca, name='editar_marca'),
     path('panel/marcas/<int:pk>/eliminar/', admin_views.eliminar_marca, name='eliminar_marca'),
 
     # Talles
     path('panel/talles/', admin_views.talles, name='talles'),
     path('panel/talles/agregar/', admin_views.agregar_talle, name='agregar_talle'),
-    path('panel/talles/<int:pk>/editarar/', admin_views.editar_talle, name='editar_talle'),
+    path('panel/talles/<int:pk>/editar/', admin_views.editar_talle, name='editar_talle'),
     path('panel/talles/<int:pk>/eliminar/', admin_views.eliminar_talle, name='eliminar_talle'),
 
     # Clientes
     path('panel/clientes/', admin_views.clientes, name='clientes'),
     path('panel/clientes/agregar/', admin_views.agregar_cliente, name='agregar_cliente'),
-    path('panel/clientes/<int:pk>/editarar/', admin_views.editar_cliente, name='editar_cliente'),
+    path('panel/clientes/<int:pk>/editar/', admin_views.editar_cliente, name='editar_cliente'),
     path('panel/clientes/<int:pk>/eliminar/', admin_views.eliminar_cliente, name='eliminar_cliente'),
 
     # Direccioneses
     path('panel/direcciones/', admin_views.direcciones, name='direcciones'),
     path('panel/direcciones/agregar/', admin_views.agregar_direccion, name='agregar_direccion'),
-    path('panel/direcciones/<int:pk>/editarar/', admin_views.editar_direccion, name='editar_direccion'),
+    path('panel/direcciones/<int:pk>/editar/', admin_views.editar_direccion, name='editar_direccion'),
     path('panel/direcciones/<int:pk>/eliminar/', admin_views.eliminar_direccion, name='eliminar_direccion'),
 
     # ========== AUTENTICACIÓN DE CLIENTES (NUEVO) ==========
-    path('registro/', cliente_auth.registro_cliente, name='registro_cliente'),
-    path('login/', cliente_auth.login_cliente, name='login_cliente'),
-    path('logout/', cliente_auth.logout_cliente, name='logout_cliente'),
-    path('perfil/', cliente_auth.perfil_cliente, name='perfil_cliente'),
-    path('perfil/editar/', cliente_auth.editar_perfil, name='editar_perfil'),
-    path('perfil/direccion/agregar/', cliente_auth.agregar_direccion, name='agregar_direccion'),
-    path('perfil/direccion/<int:direccion_id>/editar/', cliente_auth.editar_direccion, name='editar_direccion'),
-    path('perfil/direccion/<int:direccion_id>/eliminar/', cliente_auth.eliminar_direccion, name='eliminar_direccion'),
+    # path('registro/', cliente_auth.registro_cliente, name='registro_cliente'),
+    # path('login/', cliente_auth.login_cliente, name='login_cliente'),
+    # path('logout/', cliente_auth.logout_cliente, name='logout_cliente'),
+    # path('perfil/', cliente_auth.perfil_cliente, name='perfil_cliente'),
+    # path('perfil/editar/', cliente_auth.editar_perfil, name='editar_perfil'),
+    # path('perfil/direccion/agregar/', cliente_auth.agregar_direccion, name='agregar_direccion'),
+    # path('perfil/direccion/<int:direccion_id>/editar/', cliente_auth.editar_direccion, name='editar_direccion'),
+    # path('perfil/direccion/<int:direccion_id>/eliminar/', cliente_auth.eliminar_direccion, name='eliminar_direccion'),
     
     # URLs del Carrito
     path('carrito/data/', cart_views.get_cart_data, name='cart_data'),

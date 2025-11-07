@@ -12,7 +12,7 @@
 		<a href="{% url 'agregar_producto' %}" class="btn btn-primary">+ Nuevo Producto</a>
 	</div>
 	{% if productos %}
-	<div class="products-table">
+	<div class="productos-table">
 		<table>
 			<thead>
 				<tr>
@@ -57,10 +57,10 @@
 					<td><strong>${{ producto.precio }}</strong></td>
 					<td>{{ producto.created_at|date:"d/m/Y" }}</td>
 					<td>
-						<a href="/admin/productos/producto/{{ producto.id }}/change/" class="btn-edit"
+						<a href="{% url 'editar_producto' producto.id %}" class="btn-edit"
 							>✏️ Editar</a
 						>
-						<a href="/admin/productos/producto/{{ producto.id }}/delete/" class="btn-delete"
+						<a href="{% url 'eliminar_producto' producto.id %}" class="btn-delete"
 							>🗑️ Eliminar</a
 						>
 					</td>

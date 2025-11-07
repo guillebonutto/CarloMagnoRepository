@@ -56,8 +56,8 @@
 					<td>{{ cliente.fecha_registro|date:"d/m/Y" }}</td>
 					<td>{{ cliente.ultima_visita|date:"d/m/Y H:i"|default:"-" }}</td>
 					<td>
-						<a href="{% url 'editar_customer' cliente.id %}" class="btn-edit">✏️</a>
-						<a href="{% url 'eliminar_customer' cliente.id %}" class="btn-delete">🗑️</a>
+						<a href="{% url 'editar_cliente' cliente.id %}" class="btn-edit">✏️</a>
+						<a href="{% url 'eliminar_cliente' cliente.id %}" class="btn-delete">🗑️</a>
 					</td>
 				</tr>
 				{% endfor %}

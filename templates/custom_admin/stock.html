@@ -9,7 +9,7 @@
 <div class="main-content">
 	<div class="header">
 		<h1>Gestión de Stock</h1>
-		<a href="/admin/products/product/" class="btn btn-primary">Ver en Admin</a>
+		<a href="/admin/productos/productostock/" class="btn btn-primary">Ver en Admin</a>
 	</div>
 
 	{% if stock_items %}
@@ -52,7 +52,7 @@
 						{% endif %}
 					</td>
 					<td>
-						<a href="/admin/products/productstock/{{ item.id }}/change/" class="btn-edit"
+						<a href="productos/productostock/{{ item.id }}/change/" class="btn-edit"
 							>✏️ Editar</a
 						>
 					</td>

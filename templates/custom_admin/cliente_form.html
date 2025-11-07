@@ -1,13 +1,7 @@
 {% extends 'custom_admin/base.html' %}
 {% load static %}
 
-{% block title %}
-    {% if cliente %}
-        Editar Cliente 
-    {% else %}
-        Agregar Cliente
-    {% endif %}
-{% endblock %}
+{% block title %}{{title}}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/clientes.css' %}" />
