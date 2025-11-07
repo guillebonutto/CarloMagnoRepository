@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Registro - Pierre Cardin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .registro-container {
+        min-height: 100vh;
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+    }
+
+    .registro-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .registro-header {
+        background: linear-gradient(135deg, #8B0000 0%, #a00000 100%);
+        color: white;
+        padding: 40px;
+        text-align: center;
+    }
+
+    .registro-header h2 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .registro-header p {
+        margin: 10px 0 0;
+        opacity: 0.9;
+    }
+
+    .registro-body {
+        padding: 40px;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .form-section h3 {
+        color: #8B0000;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 14px;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 15px;
+        transition: border-color 0.3s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #8B0000;
+        box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+    }
+
+    .form-check {
+        margin: 15px 0;
+        padding-left: 1.5rem;
+    }
+
+    .form-check-label {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .btn-registro {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #8B0000 0%, #a00000 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 20px;
+    }
+
+    .btn-registro:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(139, 0, 0, 0.3);
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .login-link a {
+        color: #8B0000;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+
+    .alert {
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .row {
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+
+    .col-md-6 {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .error-text {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="registro-container">
+    <div class="registro-card">
+        <div class="registro-header">
+            <i class="fas fa-user-plus fa-3x mb-3"></i>
+            <h2>Crear Cuenta</h2>
+            <p>Únete a Pierre Cardin y disfruta de beneficios exclusivos</p>
+        </div>
+
+        <div class="registro-body">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Datos de Cuenta -->
+                <div class="form-section">
+                    <h3><i class="fas fa-key"></i> Datos de Cuenta</h3>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}">Nombre de Usuario *</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="error-text">{{ form.username.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">Email *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="error-text">{{ form.email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.password.id_for_label }}">Contraseña *</label>
+                                {{ form.password }}
+                                {% if form.password.errors %}
+                                    <div class="error-text">{{ form.password.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.password_confirm.id_for_label }}">Confirmar Contraseña *</label>
+                                {{ form.password_confirm }}
+                                {% if form.password_confirm.errors %}
+                                    <div class="error-text">{{ form.password_confirm.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Datos Personales -->
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Datos Personales</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.tratamiento.id_for_label }}">Tratamiento *</label>
+                                <select name="tratamiento" id="{{ form.tratamiento.id_for_label }}" class="form-select">
+                                    <option value="SR">Sr.</option>
+                                    <option value="SRA">Sra.</option>
+                                    <option value="SRTA">Srta.</option>
+                                    <option value="DR">Dr.</option>
+                                    <option value="DRA">Dra.</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.nombre.id_for_label }}">Nombre *</label>
+                                {{ form.nombre }}
+                                {% if form.nombre.errors %}
+                                    <div class="error-text">{{ form.nombre.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.apellidos.id_for_label }}">Apellidos *</label>
+                                {{ form.apellidos }}
+                                {% if form.apellidos.errors %}
+                                    <div class="error-text">{{ form.apellidos.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferencias -->
+                <div class="form-section">
+                    <h3><i class="fas fa-cog"></i> Preferencias</h3>
+                    
+                    <div class="form-check">
+                        {{ form.boletin }}
+                        <label class="form-check-label" for="{{ form.boletin.id_for_label }}">
+                            <strong>{{ form.boletin.label }}</strong>
+                            <p class="mb-0 text-muted small">Recibe noticias, ofertas y novedades de Pierre Cardin</p>
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        {{ form.ofertas_asociados }}
+                        <label class="form-check-label" for="{{ form.ofertas_asociados.id_for_label }}">
+                            <strong>{{ form.ofertas_asociados.label }}</strong>
+                            <p class="mb-0 text-muted small">Recibe ofertas de nuestros socios comerciales</p>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-registro">
+                    <i class="fas fa-user-plus"></i> Crear Mi Cuenta
+                </button>
+            </form>
+
+            <div class="login-link">
+                <p class="mb-0">¿Ya tienes una cuenta? 
+                    <a href="{% url 'login_cliente' %}">
+                        <i class="fas fa-sign-in-alt"></i> Inicia sesión aquí
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

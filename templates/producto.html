@@ -81,7 +81,7 @@
                 <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-producto" />
                 <h2>{{ producto.nombre }}</h2>
                 <p class="precio">{{ producto.precio }}</p>
-                <a href="" class="btn btn-primary text-light">Añadir al carrito</a>
+                <a href="{% url 'producto_detail' producto.id %}" class="btn btn-primary text-light">Ber detalles</a>
             </div>
 			{% endfor %}
 		</div>

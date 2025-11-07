@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Categoria, Color, Talle, Marca, Producto, ProductoStock, Cliente, GrupoCliente, Direccion
+from .models import Categoria, Color, Talle, Marca, Producto, ProductoStock, Cliente, GrupoCliente, Direccion, Carrito, CarritoItem
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
@@ -211,3 +211,108 @@ class ClienteAdmin(admin.ModelAdmin):
 class DireccionAdmin(admin.ModelAdmin):
     list_display = ['id', 'cliente', 'ciudad', 'pais', 'es_predeterminada']
     list_filter = ['pais', 'es_predeterminada']
+
+class CarritoItemInline(admin.TabularInline):
+    model = CarritoItem
+    extra = 0
+    readonly_fields = ['agregado', 'get_subtotal_display']
+    fields = ['producto', 'color', 'talle', 'cantidad', 'get_subtotal_display', 'agregado']
+    
+    def get_subtotal_display(self, obj):
+        if obj.id:
+            return format_html(
+                '<strong style="color: #8B0000;">${}</strong>',
+                obj.get_subtotal()
+            )
+        return '-'
+    get_subtotal_display.short_description = 'Subtotal'
+
+
+@admin.register(Carrito)
+class CarritoAdmin(admin.ModelAdmin):
+    list_display = ['id', 'usuario_display', 'items_count', 'total_display', 'actualizado']
+    list_filter = ['creado', 'actualizado']
+    search_fields = ['usuario__username', 'usuario__email', 'session_key']
+    readonly_fields = ['creado', 'actualizado', 'total_display']
+    inlines = [CarritoItemInline]
+    
+    fieldsets = (
+        ('Información del Carrito', {
+            'fields': ('usuario', 'session_key')
+        }),
+        ('Resumen', {
+            'fields': ('total_display',)
+        }),
+        ('Fechas', {
+            'fields': ('creado', 'actualizado'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def usuario_display(self, obj):
+        if obj.usuario:
+            return format_html(
+                '<strong>{}</strong>',
+                obj.usuario.username
+            )
+        return format_html(
+            '<span style="color: #999;">Invitado ({})</span>',
+            obj.session_key[:10] + '...' if obj.session_key else 'N/A'
+        )
+    usuario_display.short_description = 'Usuario'
+    
+    def items_count(self, obj):
+        count = obj.items.count()
+        cantidad = obj.get_cantidad_total()
+        return format_html(
+            '<span style="background: #e3f2fd; padding: 3px 10px; border-radius: 10px;">{} items ({} productos)</span>',
+            count, cantidad
+        )
+    items_count.short_description = 'Productos'
+    
+    def total_display(self, obj):
+        return format_html(
+            '<strong style="font-size: 18px; color: #8B0000;">${}</strong>',
+            obj.get_total()
+        )
+    total_display.short_description = 'Total'
+
+
+@admin.register(CarritoItem)
+class CarritoItemAdmin(admin.ModelAdmin):
+    list_display = ['id', 'carrito', 'producto', 'color_badge', 'talle_badge', 'cantidad', 'subtotal_display', 'stock_disponible']
+    list_filter = ['color', 'talle', 'agregado']
+    search_fields = ['producto__nombre', 'carrito__usuario__username']
+    readonly_fields = ['agregado', 'subtotal_display', 'stock_disponible']
+    
+    def color_badge(self, obj):
+        border = 'border: 1px solid #ccc;' if obj.color.hex_code in ['#FFFFFF', '#ffffff'] else ''
+        return format_html(
+            '<span style="display: inline-block; width: 20px; height: 20px; background: {}; border-radius: 3px; vertical-align: middle; {}"></span> {}',
+            obj.color.hex_code, border, obj.color.nombre
+        )
+    color_badge.short_description = 'Color'
+    
+    def talle_badge(self, obj):
+        return format_html(
+            '<span style="background: #e3f2fd; padding: 3px 8px; border-radius: 3px; font-weight: bold;">{}</span>',
+            obj.talle.abbreviation
+        )
+    talle_badge.short_description = 'Talle'
+    
+    def subtotal_display(self, obj):
+        return format_html(
+            '<strong style="color: #8B0000;">${}</strong>',
+            obj.get_subtotal()
+        )
+    subtotal_display.short_description = 'Subtotal'
+    
+    def stock_disponible(self, obj):
+        stock = obj.get_stock_disponible()
+        if stock == 0:
+            return format_html('<span style="color: #f44336;">❌ Sin stock</span>')
+        elif stock < 5:
+            return format_html('<span style="color: #ff9800;">⚠️ {} unidades</span>', stock)
+        else:
+            return format_html('<span style="color: #4caf50;">✅ {} unidades</span>', stock)
+    stock_disponible.short_description = 'Stock'

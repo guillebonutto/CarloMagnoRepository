@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Contacto - Carlo Magno{% endblock %}
+{% block title %}Contacto - Pierre Cardin{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/style.css' %}" />
@@ -8,33 +8,155 @@
 {% endblock %}
 
 {% block content %}
-<div>
-	<h4>Registrate en nuestra página</h4>
+<div class="contacto-container">
+    <!-- Hero Section -->
+    <div class="contacto-hero">
+        <div class="container">
+            <h1 class="contacto-title">Contactanos</h1>
+            <p class="contacto-subtitle">Estamos aquí para ayudarte. Comunicate con nosotros.</p>
+        </div>
+    </div>
 
-	<div class="contForm">
-		<div class="style">
-			<h5>Datos sobre nosotros</h5>
-			<address>Nuestro número <a href="tel: +549351466171">3516681071</a></address>
-			<address>Visitanos en nuestro local en <strong>Rivadavia 150 Local 2</strong></address>
-			<address>Nuestro mail <strong>Carlomagnocordoba@gmail.com</strong></address>
-		</div>
+    <div class="container">
+        <div class="contacto-content">
+            <!-- Información de Contacto -->
+            <div class="info-section">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Nuestra Ubicación</h3>
+                    <p>Rivadavia 150 Local 2</p>
+                    <p>San Salvador de Jujuy, Argentina</p>
+                </div>
 
-		<form class="form formulario">
-			<fieldset>
-				<legend>Formulario</legend>
-				<label for="nombre">nomnbre</label>
-				<input type="nombre" name="nombre" id="nombre" />
-				<label for="number">numero</label>
-				<input type="number" name="number" id="number" />
-				<label for="email">mail</label>
-				<input type="email" name="email" id="email" />
-				<label for="comentario">comentario</label>
-				<textarea name="comentario" id="comentario"></textarea>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h3>Teléfono</h3>
+                    <p><a href="tel:+5493516681071">+54 9 351 668-1071</a></p>
+                    <p class="info-detail">Lun - Vie: 9:00 - 18:00</p>
+                </div>
 
-				<input type="submit" value="Enviar" />
-			</fieldset>
-		</form>
-	</div>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Email</h3>
+                    <p><a href="mailto:carlomagnocordoba@gmail.com">carlomagnocordoba@gmail.com</a></p>
+                    <p class="info-detail">Respuesta en 24-48hs</p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Horarios</h3>
+                    <p>Lunes a Viernes: 9:00 - 20:00</p>
+                    <p>Sábados: 9:00 - 13:00</p>
+                    <p class="info-detail">Domingos cerrado</p>
+                </div>
+            </div>
+
+            <!-- Formulario de Contacto -->
+            <div class="form-section">
+                <div class="form-card">
+                    <h2 class="form-title">Envianos un Mensaje</h2>
+                    <p class="form-description">Completa el formulario y nos pondremos en contacto a la brevedad</p>
+                    
+                    <form class="contact-form" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="nombre">
+                                <i class="fas fa-user"></i> Nombre Completo
+                            </label>
+                            <input 
+                                type="text" 
+                                name="nombre" 
+                                id="nombre" 
+                                placeholder="Ingresa tu nombre"
+                                required
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">
+                                <i class="fas fa-envelope"></i> Email
+                            </label>
+                            <input 
+                                type="email" 
+                                name="email" 
+                                id="email" 
+                                placeholder="tucorreo@ejemplo.com"
+                                required
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="telefono">
+                                <i class="fas fa-phone"></i> Teléfono
+                            </label>
+                            <input 
+                                type="tel" 
+                                name="telefono" 
+                                id="telefono" 
+                                placeholder="Ej: 351 668-1071"
+                                required
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="asunto">
+                                <i class="fas fa-tag"></i> Asunto
+                            </label>
+                            <select name="asunto" id="asunto" required>
+                                <option value="">Selecciona un motivo</option>
+                                <option value="consulta">Consulta General</option>
+                                <option value="pedido">Consulta sobre Pedido</option>
+                                <option value="producto">Información de Producto</option>
+                                <option value="devolucion">Devolución o Cambio</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mensaje">
+                                <i class="fas fa-comment"></i> Mensaje
+                            </label>
+                            <textarea 
+                                name="mensaje" 
+                                id="mensaje" 
+                                rows="6"
+                                placeholder="Escribe tu mensaje aquí..."
+                                required
+                            ></textarea>
+                        </div>
+
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane"></i> Enviar Mensaje
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa (Opcional) -->
+        <div class="map-section">
+            <h2 class="map-title">Cómo Llegar</h2>
+            <div class="map-container">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3622.123456789!2d-65.3!3d-24.2!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjTCsDEyJzAwLjAiUyA2NcKwMTgnMDAuMCJX!5e0!3m2!1ses!2sar!4v1234567890"
+                    width="100%" 
+                    height="450" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

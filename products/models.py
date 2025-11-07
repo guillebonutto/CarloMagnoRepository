@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator
 from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.contrib.auth.models import User
 import sys
 
 class Categoria(models.Model):
@@ -206,11 +207,13 @@ class ProductoStock(models.Model):
     color = models.ForeignKey(
         Color,
         on_delete=models.PROTECT,
+        related_name='productostock',
         verbose_name='Color'
     )
     talle = models.ForeignKey(
         Talle,
         on_delete=models.PROTECT,
+        related_name='productostock',
         verbose_name='Talle'
     )
     stock = models.PositiveIntegerField(
@@ -318,3 +321,90 @@ class Direccion(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.apellidos} - {self.ciudad}, {self.pais}"
+    
+class Carrito(models.Model):
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name='Usuario'
+    )
+    session_key = models.CharField(
+        max_length=40,
+        null=True,
+        blank=True,
+        verbose_name='ID de Sesión'
+    )
+    creado = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Creación')
+    actualizado = models.DateTimeField(auto_now=True, verbose_name='Última Actualización')
+
+    class Meta:
+        verbose_name = 'Carrito'
+        verbose_name_plural = 'Carritos'
+        ordering = ['-actualizado']
+
+    def __str__(self):
+        return f"Carrito {self.id} - {self.usuario or self.session_key}"
+
+    def get_total(self):
+        """Calcula el total del carrito"""
+        return sum(item.get_subtotal() for item in self.items.all())
+
+    def get_cantidad_total(self):
+        """Obtiene la cantidad total de productos"""
+        return sum(item.cantidad for item in self.items.all())
+
+
+class CarritoItem(models.Model):
+    carrito = models.ForeignKey(
+        Carrito,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name='Carrito'
+    )
+    producto = models.ForeignKey(
+        Producto,
+        on_delete=models.CASCADE,
+        verbose_name='Producto'
+    )
+    color = models.ForeignKey(
+        Color,
+        on_delete=models.CASCADE,
+        verbose_name='Color'
+    )
+    talle = models.ForeignKey(
+        Talle,
+        on_delete=models.CASCADE,
+        verbose_name='Talle'
+    )
+    cantidad = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+        verbose_name='Cantidad'
+    )
+    agregado = models.DateTimeField(auto_now_add=True, verbose_name='Agregado')
+
+    class Meta:
+        verbose_name = 'Item del Carrito'
+        verbose_name_plural = 'Items del Carrito'
+        unique_together = ['carrito', 'producto', 'color', 'talle']
+
+    def __str__(self):
+        return f"{self.producto.nombre} - {self.color.nombre} - {self.talle.abbreviation} x{self.cantidad}"
+
+    def get_subtotal(self):
+        """Calcula el subtotal del item"""
+        return self.producto.precio * self.cantidad
+
+    def get_stock_disponible(self):
+        """Obtiene el stock disponible para esta combinación"""
+        try:
+            stock = ProductoStock.objects.get(
+                producto=self.producto,
+                color=self.color,
+                talle=self.talle
+            )
+            return stock.stock
+        except ProductoStock.DoesNotExist:
+            return 0

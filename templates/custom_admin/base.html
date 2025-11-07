@@ -20,13 +20,14 @@
 				crossorigin="anonymous"
 				referrerpolicy="no-referrer"
 			/>
+			<link rel="stylesheet" href="{% static 'css/style_admin.css' %}" />
 			{% block extra_css %}
             {% endblock %}
 		</head>
 		<body>
 			<header>
 				<div class="sidebar">
-					<h2>🛍️ Carlo Magno</h2>
+					<img src="{% static 'images/logo.png' %}" alt="">
 					<nav>
 						<div class="iconoFontAwe {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
 							<i class="fa-solid fa-home"></i>
@@ -73,7 +74,7 @@
 							</div>
 						</div>
 						<a href="/admin/" target="_blank">⚙️ Admin Django</a>
-						<a href="{% url 'home' %}">🏠 Ver sitio</a>
+						<a href="{% url 'inicio' %}">🏠 Ver sitio</a>
 					</nav>
 				</div>
 			</header>

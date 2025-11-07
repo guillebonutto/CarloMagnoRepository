@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Mi Perfil - Pierre Cardin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .perfil-container {
+        padding: 60px 20px;
+        background: #f5f5f5;
+        min-height: 100vh;
+    }
+
+    .perfil-header {
+        background: linear-gradient(135deg, #8B0000 0%, #a00000 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .perfil-header h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+
+    .perfil-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .perfil-card h3 {
+        color: #8B0000;
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .info-row {
+        display: flex;
+        padding: 15px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #666;
+        width: 180px;
+    }
+
+    .info-value {
+        color: #333;
+        flex: 1;
+    }
+
+    .btn-action {
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-primary-custom {
+        background: #8B0000;
+        color: white;
+        border: none;
+    }
+
+    .btn-primary-custom:hover {
+        background: #a00000;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary-custom {
+        background: #f0f0f0;
+        color: #333;
+        border: none;
+    }
+
+    .btn-secondary-custom:hover {
+        background: #e0e0e0;
+    }
+
+    .direccion-item {
+        background: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border: 2px solid transparent;
+        transition: border-color 0.3s;
+    }
+
+    .direccion-item.predeterminada {
+        border-color: #8B0000;
+        background: #fff8f8;
+    }
+
+    .direccion-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #8B0000;
+        color: white;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .direccion-actions {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        gap: 10px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="perfil-container">
+    <div class="container">
+        <!-- Header del Perfil -->
+        <div class="perfil-header">
+            <i class="fas fa-user-circle fa-4x mb-3"></i>
+            <h1>{{ cliente.get_tratamiento_display }} {{ cliente.nombre }} {{ cliente.apellidos }}</h1>
+            <p class="mb-0">{{ cliente.email }}</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <!-- Información Personal -->
+            <div class="col-lg-6">
+                <div class="perfil-card">
+                    <h3><i class="fas fa-user"></i> Información Personal</h3>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Nombre:</div>
+                        <div class="info-value">{{ cliente.nombre }}</div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">Apellido:</div>
+                        <div class="info-value">{{ cliente.apellidos }}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Email:</div>
+                        <div class="info-value">{{ cliente.email }}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Tratamiento:</div>
+                        <div class="info-value">{{ cliente.get_tratamiento_display }}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Ventas Totales:</div>
+                        <div class="info-value">${{ cliente.ventas_totales }}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Miembro desde:</div>
+                        <div class="info-value">{{ cliente.fecha_registro|date:"d/m/Y" }}</div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'editar_perfil' %}" class="btn btn-action btn-primary-custom">
+                            <i class="fas fa-edit"></i> Editar Perfil
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Preferencias -->
+                <div class="perfil-card">
+                    <h3><i class="fas fa-cog"></i> Preferencias</h3>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Boletín:</div>
+                        <div class="info-value">
+                            {% if cliente.boletin %}
+                                <span class="badge bg-success"><i class="fas fa-check"></i> Suscrito</span>
+                            {% else %}
+                                <span class="badge bg-secondary"><i class="fas fa-times"></i> No suscrito</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Ofertas de Asociados:</div>
+                        <div class="info-value">
+                            {% if cliente.ofertas_asociados %}
+                                <span class="badge bg-success"><i class="fas fa-check"></i> Activado</span>
+                            {% else %}
+                                <span class="badge bg-secondary"><i class="fas fa-times"></i> Desactivado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Direcciones -->
+            <div class="col-lg-6">
+                <div class="perfil-card">
+                    <h3>
+                        <i class="fas fa-map-marker-alt"></i> Mis Direcciones
+                    </h3>
+                    
+                    {% if direcciones %}
+                        {% for direccion in direcciones %}
+                        <div class="direccion-item {% if direccion.es_predeterminada %}predeterminada{% endif %}">
+                            {% if direccion.es_predeterminada %}
+                            <span class="direccion-badge">
+                                <i class="fas fa-star"></i> Predeterminada
+                            </span>
+                            {% endif %}
+                            
+                            <strong>{{ direccion.nombre }} {{ direccion.apellidos }}</strong>
+                            <p class="mb-1">{{ direccion.direccion }}</p>
+                            <p class="mb-1">{{ direccion.ciudad }}, {{ direccion.codigo_postal }}</p>
+                            <p class="mb-1">{{ direccion.pais }}</p>
+                            {% if direccion.telefono %}
+                                <p class="mb-0"><i class="fas fa-phone"></i> {{ direccion.telefono }}</p>
+                            {% endif %}
+                            
+                            <div class="direccion-actions">
+                                <a href="{% url 'editar_direccion' direccion.id %}" class="btn btn-sm btn-action btn-secondary-custom">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="{% url 'eliminar_direccion' direccion.id %}" 
+                                   class="btn btn-sm btn-action btn-secondary-custom"
+                                   onclick="return confirm('¿Estás seguro de eliminar esta dirección?')">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <p>No tienes direcciones guardadas</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{% url 'agregar_direccion' %}" class="btn btn-action btn-primary-custom">
+                            <i class="fas fa-plus"></i> Agregar Dirección
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

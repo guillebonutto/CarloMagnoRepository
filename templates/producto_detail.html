@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Imagen del Producto -->
+        <div class="col-md-6">
+            {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-fluid rounded">
+            {% else %}
+                <div class="text-center p-5 bg-light rounded">
+                    <i class="fas fa-image fa-5x text-muted"></i>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Información del Producto -->
+        <div class="col-md-6">
+            <h1>{{ producto.nombre }}</h1>
+            <p class="text-muted">{{ producto.categoria.nombre }}</p>
+            <h3 class="text-danger">${{ producto.precio }}</h3>
+            
+            <p class="mt-3">{{ producto.descripcion }}</p>
+
+            <!-- Selección de Color -->
+            <div class="mb-3">
+                <label class="form-label"><strong>Color:</strong></label>
+                <div class="d-flex gap-2 flex-wrap">
+                    {% for color in colores_disponibles %}
+                    <button class="btn btn-outline-secondary color-selector" 
+                            data-color-id="{{ color.id }}"
+                            style="border: 2px solid {{ color.hex_code }};">
+                        <span style="display: inline-block; width: 20px; height: 20px; background: {{ color.hex_code }}; border-radius: 50%; {% if color.hex_code == '#FFFFFF' or color.hex_code == '#ffffff' %}border: 1px solid #ccc;{% endif %}"></span>
+                        {{ color.nombre }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Selección de Talle -->
+            <div class="mb-3">
+                <label class="form-label"><strong>Talle:</strong></label>
+                <div class="d-flex gap-2 flex-wrap">
+                    {% for talle in talles_disponibles %}
+                    <button class="btn btn-outline-secondary talle-selector" 
+                            data-talle-id="{{ talle.id }}">
+                        {{ talle.abbreviation }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Cantidad -->
+            <div class="mb-3">
+                <label class="form-label"><strong>Cantidad:</strong></label>
+                <input type="number" id="cantidadInput" class="form-control" value="1" min="1" style="width: 100px;">
+            </div>
+
+            <!-- Botón Agregar al Carrito -->
+            <button id="btnAgregarCarrito" class="btn btn-primary btn-lg" 
+                    style="background-color: #8B0000; border: none;">
+                <i class="fas fa-shopping-cart"></i> Agregar al Carrito
+            </button>
+        </div>
+    </div>
+
+    <!-- Stock Items (info adicional) -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>Disponibilidad</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Color</th>
+                        <th>Talle</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in stock_items %}
+                    <tr>
+                        <td>
+                            <span style="display: inline-block; width: 20px; height: 20px; background: {{ item.color.hex_code }}; border-radius: 50%; vertical-align: middle;"></span>
+                            {{ item.color.nombre }}
+                        </td>
+                        <td>{{ item.talle.abbreviation }}</td>
+                        <td>
+                            {% if item.stock > 5 %}
+                                <span class="badge bg-success">{{ item.stock }} unidades</span>
+                            {% elif item.stock > 0 %}
+                                <span class="badge bg-warning">{{ item.stock }} unidades</span>
+                            {% else %}
+                                <span class="badge bg-danger">Sin stock</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedColor = null;
+    let selectedTalle = null;
+
+    // Selección de color
+    document.querySelectorAll('.color-selector').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.color-selector').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            selectedColor = this.dataset.colorId;
+        });
+    });
+
+    // Selección de talle
+    document.querySelectorAll('.talle-selector').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.talle-selector').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            selectedTalle = this.dataset.talleId;
+        });
+    });
+
+    // Agregar al carrito
+    document.getElementById('btnAgregarCarrito').addEventListener('click', async function() {
+        if (!selectedColor) {
+            alert('Por favor selecciona un color');
+            return;
+        }
+        if (!selectedTalle) {
+            alert('Por favor selecciona un talle');
+            return;
+        }
+
+        const cantidad = parseInt(document.getElementById('cantidadInput').value);
+        
+        await agregarAlCarrito({{ producto.id }}, selectedColor, selectedTalle, cantidad);
+    });
+
+    // Agregar estilos para botones activos
+    const style = document.createElement('style');
+    style.textContent = `
+        .color-selector.active, .talle-selector.active {
+            background-color: #8B0000 !important;
+            color: white !important;
+            border-color: #8B0000 !important;
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

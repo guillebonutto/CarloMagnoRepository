@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Editar Perfil - Pierre Cardin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .editar-container {
+        min-height: 100vh;
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+    }
+
+    .editar-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .editar-header {
+        background: linear-gradient(135deg, #8B0000 0%, #a00000 100%);
+        color: white;
+        padding: 40px;
+        text-align: center;
+    }
+
+    .editar-header h2 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .editar-header p {
+        margin: 10px 0 0;
+        opacity: 0.9;
+    }
+
+    .editar-body {
+        padding: 40px;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .form-section:last-of-type {
+        border-bottom: none;
+    }
+
+    .form-section h3 {
+        color: #8B0000;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 14px;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 15px;
+        width: 100%;
+        transition: border-color 0.3s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #8B0000;
+        box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+        outline: none;
+    }
+
+    .form-check {
+        margin: 15px 0;
+        padding-left: 1.5rem;
+    }
+
+    .form-check-input {
+        margin-top: 0.25rem;
+    }
+
+    .form-check-label {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn-guardar {
+        flex: 1;
+        padding: 16px;
+        background: linear-gradient(135deg, #8B0000 0%, #a00000 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-guardar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(139, 0, 0, 0.3);
+    }
+
+    .btn-cancelar {
+        flex: 1;
+        padding: 16px;
+        background: #f0f0f0;
+        color: #333;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-cancelar:hover {
+        background: #e0e0e0;
+    }
+
+    .alert {
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .info-box {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid #2196F3;
+    }
+
+    .info-box i {
+        color: #2196F3;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="editar-container">
+    <div class="editar-card">
+        <div class="editar-header">
+            <i class="fas fa-user-edit fa-3x mb-3"></i>
+            <h2>Editar Mi Perfil</h2>
+            <p>Actualiza tu información personal</p>
+        </div>
+
+        <div class="editar-body">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <strong>Nota:</strong> Los campos marcados con * son obligatorios
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Datos Personales -->
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Datos Personales</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="tratamiento">Tratamiento *</label>
+                                <select name="tratamiento" id="tratamiento" class="form-select" required>
+                                    <option value="SR" {% if cliente.tratamiento == 'SR' %}selected{% endif %}>Sr.</option>
+                                    <option value="SRA" {% if cliente.tratamiento == 'SRA' %}selected{% endif %}>Sra.</option>
+                                    <option value="SRTA" {% if cliente.tratamiento == 'SRTA' %}selected{% endif %}>Srta.</option>
+                                    <option value="DR" {% if cliente.tratamiento == 'DR' %}selected{% endif %}>Dr.</option>
+                                    <option value="DRA" {% if cliente.tratamiento == 'DRA' %}selected{% endif %}>Dra.</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="nombre">Nombre *</label>
+                                <input type="text" name="nombre" id="nombre" class="form-control" 
+                                       value="{{ cliente.nombre }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="apellidos">Apellidos *</label>
+                                <input type="text" name="apellidos" id="apellidos" class="form-control" 
+                                       value="{{ cliente.apellidos }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" name="email" id="email" class="form-control" 
+                               value="{{ cliente.email }}" disabled>
+                        <small class="text-muted">El email no puede ser modificado</small>
+                    </div>
+                </div>
+
+                <!-- Preferencias -->
+                <div class="form-section">
+                    <h3><i class="fas fa-cog"></i> Preferencias de Comunicación</h3>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="boletin" name="boletin" 
+                               {% if cliente.boletin %}checked{% endif %}>
+                        <label class="form-check-label" for="boletin">
+                            <strong>Quiero recibir el boletín con ofertas</strong>
+                            <p class="mb-0 text-muted small">Recibe noticias, ofertas y novedades de Pierre Cardin</p>
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="ofertas_asociados" name="ofertas_asociados" 
+                               {% if cliente.ofertas_asociados %}checked{% endif %}>
+                        <label class="form-check-label" for="ofertas_asociados">
+                            <strong>Acepto recibir ofertas de asociados</strong>
+                            <p class="mb-0 text-muted small">Recibe ofertas de nuestros socios comerciales</p>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-guardar">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                    <a href="{% url 'perfil_cliente' %}" class="btn-cancelar">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

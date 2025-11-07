@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ title }} - Pierre Cardin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .direccion-container {
+        min-height: 100vh;
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+    }
+
+    .direccion-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .direccion-header {
+        background: linear-gradient(135deg, #8B0000 0%, #a00000 100%);
+        color: white;
+        padding: 40px;
+        text-align: center;
+    }
+
+    .direccion-header h2 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .direccion-header p {
+        margin: 10px 0 0;
+        opacity: 0.9;
+    }
+
+    .direccion-body {
+        padding: 40px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 14px;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 15px;
+        width: 100%;
+        transition: border-color 0.3s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #8B0000;
+        box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+        outline: none;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-check {
+        margin: 20px 0;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+    }
+
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        margin-top: 0;
+    }
+
+    .form-check-label {
+        color: #333;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+
+    .form-check-description {
+        color: #666;
+        font-size: 13px;
+        margin-top: 5px;
+        margin-left: 30px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn-guardar {
+        flex: 1;
+        padding: 16px;
+        background: linear-gradient(135deg, #8B0000 0%, #a00000 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-guardar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(139, 0, 0, 0.3);
+    }
+
+    .btn-cancelar {
+        flex: 1;
+        padding: 16px;
+        background: #f0f0f0;
+        color: #333;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-cancelar:hover {
+        background: #e0e0e0;
+    }
+
+    .alert {
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .info-box {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid #2196F3;
+    }
+
+    .info-box i {
+        color: #2196F3;
+        margin-right: 8px;
+    }
+
+    .error-text {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .required-marker {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="direccion-container">
+    <div class="direccion-card">
+        <div class="direccion-header">
+            <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
+            <h2>{{ title }}</h2>
+            <p>Completa los datos de tu dirección</p>
+        </div>
+
+        <div class="direccion-body">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <strong>Nota:</strong> Esta dirección será usada para el envío de tus pedidos
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Datos del Destinatario -->
+                <h5 class="mb-3" style="color: #8B0000; font-weight: 600;">
+                    <i class="fas fa-user"></i> Datos del Destinatario
+                </h5>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.nombre.id_for_label }}">
+                                Nombre <span class="required-marker">*</span>
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="error-text">{{ form.nombre.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.apellidos.id_for_label }}">
+                                Apellidos <span class="required-marker">*</span>
+                            </label>
+                            {{ form.apellidos }}
+                            {% if form.apellidos.errors %}
+                                <div class="error-text">{{ form.apellidos.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.telefono.id_for_label }}">
+                        Teléfono <span class="required-marker">*</span>
+                    </label>
+                    {{ form.telefono }}
+                    <small class="text-muted">Ejemplo: 351 668-1071</small>
+                    {% if form.telefono.errors %}
+                        <div class="error-text">{{ form.telefono.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Dirección -->
+                <h5 class="mb-3" style="color: #8B0000; font-weight: 600;">
+                    <i class="fas fa-home"></i> Dirección de Envío
+                </h5>
+
+                <div class="form-group">
+                    <label for="{{ form.direccion.id_for_label }}">
+                        Dirección Completa <span class="required-marker">*</span>
+                    </label>
+                    {{ form.direccion }}
+                    <small class="text-muted">Calle, número, piso, departamento, etc.</small>
+                    {% if form.direccion.errors %}
+                        <div class="error-text">{{ form.direccion.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.ciudad.id_for_label }}">
+                                Ciudad <span class="required-marker">*</span>
+                            </label>
+                            {{ form.ciudad }}
+                            {% if form.ciudad.errors %}
+                                <div class="error-text">{{ form.ciudad.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.codigo_postal.id_for_label }}">
+                                Código Postal <span class="required-marker">*</span>
+                            </label>
+                            {{ form.codigo_postal }}
+                            {% if form.codigo_postal.errors %}
+                                <div class="error-text">{{ form.codigo_postal.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.pais.id_for_label }}">
+                        País <span class="required-marker">*</span>
+                    </label>
+                    {{ form.pais }}
+                    {% if form.pais.errors %}
+                        <div class="error-text">{{ form.pais.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Dirección Predeterminada -->
+                <div class="form-check">
+                    {{ form.es_predeterminada }}
+                    <label class="form-check-label" for="{{ form.es_predeterminada.id_for_label }}">
+                        <i class="fas fa-star"></i> Establecer como dirección predeterminada
+                    </label>
+                    <div class="form-check-description">
+                        Esta dirección se usará automáticamente en tus próximos pedidos
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-guardar">
+                        <i class="fas fa-save"></i> Guardar Dirección
+                    </button>
+                    <a href="{% url 'perfil_cliente' %}" class="btn-cancelar">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

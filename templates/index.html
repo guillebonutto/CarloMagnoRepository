@@ -137,14 +137,28 @@
 
 {% block content %}
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-content">
+<div id="carouselExampleSlidesOnly" class="carousel slide" data-bs-ride="carousel">
+  <div class="carousel-inner hero">
+    <div class="carousel-item active hero-content">
+      <img src="../static/images/logo.jpg" class="d-block w-100" alt="...">
     <h1>Elegancia y estilo en cada prenda</h1>
     <p>Descubrí la nueva colección otoño–invierno</p>
     <a href="{% url 'productos' %}" class="btn btn-primary">Ver colección</a>
+    </div>
+    <div class="carousel-item">
+      <img src="../static/images/qr-Fiscal.jpg" class="d-block w-100" alt="...">
+    <h1>Elegancia y estilo en cada prenda</h1>
+    <p>Descubrí la nueva colección otoño–invierno</p>
+    <a href="{% url 'productos' %}" class="btn btn-primary">Ver colección</a>
+    </div>
+    <div class="carousel-item">
+      <img src="../static/images/logo.jpg" class="d-block w-100" alt="...">
+    <h1>Elegancia y estilo en cada prenda</h1>
+    <p>Descubrí la nueva colección otoño–invierno</p>
+    <a href="{% url 'productos' %}" class="btn btn-primary">Ver colección</a>
+    </div>
   </div>
-</section>
+</div>
 
 <!-- CATEGORÍAS -->
 <section class="categorias container">
