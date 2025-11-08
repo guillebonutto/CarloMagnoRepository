@@ -8,11 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-<<<<<<< HEAD
-set "VIRTUAL_ENV=C:\Users\Guille\Downloads\proyecto de carlomagno\.venv"
-=======
 set "VIRTUAL_ENV=C:\Users\Public\git de carlomagno\CarloMagnoRepository\.venv"
->>>>>>> 0b052310bcf3aefddd23c760d0fdff966e3bb447
 
 if not defined PROMPT set PROMPT=$P$G
 
