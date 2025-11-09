@@ -1,4 +1,4 @@
-# Crear archivo: productos/cart_views.py
+# Crear archivo: products/cart_views.py
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
@@ -69,18 +69,13 @@ def agregar_al_carrito(request):
         color = get_object_or_404(Color, id=color_id)
         talle = get_object_or_404(Talle, id=talle_id)
         
-        # Verificar stock
+        # Verificar stock disponible
         try:
             stock = ProductoStock.objects.get(
                 producto=producto,
                 color=color,
                 talle=talle
             )
-            if stock.stock < cantidad:
-                return JsonResponse({
-                    'success': False,
-                    'message': f'Solo hay {stock.stock} unidades disponibles'
-                }, status=400)
         except ProductoStock.DoesNotExist:
             return JsonResponse({
                 'success': False,
@@ -90,28 +85,41 @@ def agregar_al_carrito(request):
         # Obtener o crear carrito
         carrito = get_or_create_cart(request)
         
-        # Agregar o actualizar item
+        # Buscar si ya existe este item en el carrito
         item, created = CarritoItem.objects.get_or_create(
             carrito=carrito,
             producto=producto,
             color=color,
             talle=talle,
-            defaults={'cantidad': cantidad}
+            defaults={'cantidad': 0}  # Iniciar en 0 para sumar después
         )
         
-        if not created:
-            nueva_cantidad = item.cantidad + cantidad
-            if nueva_cantidad > stock.stock:
+        # Calcular nueva cantidad
+        nueva_cantidad = item.cantidad + cantidad
+        
+        # Verificar que no exceda el stock
+        if nueva_cantidad > stock.stock:
+            stock_disponible = stock.stock - item.cantidad
+            if stock_disponible <= 0:
                 return JsonResponse({
                     'success': False,
-                    'message': f'Solo puedes agregar {stock.stock - item.cantidad} unidades más'
+                    'message': f'Ya tienes el máximo disponible ({item.cantidad} unidades) en el carrito'
                 }, status=400)
-            item.cantidad = nueva_cantidad
-            item.save()
+            return JsonResponse({
+                'success': False,
+                'message': f'Solo puedes agregar {stock_disponible} unidades más. Stock total: {stock.stock}'
+            }, status=400)
+        
+        # Actualizar cantidad
+        item.cantidad = nueva_cantidad
+        item.save()
+        
+        mensaje = f'Se {"agregó" if created else "actualizó"} el producto en el carrito'
         
         return JsonResponse({
             'success': True,
-            'message': 'Producto agregado al carrito',
+            'message': mensaje,
+            'cantidad_item': item.cantidad,
             'cantidad_total': carrito.get_cantidad_total(),
             'total': str(carrito.get_total())
         })
