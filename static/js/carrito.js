@@ -51,7 +51,7 @@ const CartManager = {
 							<button class="quantity-btn" onclick="CartManager.changeQuantity(this, 1)">+</button>
 						</div>
 					</div>
-					<div class="cart-item-remove" onclick="CartManager.removeItem(${item.id})">
+					<div class="cart-item-remove" onclick="CartManager.removeItem(${item.id}); location.reload();">
 						<i class="fas fa-times"></i>
 					</div>
 				</div>
@@ -65,7 +65,7 @@ const CartManager = {
 				<span>Total:</span>
 				<span id="cartTotal">$${parseFloat(data.total).toFixed(2)}</span>
 			</div>
-			<button class="cart-checkout-btn" onclick="window.location.href='${window.CART_URLS.checkout}'">
+			<button class="cart-checkout-btn" onclick="CartManager.vaciarCarrito()">
 				Comprar
 			</button>
 		`;
@@ -154,6 +154,29 @@ const CartManager = {
 			}
 		} catch (error) {
 			console.error("Error eliminando item:", error);
+		}
+	},
+
+	async vaciarCarrito() {
+		try {
+			const response = await fetch(window.CART_URLS.vaciarCarrito, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRFToken": this.getCookie("csrftoken"),
+				},
+			});
+
+			const data = await response.json();
+			if (data.success) {
+				alert("✅ Compra realizada con éxito");
+				this.loadCart();
+				location.reload();
+			} else {
+				alert("❌ No se pudo vaciar el carrito");
+			}
+		} catch (error) {
+			console.error("Error vaciando carrito:", error);
 		}
 	},
 

@@ -93,7 +93,7 @@ urlpatterns = [
     path('carrito/data/', cart_views.get_cart_data, name='cart_data'),
     path('carrito/agregar/', cart_views.agregar_al_carrito, name='agregar_al_carrito'),
     path('carrito/actualizar/', cart_views.actualizar_cantidad, name='actualizar_cantidad'),
-    path('carrito/eliminar/', cart_views.eliminar_del_carrito, name='eliminar_del_carrito'),
+    path('carrito/eliminar/', cart_views.eliminar_item_del_carrito, name='eliminar_item_del_carrito'),
     path('carrito/vaciar/', cart_views.vaciar_carrito, name='vaciar_carrito'),
 
     # Stock

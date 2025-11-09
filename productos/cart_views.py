@@ -175,7 +175,7 @@ def actualizar_cantidad(request):
 
 
 @require_POST
-def eliminar_del_carrito(request):
+def eliminar_item_del_carrito(request):
     """Elimina un item del carrito"""
     try:
         data = json.loads(request.body)
@@ -198,11 +198,8 @@ def eliminar_del_carrito(request):
             'message': str(e)
         }, status=500)
 
-
 def vaciar_carrito(request):
     """Vacía el carrito completamente"""
     carrito = get_or_create_cart(request)
     carrito.items.all().delete()
-    
-    messages.success(request, 'Carrito vaciado correctamente')
-    return redirect('inicio')
+    return JsonResponse({"success": True, "message": "Carrito vaciado correctamente"})

@@ -90,9 +90,6 @@
 										<div class="cart-total">
 											
 										</div>
-										<button class="cart-checkout-btn" onclick="window.location.href='{% url 'inicio' %}'">
-											Comprar
-										</button>
 									</div>
 								</div>
 							</div>
@@ -243,7 +240,8 @@
 				window.CART_URLS = {
 					cartData: "{% url 'cart_data' %}",
 					actualizarCantidad: "{% url 'actualizar_cantidad' %}",
-					eliminarDelCarrito: "{% url 'eliminar_del_carrito' %}",
+					eliminarItemDelCarrito: "{% url 'eliminar_item_del_carrito' %}",
+					vaciarCarrito: "{% url 'vaciar_carrito' %}",
 					agregarAlCarrito: "{% url 'agregar_al_carrito' %}",
 				};
 			</script>
