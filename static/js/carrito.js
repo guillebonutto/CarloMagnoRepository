@@ -29,47 +29,87 @@ const CartManager = {
 		emptyCart.style.display = "none";
 		cartSummary.style.display = "block";
 
-		// Renderizar items
+		// 🔹 Renderizar items del carrito
 		cartItems.innerHTML = data.items
 			.map(
 				(item) => `
-                    <div class="cart-item" data-item-id="${item.id}">
-                        <img src="${item.imagen || "https://via.placeholder.com/80"}" 
-                             alt="${item.nombre}" 
-                             class="cart-item-image">
-                        <div class="cart-item-details">
-                            <div class="cart-item-name">${item.nombre}</div>
-                            <div class="cart-item-description">
-                                Talle: ${item.talle} | Color: ${item.color}
-                            </div>
-                            <div class="cart-item-price">${item.precio}</div>
-                            <div class="cart-item-quantity">
-                                <button class="quantity-btn" onclick="CartManager.updateQuantity(${
-												item.id
-											}, ${item.cantidad - 1})">-</button>
-                                <span>${item.cantidad}</span>
-                                <button class="quantity-btn" onclick="CartManager.updateQuantity(${
-												item.id
-											}, ${item.cantidad + 1})">+</button>
-                            </div>
-                        </div>
-                        <div class="cart-item-remove" onclick="CartManager.removeItem(${item.id})">
-                            <i class="fas fa-times"></i>
-                        </div>
-                    </div>
-                `
+				<div class="cart-item" data-item-id="${item.id}">
+					<img src="${item.imagen || "https://via.placeholder.com/80"}" 
+						alt="${item.nombre}" 
+						class="cart-item-image">
+					<div class="cart-item-details">
+						<div class="cart-item-name">${item.nombre}</div>
+						<div class="cart-item-description">
+							Talle: ${item.talle} | Color: ${item.color}
+						</div>
+						<div class="cart-item-price">$${item.precio}</div>
+
+						<div class="cart-item-quantity" data-item-id="${item.id}">
+							<button class="quantity-btn" onclick="CartManager.changeQuantity(this, -1)">-</button>
+							<span>${item.cantidad}</span>
+							<button class="quantity-btn" onclick="CartManager.changeQuantity(this, 1)">+</button>
+						</div>
+					</div>
+					<div class="cart-item-remove" onclick="CartManager.removeItem(${item.id})">
+						<i class="fas fa-times"></i>
+					</div>
+				</div>
+			`
 			)
 			.join("");
 
-		// Actualizar total
-		cartTotal.textContent = `${data.total}`;
+		// 🔹 Mostrar resumen del carrito (solo total + botón)
+		cartSummary.innerHTML = `
+			<div class="cart-total">
+				<span>Total:</span>
+				<span id="cartTotal">$${data.total.toFixed(2)}</span>
+			</div>
+			<button class="cart-checkout-btn" onclick="window.location.href='${window.CART_URLS.checkout}'">
+				Comprar
+			</button>
+		`;
 	},
 
+	updateCartTotal() {
+		const itemSubtotals = document.querySelectorAll(".cart-item-subtotal");
+		let total = 0;
+		itemSubtotals.forEach(sub => {
+			const value = parseFloat(sub.textContent.replace("$", "").trim());
+			if (!isNaN(value)) total += value;
+		});
+		document.getElementById("cartTotal").textContent = `$${total.toFixed(2)}`;
+	},
+
+	changeQuantity(button, delta) {
+		const quantityContainer = button.closest(".cart-item-quantity");
+		const span = quantityContainer.querySelector("span");
+		const itemId = quantityContainer.dataset.itemId;
+		let currentQuantity = parseInt(span.textContent);
+		const newQuantity = currentQuantity + delta;
+
+		if (newQuantity < 1) return; // Evita números negativos
+
+		// 🔹 Actualizar visualmente al instante
+		span.textContent = newQuantity;
+
+		// 🔹 🔥 Actualizar subtotal visualmente al instante
+		const itemElement = button.closest(".cart-item");
+		const priceText = itemElement.querySelector(".cart-item-price").textContent.replace("$", "").trim();
+		const price = parseFloat(priceText);
+		const subtotalElement = itemElement.querySelector(".cart-item-subtotal");
+		subtotalElement.textContent = `$${(price * newQuantity).toFixed(2)}`;
+
+		// 🔹 Actualizar total general
+		this.updateCartTotal();
+
+		// 🔹 Llamar al backend
+		this.updateQuantity(itemId, newQuantity);
+	},
+
+
+
 	async updateQuantity(itemId, newQuantity) {
-		if (newQuantity < 1) {
-			this.removeItem(itemId);
-			return;
-		}
+		if (newQuantity < 1) return;
 
 		try {
 			const response = await fetch(window.CART_URLS.actualizarCantidad, {
@@ -84,11 +124,10 @@ const CartManager = {
 				}),
 			});
 
-			const data = await response.json();
-			if (data.success) {
-				this.loadCart();
+			if (response.ok) {
+				await this.loadCart();
 			} else {
-				alert(data.message);
+			console.error("Error al actualizar cantidad");
 			}
 		} catch (error) {
 			console.error("Error actualizando cantidad:", error);

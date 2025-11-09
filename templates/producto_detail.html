@@ -112,6 +112,7 @@
             document.querySelectorAll('.color-selector').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             selectedColor = this.dataset.colorId;
+            console.log('Color seleccionado:', selectedColor);
         });
     });
 
@@ -121,23 +122,49 @@
             document.querySelectorAll('.talle-selector').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             selectedTalle = this.dataset.talleId;
+            console.log('Talle seleccionado:', selectedTalle);
         });
     });
 
     // Agregar al carrito
     document.getElementById('btnAgregarCarrito').addEventListener('click', async function() {
+        console.log('Botón clickeado');
+        console.log('Color:', selectedColor, 'Talle:', selectedTalle);
+        
         if (!selectedColor) {
-            alert('Por favor selecciona un color');
+            if (typeof mostrarNotificacion !== 'undefined') {
+                mostrarNotificacion('Por favor selecciona un color', 'error');
+            } else {
+                alert('Por favor selecciona un color');
+            }
             return;
         }
         if (!selectedTalle) {
-            alert('Por favor selecciona un talle');
+            if (typeof mostrarNotificacion !== 'undefined') {
+                mostrarNotificacion('Por favor selecciona un talle', 'error');
+            } else {
+                alert('Por favor selecciona un talle');
+            }
             return;
         }
 
         const cantidad = parseInt(document.getElementById('cantidadInput').value);
+        console.log('Cantidad:', cantidad);
         
-        await agregarAlCarrito({{ producto.id }}, selectedColor, selectedTalle, cantidad);
+        // Deshabilitar botón mientras se procesa
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
+        
+        try {
+            await agregarAlCarrito({{ producto.id }}, selectedColor, selectedTalle, cantidad);
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            // Rehabilitar botón
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-shopping-cart"></i> Agregar al Carrito';
+        }
     });
 
     // Agregar estilos para botones activos
@@ -147,6 +174,12 @@
             background-color: #8B0000 !important;
             color: white !important;
             border-color: #8B0000 !important;
+        }
+        .color-selector, .talle-selector {
+            transition: all 0.3s;
+        }
+        .color-selector:hover, .talle-selector:hover {
+            transform: scale(1.05);
         }
     `;
     document.head.appendChild(style);
