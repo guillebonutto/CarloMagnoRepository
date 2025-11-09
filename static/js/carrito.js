@@ -11,8 +11,10 @@ const CartManager = {
 	},
 
 	updateCartUI(data) {
-		const cartDropdown = document.getElementById("cartDropdown");
+		const cartItems = document.getElementById("cartItems");
 		const cartBadge = document.getElementById("cartBadge");
+		const cartTotal = document.getElementById("cartTotal");
+		const cartSummary = document.getElementById("cartSummary");
 		const emptyCart = document.getElementById("emptyCart");
 
 		// Actualizar badge
@@ -20,58 +22,54 @@ const CartManager = {
 
 		if (data.items.length === 0) {
 			emptyCart.style.display = "block";
+			cartSummary.style.display = "none";
 			return;
 		}
 
 		emptyCart.style.display = "none";
+		cartSummary.style.display = "block";
 
 		// 🔹 Renderizar items del carrito
-		cartDropdown.innerHTML = data.items
+		cartItems.innerHTML = data.items
 			.map(
-			(item) => `
-			<div class="cart-header">
-				Tu Carrito
-			</div>
-			<div class="cart-item" data-item-id="${item.id}">
-				<img src="${item.imagen || "https://via.placeholder.com/80"}" 
-					alt="${item.nombre}" 
-					class="cart-item-image">
-				<div class="cart-item-details">
-					<div class="cart-item-name">${item.nombre}</div>
-					<div class="cart-item-description">
-						Talle: ${item.talle} | Color: ${item.color}
-					</div>
-					<div class="cart-item-price">$${item.precio}</div>
+				(item) => `
+				<div class="cart-item" data-item-id="${item.id}">
+					<img src="${item.imagen || "https://via.placeholder.com/80"}" 
+						alt="${item.nombre}" 
+						class="cart-item-image">
+					<div class="cart-item-details">
+						<div class="cart-item-name">${item.nombre}</div>
+						<div class="cart-item-description">
+							Talle: ${item.talle} | Color: ${item.color}
+						</div>
+						<div class="cart-item-price">$${item.precio}</div>
+						<div class="cart-item-subtotal" style="display: none">$${item.subtotal}</div>
 
-					<div class="cart-item-quantity" data-item-id="${item.id}">
-						<button class="quantity-btn" onclick="CartManager.changeQuantity(this, -1)">-</button>
-						<span>${item.cantidad}</span>
-						<button class="quantity-btn" onclick="CartManager.changeQuantity(this, 1)">+</button>
-					</div>
-					<div class="cart-empty" id="emptyCart" style="display: none;">
-						<i class="fas fa-shopping-cart"></i>
-						<p>Tu carrito está vacío</p>
+						<div class="cart-item-quantity" data-item-id="${item.id}">
+							<button class="quantity-btn" onclick="CartManager.changeQuantity(this, -1)">-</button>
+							<span>${item.cantidad}</span>
+							<button class="quantity-btn" onclick="CartManager.changeQuantity(this, 1)">+</button>
 						</div>
 					</div>
+					<div class="cart-item-remove" onclick="CartManager.removeItem(${item.id})">
+						<i class="fas fa-times"></i>
+					</div>
 				</div>
-				<div class="cart-item-remove" onclick="CartManager.removeItem(${item.id})">
-					<i class="fas fa-times"></i>
-				</div>
-			</div>
-			<div class="cart-summary" id="cartSummary" style="display: none;">
-				<div class="cart-total">
-					<span>Total:</span>
-					<span id="cartTotal">$${item.total.toFixed(2)}</span>
-				</div>
-				<button class="cart-checkout-btn" onclick="window.location.href='${window.CART_URLS.checkout}'">
-					Comprar
-				</button>
-			</div>
 			`
 			)
 			.join("");
-	},
 
+		// 🔹 Mostrar resumen del carrito (solo total + botón)
+		cartSummary.innerHTML = `
+			<div class="cart-total">
+				<span>Total:</span>
+				<span id="cartTotal">$${parseFloat(data.total).toFixed(2)}</span>
+			</div>
+			<button class="cart-checkout-btn" onclick="window.location.href='${window.CART_URLS.checkout}'">
+				Comprar
+			</button>
+		`;
+	},
 
 	updateCartTotal() {
 		const itemSubtotals = document.querySelectorAll(".cart-item-subtotal");
@@ -207,6 +205,7 @@ async function agregarAlCarrito(productoId, colorId, talleId, cantidad = 1) {
 		if (data.success) {
 			CartManager.loadCart();
 			alert("✅ Producto agregado al carrito");
+			location.reload();
 		} else {
 			alert("❌ " + data.message);
 		}
