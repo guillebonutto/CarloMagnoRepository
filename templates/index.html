@@ -3,7 +3,6 @@
 {% block title %}Carlo Magno - Inicio{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
 <style>
   /* Hero principal */
   .hero {
@@ -221,5 +220,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/script.js' %}"></script>
+  {{ block.super }}
+  <script src="{% static 'js/script.js' %}"></script>
 {% endblock %}

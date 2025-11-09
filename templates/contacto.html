@@ -3,7 +3,6 @@
 {% block title %}Contacto - Pierre Cardin{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}" />
 <link rel="stylesheet" href="{% static 'css/contacto.css' %}" />
 {% endblock %}
 
@@ -139,5 +138,6 @@
 
 
 {% block extra_js %}
-<script src="{% static 'js/script.js' %}"></script>
+    {{ block.super }}
+    <script src="{% static 'js/script.js' %}"></script>
 {% endblock %}

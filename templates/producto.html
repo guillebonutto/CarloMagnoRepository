@@ -2,103 +2,119 @@
 {% load static %}
 {% block title %}Productos - Carlo Magno{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}" />
 <link rel="stylesheet" href="{% static 'css/producto.css' %}" />
-{% endblock %}
-<body>
-	{% block content %}
-	<div class="container">
-		<div class="filters">
-            <h3>🔍 Filtros</h3>
-            
-            <div class="filter-group">
-                <label>Categorías:</label>
-                <a href="{% url 'productos' %}" class="filter-btn {% if not selected_categoria %}active{% endif %}">
-                    Todas
-                </a>
-                {% for categoria in categorias %}
-                <a href="?categoria={{ categoria.id }}{% if selected_color %}&color={{ selected_color }}{% endif %}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
-                    class="filter-btn {% if selected_categoria == categoria.id|stringformat:'s' %}active{% endif %}">
-                    {{ categoria.nombre }}
-                </a>
-                {% endfor %}
-            </div>
+{% endblock %} {% block content %}
+<div class="container">
+	<div class="filters">
+		<h3>🔍 Filtros</h3>
 
-            <div class="filter-group">
-                <label>Colores:</label>
-                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
-                    class="filter-btn {% if not selected_color %}active{% endif %}">
-                    Todos
-                </a>
-                {% for color in colores %}
-                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}color={{ color.id }}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
-                    class="filter-btn {% if selected_color == color.id|stringformat:'s' %}active{% endif %}"
-                    style="display: inline-flex; align-items: center; gap: 5px;">
-                    <span style="width: 15px; height: 15px; background: {{ color.hex_code }}; border-radius: 50%; border: 1px solid #ddd;"></span>
-                    {{ color.name }}
-                </a>
-                {% endfor %}
-            </div>
-
-            <div class="filter-group">
-                <label>Talles:</label>
-                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
-                    class="filter-btn {% if not selected_talle %}active{% endif %}">
-                    Todos
-                </a>
-                {% for size in sizes %}
-                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}size={{ size.id }}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
-                    class="filter-btn {% if selected_talle == size.id|stringformat:'s' %}active{% endif %}">
-                    {{ size.abbreviation }}
-                </a>
-                {% endfor %}
-            </div>
-
-            <div class="filter-group">
-                <label>Marcas:</label>
-                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}{% endif %}" 
-                    class="filter-btn {% if not selected_marca %}active{% endif %}">
-                    Todas
-                </a>
-                {% for marca in marcas %}
-                <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}marca={{ marca.id }}" 
-                    class="filter-btn {% if selected_marca == marca.id|stringformat:'s' %}active{% endif %}">
-                    {{ marca.nombre }}
-                </a>
-                {% endfor %}
-            </div>
-
-            {% if selected_categoria or selected_color or selected_talle or selected_marca %}
-            <a href="{% url 'productos' %}" class="clear-filters">
-                Limpiar Filtros
-            </a>
-            {% endif %}
-        </div>
-		{% if productos %}
-        <div class="lista-productos">
-			{% for producto in productos %}
-            <div class="producto-card">
-                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-producto" />
-                <h2>{{ producto.nombre }}</h2>
-                <p class="precio">{{ producto.precio }}</p>
-                <a href="{% url 'producto_detail' producto.id %}" class="btn btn-primary text-light">Ber detalles</a>
-            </div>
+		<div class="filter-group">
+			<label>Categorías:</label>
+			<a
+				href="{% url 'productos' %}"
+				class="filter-btn {% if not selected_categoria %}active{% endif %}"
+			>
+				Todas
+			</a>
+			{% for categoria in categorias %}
+			<a
+				href="?categoria={{ categoria.id }}{% if selected_color %}&color={{ selected_color }}{% endif %}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}"
+				class="filter-btn {% if selected_categoria == categoria.id|stringformat:'s' %}active{% endif %}"
+			>
+				{{ categoria.nombre }}
+			</a>
 			{% endfor %}
 		</div>
-		{% else %}
-		<div class="no-productos">
-			<h2>No se encontraron productos</h2>
-			<p>
-				{% if selected_categoria %}No hay productos en esta categoría{% else %}Aún no hay
-				productos cargados{% endif %}
-			</p>
-			{% if selected_categoria %}
-			<a href="{% url 'productos' %}" class="clear-filters"> Ver todos los productos </a>
-			{% endif %}
-		</div>
-		{% endif %}
 
-		<!-- <div class="containerCards">
+		<div class="filter-group">
+			<label>Colores:</label>
+			<a
+				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}"
+				class="filter-btn {% if not selected_color %}active{% endif %}"
+			>
+				Todos
+			</a>
+			{% for color in colores %}
+			<a
+				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}color={{ color.id }}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}"
+				class="filter-btn {% if selected_color == color.id|stringformat:'s' %}active{% endif %}"
+				style="display: inline-flex; align-items: center; gap: 5px"
+			>
+				<span
+					style="width: 15px; height: 15px; background: {{ color.hex_code }}; border-radius: 50%; border: 1px solid #ddd;"
+				></span>
+				{{ color.name }}
+			</a>
+			{% endfor %}
+		</div>
+
+		<div class="filter-group">
+			<label>Talles:</label>
+			<a
+				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}"
+				class="filter-btn {% if not selected_talle %}active{% endif %}"
+			>
+				Todos
+			</a>
+			{% for size in sizes %}
+			<a
+				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}size={{ size.id }}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}"
+				class="filter-btn {% if selected_talle == size.id|stringformat:'s' %}active{% endif %}"
+			>
+				{{ size.abbreviation }}
+			</a>
+			{% endfor %}
+		</div>
+
+		<div class="filter-group">
+			<label>Marcas:</label>
+			<a
+				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}{% endif %}"
+				class="filter-btn {% if not selected_marca %}active{% endif %}"
+			>
+				Todas
+			</a>
+			{% for marca in marcas %}
+			<a
+				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}marca={{ marca.id }}"
+				class="filter-btn {% if selected_marca == marca.id|stringformat:'s' %}active{% endif %}"
+			>
+				{{ marca.nombre }}
+			</a>
+			{% endfor %}
+		</div>
+
+		{% if selected_categoria or selected_color or selected_talle or selected_marca %}
+		<a href="{% url 'productos' %}" class="clear-filters"> Limpiar Filtros </a>
+		{% endif %}
+	</div>
+	{% if productos %}
+	<div class="lista-productos">
+		{% for producto in productos %}
+		<div class="producto-card">
+			<img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-producto" />
+			<h2>{{ producto.nombre }}</h2>
+			<p class="precio">{{ producto.precio }}</p>
+			<a href="{% url 'producto_detail' producto.id %}" class="btn btn-primary text-light"
+				>Ber detalles</a
+			>
+		</div>
+		{% endfor %}
+	</div>
+	{% else %}
+	<div class="no-productos">
+		<h2>No se encontraron productos</h2>
+		<p>
+			{% if selected_categoria %}No hay productos en esta categoría{% else %}Aún no hay productos
+			cargados{% endif %}
+		</p>
+		{% if selected_categoria %}
+		<a href="{% url 'productos' %}" class="clear-filters"> Ver todos los productos </a>
+		{% endif %}
+	</div>
+	{% endif %}
+
+	<!-- <div class="containerCards">
 
             {% if productos %}
             <div class="productos-grid">
@@ -156,6 +172,5 @@
             </div>
             {% endif %}
         </div> -->
-	</div>
-	{% endblock %}
-</body>
+</div>
+{% endblock %}
