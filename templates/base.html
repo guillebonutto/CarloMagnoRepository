@@ -240,10 +240,12 @@
 				window.CART_URLS = {
 					cartData: "{% url 'cart_data' %}",
 					actualizarCantidad: "{% url 'actualizar_cantidad' %}",
-					eliminarItemDelCarrito: "{% url 'eliminar_item_del_carrito' %}",
+					eliminarDelCarrito: "{% url 'eliminar_item_del_carrito' %}",
 					vaciarCarrito: "{% url 'vaciar_carrito' %}",
 					agregarAlCarrito: "{% url 'agregar_al_carrito' %}",
+					checkout: "{% url 'checkout' %}",
 				};
+
 			</script>
 
 			<script src="{% static 'js/carrito.js' %}"></script>

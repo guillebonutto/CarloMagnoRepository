@@ -95,6 +95,11 @@ urlpatterns = [
     path('carrito/actualizar/', cart_views.actualizar_cantidad, name='actualizar_cantidad'),
     path('carrito/eliminar/', cart_views.eliminar_item_del_carrito, name='eliminar_item_del_carrito'),
     path('carrito/vaciar/', cart_views.vaciar_carrito, name='vaciar_carrito'),
+    path('carrito/checkout/', cart_views.checkout, name='checkout'),
+    path('pago/exitoso/', cart_views.pago_exitoso, name='pago_exitoso'),
+    path('pago/fallido/', cart_views.pago_fallido, name='pago_fallido'),
+    path('pago/pendiente/', cart_views.pago_pendiente, name='pago_pendiente'),
+
 
     # Stock
     path('panel/stock/', admin_views.stock, name='stock'),

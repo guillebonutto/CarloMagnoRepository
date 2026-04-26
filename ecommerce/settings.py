@@ -143,3 +143,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Mercado Pago Credentials
+# Producción
+MERCADO_PAGO_PUBLIC_KEY = "APP_USR-94cc2d5d-82e5-44da-8612-afee97d487fb"
+MERCADO_PAGO_ACCESS_TOKEN = "APP_USR-7762497834204355-042410-ec020e65e4436130b4f6a98387a60ee3-1109104702"
+
+# Prueba (Comentar las de arriba y usar estas para testeo)
+# MERCADO_PAGO_PUBLIC_KEY = "TEST-8f1d745e-93b1-42ad-a0c1-865afc95a82"
+# MERCADO_PAGO_ACCESS_TOKEN = "TEST-7762497834204355-042410-bd7a03a861b5ccd6be329c79a92ed8b2-1109104702"
+

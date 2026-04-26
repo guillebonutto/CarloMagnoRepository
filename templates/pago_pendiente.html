@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5 py-5 text-center">
+    <div class="card shadow p-5 border-0 mx-auto" style="max-width: 600px; border-radius: 20px;">
+        <div class="mb-4">
+            <i class="fas fa-clock text-warning" style="font-size: 80px;"></i>
+        </div>
+        <h1 class="display-5 fw-bold mb-3">Pago pendiente</h1>
+        <p class="lead text-muted mb-4">
+            Tu pago está siendo procesado por Mercado Pago. Te avisaremos en cuanto se confirme el estado final.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a href="{% url 'inicio' %}" class="btn btn-primary btn-lg px-4 gap-3" style="background-color: #8b0000; border-color: #8b0000;">
+                Ir al inicio
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

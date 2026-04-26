@@ -65,11 +65,12 @@ const CartManager = {
 				<span>Total:</span>
 				<span id="cartTotal">$${parseFloat(data.total).toFixed(2)}</span>
 			</div>
-			<button class="cart-checkout-btn" onclick="CartManager.vaciarCarrito()">
+			<button class="cart-checkout-btn" onclick="CartManager.checkout()">
 				Comprar
 			</button>
 		`;
 	},
+
 
 	updateCartTotal() {
 		const itemSubtotals = document.querySelectorAll(".cart-item-subtotal");
@@ -157,7 +158,38 @@ const CartManager = {
 		}
 	},
 
+	async checkout() {
+		try {
+			// Cambiar texto del botón a "Cargando..."
+			const btn = document.querySelector(".cart-checkout-btn");
+			const originalText = btn.textContent;
+			btn.textContent = "Procesando...";
+			btn.disabled = true;
+
+			const response = await fetch(window.CART_URLS.checkout);
+			const data = await response.json();
+
+			if (data.success && data.init_point) {
+				// Redirigir a Mercado Pago
+				window.location.href = data.init_point;
+			} else {
+				alert("❌ Error: " + (data.message || "No se pudo iniciar el pago"));
+				btn.textContent = originalText;
+				btn.disabled = false;
+			}
+		} catch (error) {
+			console.error("Error en checkout:", error);
+			alert("❌ Error de conexión al intentar pagar");
+			const btn = document.querySelector(".cart-checkout-btn");
+			if (btn) {
+				btn.textContent = "Comprar";
+				btn.disabled = false;
+			}
+		}
+	},
+
 	async vaciarCarrito() {
+
 		try {
 			const response = await fetch(window.CART_URLS.vaciarCarrito, {
 				method: "POST",
