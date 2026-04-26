@@ -1,5 +1,3 @@
-# Crear archivo: products/cart_views.py
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
@@ -18,7 +16,6 @@ def get_or_create_cart(request):
         carrito, created = Carrito.objects.get_or_create(session_key=session_key)
     
     return carrito
-
 
 def get_cart_data(request):
     """Obtiene los datos del carrito en formato JSON para el navbar"""
@@ -45,7 +42,6 @@ def get_cart_data(request):
         'cantidad_total': carrito.get_cantidad_total(),
         'total': str(carrito.get_total())
     })
-
 
 @require_POST
 def agregar_al_carrito(request):
@@ -130,7 +126,6 @@ def agregar_al_carrito(request):
             'message': str(e)
         }, status=500)
 
-
 @require_POST
 def actualizar_cantidad(request):
     """Actualiza la cantidad de un item en el carrito"""
@@ -173,7 +168,6 @@ def actualizar_cantidad(request):
             'message': str(e)
         }, status=500)
 
-
 @require_POST
 def eliminar_item_del_carrito(request):
     """Elimina un item del carrito"""
@@ -204,32 +198,70 @@ def vaciar_carrito(request):
     carrito.items.all().delete()
     return JsonResponse({"success": True, "message": "Carrito vaciado correctamente"})
 
-
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 from .mercado_pago_service import MercadoPagoService
+from .models import Cliente, Direccion
+from django.conf import settings
 
-def checkout(request):
-    """Crea una preferencia de Mercado Pago y redirige al usuario"""
+@login_required(login_url='login_cliente')
+def checkout_view(request):
+    """Muestra la página de checkout con datos de facturación"""
     carrito = get_or_create_cart(request)
     items = carrito.items.all()
     
     if not items:
-        return JsonResponse({"success": False, "message": "El carrito está vacío"}, status=400)
+        messages.warning(request, "Tu carrito está vacío")
+        return redirect('productos')
         
-    mp_service = MercadoPagoService()
-    
-    # Construir URLs de retorno
-    success_url = request.build_absolute_uri(reverse('pago_exitoso'))
-    failure_url = request.build_absolute_uri(reverse('pago_fallido'))
-    pending_url = request.build_absolute_uri(reverse('pago_pendiente'))
-    
     try:
+        cliente = Cliente.objects.get(email=request.user.email)
+    except Cliente.DoesNotExist:
+        cliente = Cliente.objects.create(
+            nombre=request.user.first_name,
+            apellidos=request.user.last_name,
+            email=request.user.email,
+            activado=True
+        )
+        
+    direccion = cliente.direcciones.filter(es_predeterminada=True).first()
+    if not direccion:
+        direccion = cliente.direcciones.first()
+            
+    return render(request, 'checkout.html', {
+        'carrito': carrito,
+        'items': items,
+        'cliente': cliente,
+        'direccion': direccion,
+        'total': carrito.get_total(),
+        'MERCADO_PAGO_PUBLIC_KEY': settings.MERCADO_PAGO_PUBLIC_KEY
+    })
+
+@login_required(login_url='login_cliente')
+def iniciar_pago_mercadopago(request):
+    """Crea una preferencia de Mercado Pago y redirige al usuario"""
+    try:
+        carrito = get_or_create_cart(request)
+        items = carrito.items.all()
+        
+        if not items:
+            return JsonResponse({"success": False, "message": "El carrito está vacío"}, status=400)
+            
+        mp_service = MercadoPagoService()
+        
+        # Construir URLs de retorno
+        success_url = request.build_absolute_uri(reverse('pago_exitoso'))
+        failure_url = request.build_absolute_uri(reverse('pago_fallido'))
+        pending_url = request.build_absolute_uri(reverse('pago_pendiente'))
+        
+        base_url = request.build_absolute_uri('/')
         preference = mp_service.crear_preferencia(
             carrito, 
             items, 
             success_url, 
             failure_url, 
-            pending_url
+            pending_url,
+            base_url=base_url
         )
         
         return JsonResponse({
@@ -238,11 +270,50 @@ def checkout(request):
             "init_point": preference.get("init_point")
         })
     except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+@require_POST
+@login_required(login_url='login_cliente')
+def procesar_pago_tarjeta(request):
+    """Procesa el pago enviado por el Card Brick"""
+    try:
+        data = json.loads(request.body)
+        carrito = get_or_create_cart(request)
+        
+        # Preparar los datos para la API de Mercado Pago
+        payment_data = {
+            "transaction_amount": float(data.get("transaction_amount")),
+            "token": data.get("token"),
+            "description": f"Compra en Carlo Magno - Carrito #{carrito.id}",
+            "installments": int(data.get("installments")),
+            "payment_method_id": data.get("payment_method_id"),
+            "issuer_id": data.get("issuer_id"),
+            "payer": {
+                "email": data.get("payer", {}).get("email"),
+                "identification": data.get("payer", {}).get("identification"),
+            },
+            "external_reference": str(carrito.id),
+            "statement_descriptor": "CARLOMAGNO",
+        }
+        
+        mp_service = MercadoPagoService()
+        result = mp_service.procesar_pago_tarjeta(payment_data)
+        
+        # Si el pago fue aprobado
+        if result.get("status") == "approved":
+            carrito.items.all().delete() # Vaciar el carrito
+            return JsonResponse({"success": True})
+        else:
+            status_detail = result.get("status_detail", "El pago no pudo ser aprobado")
+            return JsonResponse({"success": False, "message": status_detail}, status=400)
+            
+    except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 def pago_exitoso(request):
     """Vista de retorno para pagos exitosos"""
-    # Aquí podrías crear un Pedido oficial en la DB si lo tuvieras
     carrito = get_or_create_cart(request)
     carrito.items.all().delete() # Vaciar el carrito tras el pago
     return render(request, 'pago_exitoso.html')
@@ -253,4 +324,4 @@ def pago_fallido(request):
 
 def pago_pendiente(request):
     """Vista de retorno para pagos pendientes"""
-    return render(request, 'pago_pendiente.html')
+    return render(request, 'pago_pendiente.html')

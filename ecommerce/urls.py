@@ -24,6 +24,7 @@ from contact.views import contact
 from custom_admin import views as admin_views
 from productos import cart_views
 from productos import cliente_auth
+from productos import vton_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -95,10 +96,15 @@ urlpatterns = [
     path('carrito/actualizar/', cart_views.actualizar_cantidad, name='actualizar_cantidad'),
     path('carrito/eliminar/', cart_views.eliminar_item_del_carrito, name='eliminar_item_del_carrito'),
     path('carrito/vaciar/', cart_views.vaciar_carrito, name='vaciar_carrito'),
-    path('carrito/checkout/', cart_views.checkout, name='checkout'),
+    path('checkout/', cart_views.checkout_view, name='checkout'),
+    path('carrito/iniciar-pago-mp/', cart_views.iniciar_pago_mercadopago, name='iniciar_pago_mercadopago'),
+    path('carrito/procesar-pago-tarjeta/', cart_views.procesar_pago_tarjeta, name='procesar_pago_tarjeta'),
     path('pago/exitoso/', cart_views.pago_exitoso, name='pago_exitoso'),
     path('pago/fallido/', cart_views.pago_fallido, name='pago_fallido'),
     path('pago/pendiente/', cart_views.pago_pendiente, name='pago_pendiente'),
+
+    # API de Inteligencia Artificial (Virtual Try-On)
+    path('api/vton/', vton_views.vton_generate, name='vton_generate'),
 
 
     # Stock

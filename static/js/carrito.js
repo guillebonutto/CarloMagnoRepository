@@ -2,7 +2,9 @@
 const CartManager = {
 	async loadCart() {
 		try {
-			const response = await fetch(window.CART_URLS.cartData);
+			const response = await fetch(window.CART_URLS.cartData, {
+				credentials: 'same-origin'
+			});
 			const data = await response.json();
 			this.updateCartUI(data);
 		} catch (error) {
@@ -116,6 +118,7 @@ const CartManager = {
 		try {
 			const response = await fetch(window.CART_URLS.actualizarCantidad, {
 				method: "POST",
+				credentials: 'same-origin',
 				headers: {
 					"Content-Type": "application/json",
 					"X-CSRFToken": this.getCookie("csrftoken"),
@@ -140,6 +143,7 @@ const CartManager = {
 		try {
 			const response = await fetch(window.CART_URLS.eliminarDelCarrito, {
 				method: "POST",
+				credentials: 'same-origin',
 				headers: {
 					"Content-Type": "application/json",
 					"X-CSRFToken": this.getCookie("csrftoken"),
@@ -158,34 +162,8 @@ const CartManager = {
 		}
 	},
 
-	async checkout() {
-		try {
-			// Cambiar texto del botón a "Cargando..."
-			const btn = document.querySelector(".cart-checkout-btn");
-			const originalText = btn.textContent;
-			btn.textContent = "Procesando...";
-			btn.disabled = true;
-
-			const response = await fetch(window.CART_URLS.checkout);
-			const data = await response.json();
-
-			if (data.success && data.init_point) {
-				// Redirigir a Mercado Pago
-				window.location.href = data.init_point;
-			} else {
-				alert("❌ Error: " + (data.message || "No se pudo iniciar el pago"));
-				btn.textContent = originalText;
-				btn.disabled = false;
-			}
-		} catch (error) {
-			console.error("Error en checkout:", error);
-			alert("❌ Error de conexión al intentar pagar");
-			const btn = document.querySelector(".cart-checkout-btn");
-			if (btn) {
-				btn.textContent = "Comprar";
-				btn.disabled = false;
-			}
-		}
+	checkout() {
+		window.location.href = window.CART_URLS.checkout;
 	},
 
 	async vaciarCarrito() {
@@ -193,6 +171,7 @@ const CartManager = {
 		try {
 			const response = await fetch(window.CART_URLS.vaciarCarrito, {
 				method: "POST",
+				credentials: 'same-origin',
 				headers: {
 					"Content-Type": "application/json",
 					"X-CSRFToken": this.getCookie("csrftoken"),
@@ -244,6 +223,7 @@ async function agregarAlCarrito(productoId, colorId, talleId, cantidad = 1) {
 	try {
 		const response = await fetch(window.CART_URLS.agregarAlCarrito, {
 			method: "POST",
+			credentials: 'same-origin',
 			headers: {
 				"Content-Type": "application/json",
 				"X-CSRFToken": CartManager.getCookie("csrftoken"),

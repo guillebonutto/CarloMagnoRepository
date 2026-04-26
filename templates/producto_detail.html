@@ -58,9 +58,14 @@
             </div>
 
             <!-- Botón Agregar al Carrito -->
-            <button id="btnAgregarCarrito" class="btn btn-primary btn-lg" 
+            <button id="btnAgregarCarrito" class="btn btn-primary btn-lg w-100 mb-2" 
                     style="background-color: #8B0000; border: none;">
                 <i class="fas fa-shopping-cart"></i> Agregar al Carrito
+            </button>
+
+            <!-- Botón Pruébatelo virtualmente -->
+            <button class="btn btn-outline-dark btn-lg w-100" data-bs-toggle="modal" data-bs-target="#vtonModal">
+                <i class="fas fa-magic"></i> Pruébatelo virtualmente con IA
             </button>
         </div>
     </div>
@@ -100,6 +105,64 @@
             </table>
         </div>
     </div>
+</div>
+
+<!-- Modal VTON -->
+<div class="modal fade" id="vtonModal" tabindex="-1" aria-labelledby="vtonModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="vtonModalLabel"><i class="fas fa-magic text-warning"></i> Probador Virtual Inteligente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p class="text-muted mb-4">Sube una foto tuya y la Inteligencia Artificial te vestirá con esta prenda automáticamente.</p>
+        
+        <div class="row align-items-center mb-4">
+            <div class="col-md-5">
+                <h6>Tu foto</h6>
+                <div class="border rounded p-3 d-flex flex-column align-items-center justify-content-center" style="min-height: 250px; background: #f8f9fa; position: relative;">
+                    <img id="vtonPreviewUser" src="" style="max-width: 100%; max-height: 200px; display: none; border-radius: 8px;">
+                    <label for="vtonInputUser" class="btn btn-secondary mt-2" id="vtonUploadBtn">
+                        <i class="fas fa-upload"></i> Subir tu foto
+                    </label>
+                    <input type="file" id="vtonInputUser" accept="image/png, image/jpeg" style="display: none;">
+                </div>
+            </div>
+            <div class="col-md-2 text-center my-3">
+                <i class="fas fa-plus fa-2x text-muted"></i>
+            </div>
+            <div class="col-md-5">
+                <h6>La prenda</h6>
+                <div class="border rounded p-3 d-flex align-items-center justify-content-center" style="min-height: 250px; background: #f8f9fa;">
+                    {% if producto.imagen %}
+                        <img id="vtonPreviewGarment" src="{{ producto.imagen.url }}" style="max-width: 100%; max-height: 200px; border-radius: 8px;">
+                    {% else %}
+                        <i class="fas fa-tshirt fa-4x text-muted"></i>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div id="vtonLoadingArea" style="display: none;" class="my-4">
+            <div class="spinner-border" style="color: #8B0000; width: 3rem; height: 3rem;" role="status"></div>
+            <p class="mt-3 fw-bold" style="color: #8B0000;">Procesando con IA... Esto puede tomar hasta 15 segundos.</p>
+        </div>
+
+        <div id="vtonResultArea" style="display: none;" class="my-4">
+            <h5 class="text-success mb-3"><i class="fas fa-check-circle"></i> ¡Listo! Así te verías:</h5>
+            <img id="vtonResultImage" src="" class="img-fluid rounded shadow-lg" style="max-height: 400px;">
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" id="btnGenerateVton" style="background-color: #8B0000; border: none;" disabled>
+            <i class="fas fa-bolt"></i> Probar Prenda
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -183,5 +246,76 @@
         }
     `;
     document.head.appendChild(style);
+    // Lógica del Probador Virtual (VTON)
+    const vtonInputUser = document.getElementById('vtonInputUser');
+    const vtonPreviewUser = document.getElementById('vtonPreviewUser');
+    const vtonUploadBtn = document.getElementById('vtonUploadBtn');
+    const btnGenerateVton = document.getElementById('btnGenerateVton');
+    const vtonLoadingArea = document.getElementById('vtonLoadingArea');
+    const vtonResultArea = document.getElementById('vtonResultArea');
+    const vtonResultImage = document.getElementById('vtonResultImage');
+
+    vtonInputUser.addEventListener('change', function(e) {
+        if(this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                vtonPreviewUser.src = e.target.result;
+                vtonPreviewUser.style.display = 'block';
+                vtonUploadBtn.innerHTML = '<i class="fas fa-sync"></i> Cambiar foto';
+                btnGenerateVton.disabled = false;
+            }
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    btnGenerateVton.addEventListener('click', async function() {
+        if (!vtonPreviewUser.src || vtonPreviewUser.src === "") {
+            alert("Por favor sube una foto tuya primero.");
+            return;
+        }
+
+        // Ocultar resultados previos si los hay
+        vtonResultArea.style.display = 'none';
+        
+        // Mostrar estado de carga
+        btnGenerateVton.disabled = true;
+        vtonLoadingArea.style.display = 'block';
+
+        try {
+            const response = await fetch('/api/vton/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_image: vtonPreviewUser.src,
+                    producto_id: {{ producto.id }}
+                })
+            });
+            
+            const data = await response.json();
+            
+            vtonLoadingArea.style.display = 'none';
+            
+            if (data.success) {
+                vtonResultArea.style.display = 'block';
+                // La API nos devuelve la URL de la imagen de Replicate
+                vtonResultImage.src = data.result_url; 
+                vtonResultImage.style.filter = "none"; 
+                
+                btnGenerateVton.innerHTML = '<i class="fas fa-redo"></i> Intentar con otra foto';
+            } else {
+                alert("Error generando prueba virtual: " + data.message);
+                btnGenerateVton.innerHTML = '<i class="fas fa-bolt"></i> Probar Prenda';
+            }
+        } catch (error) {
+            console.error("Error en VTON:", error);
+            vtonLoadingArea.style.display = 'none';
+            alert("Error de conexión al servidor.");
+            btnGenerateVton.innerHTML = '<i class="fas fa-bolt"></i> Probar Prenda';
+        } finally {
+            btnGenerateVton.disabled = false;
+        }
+    });
 </script>
 {% endblock %}

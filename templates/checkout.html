@@ -1,0 +1,445 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load l10n %}
+
+
+{% block extra_css %}
+<style>
+    .checkout-container {
+        padding: 40px 0;
+        background-color: #f8f9fa;
+    }
+
+    .checkout-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        background: white;
+        margin-bottom: 30px;
+    }
+
+    .checkout-header {
+        padding: 25px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .checkout-body {
+        padding: 30px;
+    }
+
+    .section-title {
+        font-weight: 700;
+        color: #8b0000;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #444;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 12px;
+        border: 1px solid #ddd;
+    }
+
+    .payment-option {
+        border: 2px solid #eee;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        position: relative;
+    }
+
+    .payment-option:hover {
+        border-color: #8b0000;
+        background-color: #fff9f9;
+    }
+
+    .payment-option.active {
+        border-color: #8b0000;
+        background-color: #fffbfa;
+        box-shadow: 0 4px 12px rgba(139, 0, 0, 0.1);
+    }
+
+    .payment-option input {
+        position: absolute;
+        opacity: 0;
+        top: 0;
+        left: 0;
+    }
+
+    .payment-icon {
+        width: 45px;
+        height: 45px;
+        background: #fdf2f2;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #8b0000;
+        flex-shrink: 0;
+    }
+
+    .payment-check {
+        margin-left: auto;
+        color: #8b0000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        width: 20px;
+    }
+
+    .payment-option.active .payment-check {
+        opacity: 1;
+    }
+
+    #card-brick-container {
+        display: none;
+        margin-top: 20px;
+        padding: 20px;
+        background: #fafafa;
+        border-radius: 12px;
+        border: 1px dashed #ddd;
+    }
+
+    .payment-option.active+#card-brick-container {
+        display: block;
+    }
+
+
+    .order-summary {
+        position: sticky;
+        top: 20px;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .total-amount {
+        font-size: 24px;
+        font-weight: 800;
+        color: #8b0000;
+    }
+
+    .btn-checkout {
+        background: #8b0000;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 15px;
+        font-weight: 700;
+        width: 100%;
+        margin-top: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-checkout:hover {
+        background: #660000;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <div class="container">
+        <h2 class="mb-5 fw-bold">Finalizar Compra</h2>
+
+        <form id="checkoutForm">
+            <div class="row">
+                <!-- Columna Izquierda: Datos -->
+                <div class="col-lg-8">
+                    <!-- Datos Personales -->
+                    <div class="card checkout-card">
+                        <div class="checkout-header">
+                            <h5 class="section-title"><i class="fas fa-user"></i> Datos de Facturación</h5>
+                        </div>
+                        <div class="checkout-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nombre</label>
+                                    <input type="text" class="form-control" name="nombre" value="{{ cliente.nombre }}"
+                                        required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Apellidos</label>
+                                    <input type="text" class="form-control" name="apellidos"
+                                        value="{{ cliente.apellidos }}" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" value="{{ cliente.email }}" readonly>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Dirección</label>
+                                    <input type="text" class="form-control" name="direccion"
+                                        value="{{ direccion.direccion|default:'' }}" placeholder="Ej: Calle Falsa 123"
+                                        required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Ciudad</label>
+                                    <input type="text" class="form-control" name="ciudad"
+                                        value="{{ direccion.ciudad|default:'' }}" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Código Postal</label>
+                                    <input type="text" class="form-control" name="cp"
+                                        value="{{ direccion.codigo_postal|default:'' }}" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Teléfono</label>
+                                    <input type="text" class="form-control" name="telefono"
+                                        value="{{ direccion.telefono|default:'' }}" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Métodos de Pago -->
+                    <div class="card checkout-card">
+                        <div class="checkout-header">
+                            <h5 class="section-title"><i class="fas fa-credit-card"></i> Selección de Pago</h5>
+                        </div>
+                        <div class="checkout-body">
+                            <!-- Opción 1: Tarjetas -->
+                            <label class="payment-option" for="pay_cards">
+                                <input type="radio" name="payment_method" id="pay_cards" value="cards">
+                                <div class="payment-icon"><i class="fas fa-credit-card"></i></div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">Tarjeta de Crédito o Débito</div>
+                                    <small class="text-muted">Visa, Mastercard, Amex, Cabal</small>
+                                </div>
+                                <div class="payment-check"><i class="fas fa-check-circle"></i></div>
+                            </label>
+
+
+                            <!-- Contenedor dinámico para el formulario de tarjeta -->
+                            <div id="card-brick-container">
+                                <div id="cardPaymentBrick_container"></div>
+                            </div>
+
+                            <!-- Opción 2: MP Wallet -->
+                            <label class="payment-option" for="pay_mp">
+                                <input type="radio" name="payment_method" id="pay_mp" value="mercadopago">
+                                <div class="payment-icon"><i class="fas fa-wallet"></i></div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">Billetera Mercado Pago</div>
+                                    <small class="text-muted">Saldo en cuenta, QR o Cuotas sin tarjeta</small>
+                                </div>
+                                <div class="payment-check"><i class="fas fa-check-circle"></i></div>
+                            </label>
+
+                            <!-- Opción 3: Transferencia -->
+                            <label class="payment-option" for="pay_transfer">
+                                <input type="radio" name="payment_method" id="pay_transfer" value="transfer">
+                                <div class="payment-icon"><i class="fas fa-university"></i></div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">Transferencia Bancaria Directa</div>
+                                    <small class="text-muted">Descuento del 10% adicional</small>
+                                </div>
+                                <div class="payment-check"><i class="fas fa-check-circle"></i></div>
+                            </label>
+                        </div> <!-- Cierre checkout-body -->
+                    </div> <!-- Cierre checkout-card -->
+                </div> <!-- Cierre col-lg-8 -->
+
+
+                <!-- Columna Derecha: Resumen -->
+                <div class="col-lg-4">
+                    <div class="card checkout-card order-summary">
+                        <div class="checkout-header">
+                            <h5 class="fw-bold mb-0">Resumen del Pedido</h5>
+                        </div>
+                        <div class="checkout-body">
+                            <div class="cart-items-preview mb-4">
+                                {% for item in items %}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">{{ item.cantidad }}x {{ item.producto.nombre }}</span>
+                                    <span>${{ item.get_subtotal }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <hr>
+                            <div class="summary-item">
+                                <span>Subtotal</span>
+                                <span>${{ total }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Envío</span>
+                                <span class="text-success">Gratis</span>
+                            </div>
+                            <hr>
+                            <div class="summary-item mb-4">
+                                <span class="fw-bold">Total</span>
+                                <span class="total-amount">${{ total }}</span>
+                            </div>
+
+                            <button type="submit" class="btn-checkout" id="btnPlaceOrder">
+                                Finalizar y Pagar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://sdk.mercadopago.com/js/v2"></script>
+<script>
+    const mp = new MercadoPago("{{ MERCADO_PAGO_PUBLIC_KEY }}");
+    const bricksBuilder = mp.bricks();
+    let cardPaymentBrickController;
+
+    const renderCardBrick = async (bricksBuilder) => {
+        const settings = {
+            initialization: {
+                amount: Number("{{ total|unlocalize }}"),
+                payer: {
+                    email: "{{ cliente.email }}",
+                },
+            },
+            style: {
+                theme: 'bootstrap'
+            },
+            callbacks: {
+                onReady: () => {
+                    console.log("Card Brick listo");
+                },
+                onSubmit: (formData) => {
+                    return new Promise((resolve, reject) => {
+                        fetch(window.CART_URLS.procesarPagoTarjeta, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": "{{ csrf_token }}"
+                            },
+                            body: JSON.stringify(formData)
+                        })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                                window.location.href = "{% url 'pago_exitoso' %}";
+                                resolve();
+                            } else {
+                                alert("Error en el pago: " + data.message);
+                                reject();
+                            }
+                        })
+                        .catch((error) => {
+                            alert("Error de conexión");
+                            reject();
+                        });
+                    });
+                },
+                onError: (error) => {
+                    console.error("Error en Brick:", error);
+                },
+            },
+        };
+        cardPaymentBrickController = await bricksBuilder.create('cardPayment', 'cardPaymentBrick_container', settings);
+    };
+
+    // Manejar el cambio de método de pago
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', function (e) {
+            // Buscar el radio button dentro de este label
+            const radio = this.querySelector('input[name="payment_method"]');
+            if (radio && !radio.checked) {
+                radio.checked = true;
+                // Disparar manualmente el evento change
+                radio.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    });
+
+    // Escuchar el evento change en los radios (se dispara por el código de arriba)
+    document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            // Actualizar clases visuales de los labels
+            document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('active'));
+            const parentLabel = this.closest('.payment-option');
+            if (parentLabel) parentLabel.classList.add('active');
+
+            const method = this.value;
+            const cardContainer = document.getElementById('card-brick-container');
+            const mainBtn = document.getElementById('btnPlaceOrder');
+
+            if (method === 'cards') {
+                cardContainer.style.display = 'block';
+                mainBtn.classList.add('d-none');
+                if (!cardPaymentBrickController) renderCardBrick(bricksBuilder);
+            } else {
+                cardContainer.style.display = 'none';
+                mainBtn.classList.remove('d-none');
+                mainBtn.disabled = false;
+            }
+        });
+    });
+
+
+    document.getElementById('checkoutForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnPlaceOrder');
+        const paymentMethodInput = document.querySelector('input[name="payment_method"]:checked');
+
+        if (!paymentMethodInput) {
+            alert("Por favor, selecciona un método de pago.");
+            return;
+        }
+
+        const paymentMethod = paymentMethodInput.value;
+        if (paymentMethod === 'cards') return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
+
+        if (paymentMethod === 'mercadopago') {
+            try {
+                const response = await fetch("{% url 'iniciar_pago_mercadopago' %}");
+                const data = await response.json();
+                if (data.success && data.init_point) {
+                    window.location.href = data.init_point;
+                } else {
+                    alert("Error: " + (data.message || "No se pudo iniciar el pago"));
+                    btn.disabled = false;
+                    btn.innerHTML = 'Finalizar y Pagar';
+                }
+            } catch (error) {
+                alert("Error de conexión con el servidor. Por favor intenta de nuevo.");
+                btn.disabled = false;
+                btn.innerHTML = 'Finalizar y Pagar';
+            }
+
+        } else if (paymentMethod === 'transfer') {
+            alert("Has seleccionado transferencia. Pronto recibirás un email con los datos de la cuenta.");
+            window.location.href = "{% url 'pago_exitoso' %}";
+        }
+    });
+
+    // Restaurar el botón si el usuario vuelve atrás en el navegador
+    window.addEventListener('pageshow', function(event) {
+        // event.persisted es true si la página se cargó desde la caché del navegador (botón atrás)
+        const btn = document.getElementById('btnPlaceOrder');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = 'Finalizar y Pagar';
+        }
+    });
+</script>
+{% endblock %}
