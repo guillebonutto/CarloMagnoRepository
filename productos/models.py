@@ -29,6 +29,7 @@ class Color(models.Model):
         default='#000000'
     )
     order = models.PositiveIntegerField(default=0, verbose_name='Orden de visualización')
+    esta_activo = models.BooleanField(default=True, verbose_name='Está activo')
 
     class Meta:
         verbose_name = 'Color'
@@ -47,6 +48,7 @@ class Talle(models.Model):
         help_text='Ej: XS, S, M, L, XL'
     )
     order = models.PositiveIntegerField(default=0, verbose_name='Orden de visualización')
+    esta_activo = models.BooleanField(default=True, verbose_name='Está activo')
 
     class Meta:
         verbose_name = 'Talle'
@@ -288,7 +290,7 @@ class Cliente(models.Model):
     boletin = models.BooleanField(default=False, verbose_name='Suscrito a Boletín')
     ofertas_asociados = models.BooleanField(default=False, verbose_name='Ofertas de Asociados')
     fecha_registro = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Registro')
-    ultima_visita = models.DateTimeField(null=True, blank=True, verbose_name='Última Visita')
+    ultima_visita = models.DateTimeField(null=True, blank=True, verbose_name='Última Visit')
 
     class Meta:
         verbose_name = 'Cliente'

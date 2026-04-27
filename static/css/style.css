@@ -216,7 +216,8 @@
 	opacity: 0.5;
 }
 
-.producto-card h2, .producto-card p {
+.producto-card h2,
+.producto-card p {
 	color: #333;
 }
 
@@ -413,6 +414,13 @@ a {
 	cursor: pointer;
 }
 
-.country-selector:hover {
+.country-selector a {
+	color: #888;
+	text-decoration: none;
+	font-size: 12px;
+	transition: color 0.3s;
+}
+
+.country-selector a:hover {
 	color: #fff;
 }

@@ -220,14 +220,35 @@
                                 <div class="payment-icon"><i class="fas fa-credit-card"></i></div>
                                 <div class="flex-grow-1">
                                     <div class="fw-bold">Tarjeta de Crédito o Débito</div>
-                                    <small class="text-muted">Visa, Mastercard, Amex, Cabal</small>
+                                    <small class="text-muted">Hasta 3 cuotas SIN INTERÉS</small>
                                 </div>
                                 <div class="payment-check"><i class="fas fa-check-circle"></i></div>
                             </label>
 
-
                             <!-- Contenedor dinámico para el formulario de tarjeta -->
                             <div id="card-brick-container">
+                                <div class="alert alert-info py-2" style="font-size: 0.85rem;">
+                                    <i class="fas fa-info-circle"></i> Aceptamos hasta 3 cuotas sin interés en todas las tarjetas de crédito.
+                                </div>
+                                
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Tipo de Tarjeta</label>
+                                        <select class="form-select form-select-sm" id="card_type">
+                                            <option value="credit">Tarjeta de Crédito</option>
+                                            <option value="debit">Tarjeta de Débito</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6" id="installments_container">
+                                        <label class="form-label small fw-bold">Cuotas</label>
+                                        <select class="form-select form-select-sm" id="installments_select">
+                                            <option value="1">1 cuota sin interés</option>
+                                            <option value="2">2 cuotas sin interés</option>
+                                            <option value="3">3 cuotas sin interés</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div id="cardPaymentBrick_container"></div>
                             </div>
 
@@ -248,10 +269,32 @@
                                 <div class="payment-icon"><i class="fas fa-university"></i></div>
                                 <div class="flex-grow-1">
                                     <div class="fw-bold">Transferencia Bancaria Directa</div>
-                                    <small class="text-muted">Descuento del 10% adicional</small>
+                                    <small class="text-muted">Ahorrá un 10% adicional</small>
                                 </div>
                                 <div class="payment-check"><i class="fas fa-check-circle"></i></div>
                             </label>
+
+                            <!-- Detalles de Transferencia (Ocultos por defecto) -->
+                            <div id="bank-details" class="mt-3 p-3 border rounded bg-light" style="display: none;">
+                                <h6 class="fw-bold text-dark mb-3"><i class="fas fa-info-circle"></i> Datos de la Cuenta</h6>
+                                <div class="row g-2" style="font-size: 0.9rem;">
+                                    <div class="col-4 text-muted">Titular:</div>
+                                    <div class="col-8 fw-bold">Carlo Magno S.R.L.</div>
+                                    <div class="col-4 text-muted">CUIT/CUIL:</div>
+                                    <div class="col-8 fw-bold">30-71714298-5</div>
+                                    <div class="col-4 text-muted">CBU/CVU:</div>
+                                    <div class="col-8 fw-bold">0170259220000001234567</div>
+                                    <div class="col-4 text-muted">Alias:</div>
+                                    <div class="col-8 fw-bold text-danger">carlomagno.cba</div>
+                                </div>
+                                <div class="mt-3 text-muted small">
+                                    * Por favor enviá el comprobante de transferencia a nuestro WhatsApp o Email para agilizar el envío.
+                                </div>
+                            </div>
+
+                            <div class="mt-3 p-2 text-center" style="background: #fff8e1; border: 1px dashed #ffd54f; border-radius: 8px;">
+                                <small class="fw-bold"><i class="fas fa-percentage"></i> También aceptamos pago en Efectivo con 10% de descuento en el local.</small>
+                            </div>
                         </div> <!-- Cierre checkout-body -->
                     </div> <!-- Cierre checkout-card -->
                 </div> <!-- Cierre col-lg-8 -->
@@ -282,9 +325,13 @@
                                 <span class="text-success">Gratis</span>
                             </div>
                             <hr>
+                            <div class="summary-item" id="discount-row" style="display: none;">
+                                <span class="text-success">Descuento (10% Transf.)</span>
+                                <span class="text-success" id="discount-amount">-$0.00</span>
+                            </div>
                             <div class="summary-item mb-4">
                                 <span class="fw-bold">Total</span>
-                                <span class="total-amount">${{ total }}</span>
+                                <span class="total-amount" id="final-total">${{ total }}</span>
                             </div>
 
                             <button type="submit" class="btn-checkout" id="btnPlaceOrder">
@@ -378,20 +425,55 @@
 
             const method = this.value;
             const cardContainer = document.getElementById('card-brick-container');
+            const bankDetails = document.getElementById('bank-details');
             const mainBtn = document.getElementById('btnPlaceOrder');
+            const discountRow = document.getElementById('discount-row');
+            const discountAmount = document.getElementById('discount-amount');
+            const finalTotalDisplay = document.getElementById('final-total');
+            
+            const baseTotal = parseFloat("{{ total|unlocalize }}");
 
             if (method === 'cards') {
                 cardContainer.style.display = 'block';
+                bankDetails.style.display = 'none';
+                discountRow.style.display = 'none';
+                finalTotalDisplay.textContent = `$${baseTotal.toFixed(2)}`;
                 mainBtn.classList.add('d-none');
                 if (!cardPaymentBrickController) renderCardBrick(bricksBuilder);
+            } else if (method === 'transfer') {
+                cardContainer.style.display = 'none';
+                bankDetails.style.display = 'block';
+                discountRow.style.display = 'flex';
+                
+                const discount = baseTotal * 0.10;
+                const finalTotal = baseTotal - discount;
+                
+                discountAmount.textContent = `-$${discount.toFixed(2)}`;
+                finalTotalDisplay.textContent = `$${finalTotal.toFixed(2)}`;
+                
+                mainBtn.classList.remove('d-none');
+                mainBtn.disabled = false;
             } else {
                 cardContainer.style.display = 'none';
+                bankDetails.style.display = 'none';
+                discountRow.style.display = 'none';
+                finalTotalDisplay.textContent = `$${baseTotal.toFixed(2)}`;
                 mainBtn.classList.remove('d-none');
                 mainBtn.disabled = false;
             }
         });
     });
 
+
+    // Manejar el tipo de tarjeta (Crédito/Débito)
+    document.getElementById('card_type').addEventListener('change', function() {
+        const installmentsContainer = document.getElementById('installments_container');
+        if (this.value === 'debit') {
+            installmentsContainer.style.visibility = 'hidden';
+        } else {
+            installmentsContainer.style.visibility = 'visible';
+        }
+    });
 
     document.getElementById('checkoutForm').addEventListener('submit', async function (e) {
         e.preventDefault();

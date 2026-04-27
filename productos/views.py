@@ -14,8 +14,8 @@ def producto_list(request):
     marca_id = request.GET.get('marca')
     
     categorias = Categoria.objects.all()
-    colores = Color.objects.all()
-    talles = Talle.objects.all()
+    colores = Color.objects.filter(esta_activo=True)
+    talles = Talle.objects.filter(esta_activo=True)
     marcas = Marca.objects.all()
     
     productos = Producto.objects.select_related('categoria', 'marca').prefetch_related('colores', 'stock_items').all()
@@ -36,6 +36,10 @@ def producto_list(request):
     if marca_id:
         productos = productos.filter(marca_id=marca_id)
     
+    # Determinar qué colores y talles tienen stock disponible (en general o según filtros)
+    colores_con_stock = Color.objects.filter(productostock__stock__gt=0).values_list('id', flat=True).distinct()
+    talles_con_stock = Talle.objects.filter(productostock__stock__gt=0).values_list('id', flat=True).distinct()
+    
     return render(request, 'producto.html', {
         'productos': productos,
         'categorias': categorias,
@@ -46,6 +50,8 @@ def producto_list(request):
         'selected_color': color_id,
         'selected_talle': talle_id,
         'selected_marca': marca_id,
+        'colores_con_stock': list(colores_con_stock),
+        'talles_con_stock': list(talles_con_stock),
     })
 
 def producto_detail(request, producto_id):

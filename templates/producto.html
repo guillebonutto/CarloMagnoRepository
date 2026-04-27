@@ -1,176 +1,324 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}Productos - Carlo Magno{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/producto.css' %}" />
-{% endblock %} {% block content %}
-<div class="container">
-	<div class="filters">
-		<h3>🔍 Filtros</h3>
+<style>
+    .products-page {
+        padding: 40px 0;
+        background-color: #f8f9fa;
+    }
 
-		<div class="filter-group">
-			<label>Categorías:</label>
-			<a
-				href="{% url 'productos' %}"
-				class="filter-btn {% if not selected_categoria %}active{% endif %}"
-			>
-				Todas
-			</a>
-			{% for categoria in categorias %}
-			<a
-				href="?categoria={{ categoria.id }}{% if selected_color %}&color={{ selected_color }}{% endif %}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}"
-				class="filter-btn {% if selected_categoria == categoria.id|stringformat:'s' %}active{% endif %}"
-			>
-				{{ categoria.nombre }}
-			</a>
-			{% endfor %}
-		</div>
+    /* Sidebar Filters */
+    .filter-sidebar {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 20px;
+    }
 
-		<div class="filter-group">
-			<label>Colores:</label>
-			<a
-				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}"
-				class="filter-btn {% if not selected_color %}active{% endif %}"
-			>
-				Todos
-			</a>
-			{% for color in colores %}
-			<a
-				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}color={{ color.id }}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}"
-				class="filter-btn {% if selected_color == color.id|stringformat:'s' %}active{% endif %}"
-				style="display: inline-flex; align-items: center; gap: 5px"
-			>
-				<span
-					style="width: 15px; height: 15px; background: {{ color.hex_code }}; border-radius: 50%; border: 1px solid #ddd;"
-				></span>
-				{{ color.name }}
-			</a>
-			{% endfor %}
-		</div>
+    .filter-title {
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 25px;
+        font-size: 1.2rem;
+        border-bottom: 2px solid #8b0000;
+        padding-bottom: 10px;
+    }
 
-		<div class="filter-group">
-			<label>Talles:</label>
-			<a
-				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}"
-				class="filter-btn {% if not selected_talle %}active{% endif %}"
-			>
-				Todos
-			</a>
-			{% for size in sizes %}
-			<a
-				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}size={{ size.id }}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}"
-				class="filter-btn {% if selected_talle == size.id|stringformat:'s' %}active{% endif %}"
-			>
-				{{ size.abbreviation }}
-			</a>
-			{% endfor %}
-		</div>
+    .filter-group {
+        margin-bottom: 25px;
+    }
 
-		<div class="filter-group">
-			<label>Marcas:</label>
-			<a
-				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}{% endif %}"
-				class="filter-btn {% if not selected_marca %}active{% endif %}"
-			>
-				Todas
-			</a>
-			{% for marca in marcas %}
-			<a
-				href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}marca={{ marca.id }}"
-				class="filter-btn {% if selected_marca == marca.id|stringformat:'s' %}active{% endif %}"
-			>
-				{{ marca.nombre }}
-			</a>
-			{% endfor %}
-		</div>
+    .filter-group label {
+        font-weight: 600;
+        color: #555;
+        display: block;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-		{% if selected_categoria or selected_color or selected_talle or selected_marca %}
-		<a href="{% url 'productos' %}" class="clear-filters"> Limpiar Filtros </a>
-		{% endif %}
-	</div>
-	{% if productos %}
-	<div class="lista-productos">
-		{% for producto in productos %}
-		<div class="producto-card">
-			<img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-producto" />
-			<h2>{{ producto.nombre }}</h2>
-			<p class="precio">{{ producto.precio }}</p>
-			<a href="{% url 'producto_detail' producto.id %}" class="btn btn-primary text-light"
-				>Ber detalles</a
-			>
-		</div>
-		{% endfor %}
-	</div>
-	{% else %}
-	<div class="no-productos">
-		<h2>No se encontraron productos</h2>
-		<p>
-			{% if selected_categoria %}No hay productos en esta categoría{% else %}Aún no hay productos
-			cargados{% endif %}
-		</p>
-		{% if selected_categoria %}
-		<a href="{% url 'productos' %}" class="clear-filters"> Ver todos los productos </a>
-		{% endif %}
-	</div>
-	{% endif %}
+    .filter-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
 
-	<!-- <div class="containerCards">
+    .filter-link {
+        display: inline-block;
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        color: #666;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
 
-            {% if productos %}
-            <div class="productos-grid">
-                {% for producto in productos %}
-                <div class="product-card">
-                    {% if producto.imagen %}
-                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-image">
-                    {% else %}
-                    <div class="product-image" style="display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999; font-size: 3em;">
-                        📦
+    .filter-link:hover {
+        border-color: #8b0000;
+        color: #8b0000;
+        background: #fff5f5;
+    }
+
+    .filter-link.active {
+        background: #8b0000;
+        color: white;
+        border-color: #8b0000;
+    }
+
+    .filter-link.out-of-stock {
+        opacity: 0.5;
+        background: #f0f0f0;
+        color: #999;
+        pointer-events: none;
+        border-color: #ddd;
+    }
+
+    .color-dot-filter.out-of-stock {
+        filter: grayscale(1);
+        opacity: 0.6;
+    }
+
+    .color-dot-filter {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        border: 1px solid #ddd;
+        vertical-align: middle;
+        margin-right: 5px;
+    }
+
+    /* Product Cards */
+    .product-grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 25px;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #f0f0f0;
+    }
+
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    }
+
+    .product-image-wrapper {
+        position: relative;
+        padding-top: 125%; /* Aspect ratio 4:5 */
+        overflow: hidden;
+    }
+
+    .product-image-wrapper img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .product-image-wrapper img {
+        transform: scale(1.1);
+    }
+
+    .product-info {
+        padding: 15px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .product-category {
+        font-size: 0.75rem;
+        color: #999;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .product-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+        height: 2.4em;
+        overflow: hidden;
+        line-height: 1.2;
+    }
+
+    .product-price {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #8b0000;
+        margin-top: auto;
+    }
+
+    .btn-view-details {
+        margin-top: 15px;
+        background: #333;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-view-details:hover {
+        background: #8b0000;
+        color: white;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 15px;
+    }
+
+    @media (max-width: 991px) {
+        .filter-sidebar {
+            margin-bottom: 30px;
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="products-page">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar de Filtros -->
+            <div class="col-lg-3">
+                <div class="filter-sidebar">
+                    <h5 class="filter-title"><i class="fas fa-filter me-2"></i>Filtros</h5>
+
+                    <!-- Categorías -->
+                    <div class="filter-group">
+                        <label>Categorías</label>
+                        <div class="filter-list">
+                            <a href="{% url 'productos' %}" class="filter-link {% if not selected_categoria %}active{% endif %}">Todas</a>
+                            {% for cat in categorias %}
+                            <a href="?categoria={{ cat.id }}{% if selected_color %}&color={{ selected_color }}{% endif %}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+                               class="filter-link {% if selected_categoria == cat.id|stringformat:'s' %}active{% endif %}">
+                                {{ cat.nombre }}
+                            </a>
+                            {% endfor %}
+                        </div>
                     </div>
-                    {% endif %}
 
-                    <div class="product-info">
-                        <span class="product-category">{{ producto.categoria.nombre }}</span>
-                        <h2 class="product-name">{{ producto.nombre }}</h2>
-                        <p class="product-description">{{ producto.descripcion }}</p>
-
-                        {% with colores=producto.get_colores_disponibles %}
-                        {% if colores %}
-                        <div class="product-colors">
-                            <small style="width: 100%; color: #666; font-weight: 600;">Colores:</small>
+                    <!-- Colores -->
+                    <div class="filter-group">
+                        <label>Colores</label>
+                        <div class="filter-list">
+                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+                               class="filter-link {% if not selected_color %}active{% endif %}">Todos</a>
                             {% for color in colores %}
-                            <div class="color-dot" 
-                                style="background-color: {{ color.hex_code }}; {% if color.hex_code == '#FFFFFF' or color.hex_code == '#ffffff' %}border: 2px solid #ddd;{% endif %}"
-                                title="{{ color.nombre }}"></div>
+                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}color={{ color.id }}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+                               class="filter-link {% if selected_color == color.id|stringformat:'s' %}active{% endif %} {% if color.id not in colores_con_stock %}out-of-stock{% endif %}">
+                                <span class="color-dot-filter {% if color.id not in colores_con_stock %}out-of-stock{% endif %}" style="background-color: {{ color.hex_code }};"></span>
+                                {{ color.name }}
+                            </a>
                             {% endfor %}
                         </div>
-                        {% endif %}
-                        {% endwith %}
-
-                        {% with sizes=producto.get_talles_disponibles %}
-                        {% if talles %}
-                        <div class="producto-talles">
-                            <small style="width: 100%; color: #666; font-weight: 600;">Talles:</small>
-                            {% for size in sizes %}
-                            <span class="size-badge">{{ size }}</span>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        {% endwith %}
                     </div>
+
+                    <!-- Talles -->
+                    <div class="filter-group">
+                        <label>Talles</label>
+                        <div class="filter-list">
+                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+                               class="filter-link {% if not selected_talle %}active{% endif %}">Todos</a>
+                            {% for size in sizes %}
+                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}size={{ size.id }}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+                               class="filter-link {% if selected_talle == size.id|stringformat:'s' %}active{% endif %} {% if size.id not in talles_con_stock %}out-of-stock{% endif %}">
+                                {{ size.abbreviation }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Marcas -->
+                    <div class="filter-group">
+                        <label>Marcas</label>
+                        <div class="filter-list">
+                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}{% endif %}" 
+                               class="filter-link {% if not selected_marca %}active{% endif %}">Todas</a>
+                            {% for marca in marcas %}
+                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}marca={{ marca.id }}" 
+                               class="filter-link {% if selected_marca == marca.id|stringformat:'s' %}active{% endif %}">
+                                {{ marca.nombre }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {% if selected_categoria or selected_color or selected_talle or selected_marca %}
+                    <a href="{% url 'productos' %}" class="btn btn-outline-danger btn-sm w-100 mt-2">
+                        <i class="fas fa-times me-2"></i>Limpiar Filtros
+                    </a>
+                    {% endif %}
                 </div>
-                {% endfor %}
             </div>
-            {% else %}
-            <div class="no-productos">
-                <h2>No se encontraron productos</h2>
-                <p>{% if selected_categoria %}No hay productos en esta categoría{% else %}Aún no hay productos cargados{% endif %}</p>
-                {% if selected_categoria %}
-                <a href="{% url 'productos' %}" class="clear-filters">
-                    Ver todos los productos
-                </a>
+
+            <!-- Grilla de Productos -->
+            <div class="col-lg-9">
+                {% if productos %}
+                <div class="product-grid-container">
+                    {% for producto in productos %}
+                    <div class="product-card">
+                        <a href="{% url 'producto_detail' producto.id %}" class="product-image-wrapper">
+                            {% if producto.imagen %}
+                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                            {% else %}
+                            <div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
+                                <i class="fas fa-box fa-3x"></i>
+                            </div>
+                            {% endif %}
+                        </a>
+                        <div class="product-info">
+                            <span class="product-category">{{ producto.categoria.nombre }}</span>
+                            <h3 class="product-name">{{ producto.nombre }}</h3>
+                            <div class="product-price">${{ producto.precio }}</div>
+                            <a href="{% url 'producto_detail' producto.id %}" class="btn-view-details">Ver detalles</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-results shadow-sm">
+                    <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                    <h3>No encontramos productos</h3>
+                    <p class="text-muted">Intentá cambiando los filtros de búsqueda.</p>
+                    <a href="{% url 'productos' %}" class="btn btn-primary mt-3">Ver todo el catálogo</a>
+                </div>
                 {% endif %}
             </div>
-            {% endif %}
-        </div> -->
+        </div>
+    </div>
 </div>
 {% endblock %}
