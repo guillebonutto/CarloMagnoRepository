@@ -101,19 +101,28 @@
 		<div class="container">
 			<div class="row">
 				<!-- Sobre Nosotros -->
-				<!-- <div class="col-md-3 col-sm-6 footer-section">
-						<h5>Sobre Nosotros</h5>
-						<ul>
-							<li><a href="#">Quiénes Somos</a></li>
-							<li><a href="#">Nuestra Historia</a></li>
-							<li><a href="#">Trabajá con Nosotros</a></li>
-							<li><a href="#">Sucursales</a></li>
-						</ul>
-					</div> -->
+				<div class="col-lg-3 col-md-6 footer-section">
+					<h5>Carlo Magno</h5>
+					<p style="font-size: 13px; color: #d4af37; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">
+						Calidad premium en indumentaria masculina.
+					</p>
+					<p style="font-size: 13px; color: #bbb; line-height: 1.6;">
+						Carlo Magno nace de la pasión por vestir al hombre moderno con elegancia auténtica. Seleccionamos cuidadosamente telas de alta calidad y apostamos a un corte impecable que combina tradición sastrera con un estilo contemporáneo y sofisticado.
+					</p>
+					<p style="font-size: 13px; color: #bbb; line-height: 1.6; font-style: italic;">
+						Aquí no vendemos ropa. Vendemos presencia.
+					</p>
+					<div class="social-icons">
+						<a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+						<a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+						<a href="https://tiktok.com" target="_blank" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+						<a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+					</div>
+				</div>
 
 				<!-- Ayuda & Apoyo -->
-				<div class="col-md-3 col-sm-6 footer-section">
-					<h5>Ayuda & Apoyo</h5>
+				<div class="col-lg-2 col-md-6 footer-section">
+					<h5>Ayuda</h5>
 					<ul>
 						<li><a href="#">Información de Envío</a></li>
 						<li><a href="#">Devoluciones</a></li>
@@ -124,100 +133,82 @@
 				</div>
 
 				<!-- Servicio al Cliente -->
-				<div class="col-md-3 col-sm-6 footer-section">
-					<h5>Servicio al Cliente</h5>
+				<div class="col-lg-2 col-md-6 footer-section">
+					<h5>Servicio</h5>
 					<ul>
-						<li><a href="#">Contáctenos</a></li>
+						<li><a href="{% url 'contact' %}">Contáctenos</a></li>
 						<li><a href="#">Formas de Pago</a></li>
 						<li><a href="#">Puntos de Retiro</a></li>
 						<li><a href="#">Preguntas Frecuentes</a></li>
 					</ul>
 				</div>
 
-				<!-- Redes Sociales -->
-				<div class="col-lg-3 col-md-4 col-sm-6 footer-section">
-					<h5>Seguinos</h5>
-					<div class="social-icons">
-						<a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-						<a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-						<a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-						<a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-						<a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-						<a href="#" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
-					</div>
-				</div>
-
-				<!-- Mail -->
-				<div class="col-md-3 col-sm-6 footer-section">
-					<ul>
+				<!-- Contacto -->
+				<div class="col-lg-2 col-md-6 footer-section">
+					<h5>Contacto</h5>
+					<ul class="contact-list">
 						<li>
-							<i class="fas fa-map-marker-alt me-4"></i>
+							<i class="fas fa-map-marker-alt"></i>
 							<a href="https://www.google.com/maps/place/CARLO+MAGNO/@-31.4146665,-64.1819471,15z/data=!4m15!1m8!3m7!1s0x9432a29cde0c5bbd:0x127d42fc6c61865d!2sCARLO+MAGNO!8m2!3d-31.4147099!4d-64.181681!10e5!16s%2Fg%2F11df81fy6f!3m5!1s0x9432a29cde0c5bbd:0x127d42fc6c61865d!8m2!3d-31.4147099!4d-64.181681!16s%2Fg%2F11df81fy6f?entry=ttu&g_ep=EgoyMDI2MDQyMi4wIKXMDSoASAFQAw%3D%3D"
 								target="_blank" rel="noopener noreferrer">
 								Rivadavia 150 Local 2
 							</a>
 						</li>
-						<li>
-							<i class="fas fa-envelope me-3"></i>
+						<li class="mt-2">
+							<i class="fas fa-envelope"></i>
 							<a href="mailto:gabriellamadrid52@gmail.com">
-								gabriellamadrid52@gmail.com
+								Soporte Online
+							</a>
+						</li>
+						<li class="mt-2">
+							<i class="fab fa-whatsapp"></i>
+							<a href="https://wa.me/5493516681071" target="_blank">
+								Centro de Atención
 							</a>
 						</li>
 					</ul>
 				</div>
 
 				<!-- Newsletter -->
-				<div class="row newsletter-section">
-					<div class="col-12">
-						<h5>Suscribite para recibir ofertas exclusivas y promociones</h5>
-						<div class="newsletter-form">
-							<input type="email" placeholder="Tu dirección de Email" />
-							<button type="submit">Suscribir</button>
-						</div>
+				<div class="col-lg-3 col-md-12 footer-section">
+					<h5>Newsletter</h5>
+					<p style="font-size: 12px; color: #888;">Suscribite para recibir colecciones exclusivas.</p>
+					<div class="newsletter-form">
+						<input type="email" placeholder="Tu Email" />
+						<button type="submit"><i class="fas fa-paper-plane"></i></button>
 					</div>
 				</div>
+			</div>
 
-				<!-- Métodos de Pago -->
-				<div class="row mt-4">
-					<div class="col-md-8 col-12">
-						<h5 style="font-size: 13px; text-transform: uppercase; margin-bottom: 15px">
-							Aceptamos
-						</h5>
-						<div class="payment-methods">
-							<img src="{% static 'images/visa-logo-svgrepo-com.svg' %}" alt="Visa" />
-							<img src="{% static 'images/mastercard-2-logo-svgrepo-com.svg' %}" alt="Mastercard" />
-							<img src="{% static 'images/PayPal_logo.svg' %}" alt="PayPal" />
-							<img src="{% static 'images/American_Express_Logo.svg' %}" alt="American Express" />
-						</div>
-					</div>
-					<div class="col-md-4 col-12 text-center">
-						<h5 style="font-size: 13px; text-transform: uppercase; margin-bottom: 15px">
-							Data Fiscal
-						</h5>
-						<img src="{% static 'images/qr-Fiscal.jpg' %}" alt="QR Data Fiscal" class="qr-fiscal" />
+			<!-- Métodos de Pago y QR -->
+			<div class="row mt-4 pt-4 border-top border-secondary">
+				<div class="col-md-8 col-12">
+					<div class="payment-methods">
+						<img src="{% static 'images/visa-logo-svgrepo-com.svg' %}" alt="Visa" />
+						<img src="{% static 'images/mastercard-2-logo-svgrepo-com.svg' %}" alt="Mastercard" />
+						<img src="{% static 'images/PayPal_logo.svg' %}" alt="PayPal" />
+						<img src="{% static 'images/American_Express_Logo.svg' %}" alt="American Express" />
 					</div>
 				</div>
+				<div class="col-md-4 col-12 text-md-end text-center mt-3 mt-md-0">
+					<img src="{% static 'images/qr-Fiscal.jpg' %}" alt="QR Data Fiscal" class="qr-fiscal" style="max-width: 100px;" />
+				</div>
+			</div>
 
-				<!-- Footer Bottom -->
-				<div class="footer-bottom">
-					<p>©2009-2025 Pierre Cardin. Todos los derechos reservados</p>
-					<div class="footer-links">
-						<a href="#">Centro de Privacidad</a>
-						<span>|</span>
-						<a href="#">Política de privacidad y cookies</a>
-						<span>|</span>
-						<a href="#">Términos y condiciones</a>
-						<span>|</span>
-						<a href="#">Aviso de copyright</a>
-						<span>|</span>
-						<a href="#">Impresión</a>
-					</div>
-					<div class="country-selector">
-						<i class="fas fa-map-marker-alt"></i>
-						<a href="https://www.google.com/maps/place/CARLO+MAGNO/@-31.4146665,-64.1819471,15z/data=!4m15!1m8!3m7!1s0x9432a29cde0c5bbd:0x127d42fc6c61865d!2sCARLO+MAGNO!8m2!3d-31.4147099!4d-64.181681!10e5!16s%2Fg%2F11df81fy6f!3m5!1s0x9432a29cde0c5bbd:0x127d42fc6c61865d!8m2!3d-31.4147099!4d-64.181681!16s%2Fg%2F11df81fy6f?entry=ttu&g_ep=EgoyMDI2MDQyMi4wIKXMDSoASAFQAw%3D%3D"
-							target="_blank" rel="noopener noreferrer"> Rivadavia
-							150 Local 2, Córdoba - Argentina</a>
-					</div>
+			<!-- Footer Bottom -->
+			<div class="footer-bottom">
+				<p>© Carlo Magno Indumentaria. Todos los derechos reservados.</p>
+				<div class="footer-links">
+					<a href="#">Privacidad</a>
+					<span>|</span>
+					<a href="#">Términos</a>
+					<span>|</span>
+					<a href="#">Cookies</a>
+				</div>
+				<div class="country-selector">
+					<i class="fas fa-map-marker-alt"></i>
+					<a href="https://www.google.com/maps/place/CARLO+MAGNO/@-31.4146665,-64.1819471,15z/data=!4m15!1m8!3m7!1s0x9432a29cde0c5bbd:0x127d42fc6c61865d!2sCARLO+MAGNO!8m2!3d-31.4147099!4d-64.181681!10e5!16s%2Fg%2F11df81fy6f!3m5!1s0x9432a29cde0c5bbd:0x127d42fc6c61865d!8m2!3d-31.4147099!4d-64.181681!16s%2Fg%2F11df81fy6f?entry=ttu&g_ep=EgoyMDI2MDQyMi4wIKXMDSoASAFQAw%3D%3D"
+						target="_blank" rel="noopener noreferrer"> Córdoba, Argentina</a>
 				</div>
 			</div>
 		</div>
@@ -256,22 +247,49 @@
 			right: 40px;
 			background-color: #25d366;
 			color: #FFF;
-			border-radius: 50px;
+			border-radius: 50%;
 			text-align: center;
 			font-size: 30px;
-			box-shadow: 2px 2px 3px #999;
+			box-shadow: 2px 5px 15px rgba(0,0,0,0.3);
 			z-index: 1000;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			transition: all 0.3s ease;
 			text-decoration: none;
+			border: none; /* No borders */
 		}
 
 		.whatsapp-float:hover {
 			background-color: #128c7e;
 			transform: scale(1.1);
 			color: #FFF;
+		}
+
+		/* Fix Social Icons Visibility in Footer */
+		.social-icons a {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 35px;
+			height: 35px;
+			background: #333;
+			border-radius: 50%;
+			color: #fff !important;
+			margin-right: 10px;
+			font-size: 16px;
+			transition: all 0.3s;
+		}
+
+		.social-icons a:hover {
+			background: #d4af37;
+			color: #000 !important;
+			transform: translateY(-3px);
+		}
+
+		.contact-list li i {
+			color: #d4af37;
+			width: 25px;
 		}
 	</style>
 </body>
