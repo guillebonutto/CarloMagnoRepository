@@ -349,7 +349,11 @@
       <div class="col-md-3">
         <div class="producto-card">
           <a href="{% url 'producto_detail' producto.id %}" class="producto-img-wrapper d-block">
-            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+            {% if producto.imagen and producto.imagen.name %}
+              <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+            {% else %}
+              <img src="{% static 'images/p1.jpg' %}" alt="{{ producto.nombre }}" style="opacity: 0.5;">
+            {% endif %}
           </a>
           <div class="producto-body">
             <h5>{{ producto.nombre }}</h5>

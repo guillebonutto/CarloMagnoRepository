@@ -6,126 +6,129 @@
 {% block extra_css %}
 <style>
     .products-page {
-        padding: 40px 0;
-        background-color: #f8f9fa;
+        padding: 40px 20px;
+        background-color: #f4f4f4;
+        width: 100%;
     }
 
     /* Sidebar Filters */
     .filter-sidebar {
         background: white;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 30px;
+        border-radius: 0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         position: sticky;
         top: 20px;
+        border: 1px solid #eee;
     }
 
     .filter-title {
-        font-weight: 700;
-        color: #333;
-        margin-bottom: 25px;
-        font-size: 1.2rem;
+        font-weight: 800;
+        color: #111;
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
         border-bottom: 2px solid #8b0000;
-        padding-bottom: 10px;
+        padding-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
 
     .filter-group {
-        margin-bottom: 25px;
+        margin-bottom: 35px;
     }
 
     .filter-group label {
-        font-weight: 600;
-        color: #555;
+        font-weight: 700;
+        color: #333;
         display: block;
-        margin-bottom: 12px;
-        font-size: 0.9rem;
+        margin-bottom: 15px;
+        font-size: 0.85rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
     }
 
     .filter-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
     }
 
     .filter-link {
-        display: inline-block;
-        padding: 6px 12px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        color: #666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 2px;
+        border: 1px solid #eee;
+        background: #fff;
+        color: #555;
         text-decoration: none;
-        font-size: 0.85rem;
-        transition: all 0.2s ease;
+        font-size: 0.68rem;
+        transition: all 0.3s ease;
+        text-align: center;
+        min-height: 36px;
+        font-weight: 500;
+        overflow: hidden;
     }
 
     .filter-link:hover {
         border-color: #8b0000;
         color: #8b0000;
-        background: #fff5f5;
+        background: #fafafa;
     }
 
     .filter-link.active {
         background: #8b0000;
         color: white;
         border-color: #8b0000;
+        font-weight: 700;
     }
 
-    .filter-link.out-of-stock {
-        opacity: 0.5;
-        background: #f0f0f0;
-        color: #999;
-        pointer-events: none;
-        border-color: #ddd;
-    }
-
-    .color-dot-filter.out-of-stock {
-        filter: grayscale(1);
-        opacity: 0.6;
+    .filter-link.full-width {
+        grid-column: span 3;
     }
 
     .color-dot-filter {
-        width: 20px;
-        height: 20px;
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
-        display: inline-block;
-        border: 1px solid #ddd;
-        vertical-align: middle;
-        margin-right: 5px;
+        margin-right: 8px;
+        border: 1px solid rgba(0,0,0,0.1);
+        flex-shrink: 0;
     }
 
     /* Product Cards */
     .product-grid-container {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 25px;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 15px; /* Reduced gap for high density */
     }
 
     .product-card {
         background: white;
-        border-radius: 12px;
+        border-radius: 0;
         overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         height: 100%;
         display: flex;
         flex-direction: column;
-        border: 1px solid #f0f0f0;
+        border: 1px solid #eee;
+        position: relative;
     }
 
     .product-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        border-color: #ddd;
     }
 
     .product-image-wrapper {
         position: relative;
-        padding-top: 125%; /* Aspect ratio 4:5 */
+        padding-top: 130%; /* Slightly taller */
         overflow: hidden;
+        background: #f9f9f9;
     }
 
     .product-image-wrapper img {
@@ -135,15 +138,15 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.5s ease;
+        transition: transform 0.8s ease;
     }
 
     .product-card:hover .product-image-wrapper img {
-        transform: scale(1.1);
+        transform: scale(1.08);
     }
 
     .product-info {
-        padding: 15px;
+        padding: 20px;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
@@ -151,57 +154,142 @@
     }
 
     .product-category {
-        font-size: 0.75rem;
-        color: #999;
+        font-size: 0.7rem;
+        color: #888;
         text-transform: uppercase;
-        margin-bottom: 5px;
+        letter-spacing: 1.5px;
+        margin-bottom: 8px;
+        font-weight: 600;
     }
 
     .product-name {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 10px;
+        font-size: 0.8rem; /* Smaller font for high density */
+        font-weight: 700;
+        color: #111;
+        margin-bottom: 8px;
         height: 2.4em;
         overflow: hidden;
         line-height: 1.2;
+        text-transform: uppercase;
     }
 
     .product-price {
-        font-size: 1.15rem;
-        font-weight: 700;
+        font-size: 1rem;
+        font-weight: 800;
         color: #8b0000;
         margin-top: auto;
+        letter-spacing: -0.5px;
     }
 
     .btn-view-details {
-        margin-top: 15px;
-        background: #333;
+        margin-top: 20px;
+        background: #111;
         color: white;
         border: none;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 600;
+        padding: 12px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
         transition: all 0.3s;
         text-decoration: none;
+        border: 1px solid #111;
     }
 
     .btn-view-details:hover {
-        background: #8b0000;
-        color: white;
+        background: white;
+        color: #111;
     }
 
     .no-results {
         text-align: center;
-        padding: 80px 20px;
+        padding: 100px 20px;
         background: white;
-        border-radius: 15px;
+        border-radius: 0;
+        border: 1px solid #eee;
     }
 
-    @media (max-width: 991px) {
+    .category-accordion .accordion-item {
+        border: none;
+        border-bottom: 1px solid #eee;
+        border-radius: 0 !important;
+    }
+
+    .category-accordion .accordion-button {
+        padding: 15px 0;
+        font-size: 0.85rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #111;
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .category-accordion .accordion-button:not(.collapsed) {
+        color: #8b0000;
+    }
+
+    .category-accordion .accordion-button::after {
+        background-size: 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .category-accordion .accordion-body {
+        padding: 10px 0 20px 0;
+    }
+
+    .subgroup-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .subgroup-link {
+        font-size: 0.85rem;
+        color: #555;
+        text-decoration: none;
+        padding: 5px 0;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+    }
+
+    .subgroup-link:hover {
+        color: #8b0000;
+        padding-left: 5px;
+    }
+
+    .subgroup-link.active {
+        color: #8b0000;
+        font-weight: 700;
+        border-left: 2px solid #8b0000;
+        padding-left: 10px;
+    }
+
+    .category-item {
+        margin-bottom: 2px;
+    }
+
+    @media (max-width: 1600px) {
+        .product-grid-container {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @media (max-width: 1200px) {
+        .product-grid-container {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 992px) {
+        .product-grid-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
         .filter-sidebar {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             position: static;
         }
     }
@@ -210,23 +298,48 @@
 
 {% block content %}
 <div class="products-page">
-    <div class="container">
+    <div class="container-fluid px-md-5">
         <div class="row">
             <!-- Sidebar de Filtros -->
-            <div class="col-lg-3">
+            <div class="col-xl-2 col-lg-3">
                 <div class="filter-sidebar">
                     <h5 class="filter-title"><i class="fas fa-filter me-2"></i>Filtros</h5>
 
-                    <!-- Categorías -->
+                    <!-- Búsqueda de Categorías -->
                     <div class="filter-group">
-                        <label>Categorías</label>
-                        <div class="filter-list">
-                            <a href="{% url 'productos' %}" class="filter-link {% if not selected_categoria %}active{% endif %}">Todas</a>
-                            {% for cat in categorias %}
-                            <a href="?categoria={{ cat.id }}{% if selected_color %}&color={{ selected_color }}{% endif %}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
-                               class="filter-link {% if selected_categoria == cat.id|stringformat:'s' %}active{% endif %}">
-                                {{ cat.nombre }}
+                        <label>Explorar</label>
+                        <div class="mb-3">
+                            <input type="text" id="categorySearch" class="form-control form-control-sm" placeholder="¿Qué estás buscando?" style="border-radius: 0; border-color: #eee; font-size: 0.8rem; padding: 10px;">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <a href="{% url 'productos' %}" class="subgroup-link {% if not selected_categorias %}active{% endif %}">
+                                <i class="fas fa-th-large me-2"></i>TODAS LAS PRENDAS
                             </a>
+                        </div>
+
+                        <div class="accordion category-accordion" id="categoryAccordion">
+                            {% for group, subgroups in categorias_grouped.items %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-{{ forloop.counter }}">
+                                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% endif %}" aria-controls="collapse-{{ forloop.counter }}">
+                                        {{ group }}
+                                    </button>
+                                </h2>
+                                <div id="collapse-{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading-{{ forloop.counter }}" data-bs-parent="#categoryAccordion">
+                                    <div class="accordion-body">
+                                        <div class="subgroup-list">
+                                            {% for subgroup_name, cats in subgroups.items %}
+                                            <a href="?{% for cat in cats %}categoria={{ cat.id }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+                                               class="subgroup-link subgroup-item {% if cats.0.id|stringformat:'s' in selected_categorias %}active{% endif %}"
+                                               data-name="{{ subgroup_name }}">
+                                                {{ subgroup_name }}
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             {% endfor %}
                         </div>
                     </div>
@@ -235,26 +348,27 @@
                     <div class="filter-group">
                         <label>Colores</label>
                         <div class="filter-list">
-                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
-                               class="filter-link {% if not selected_color %}active{% endif %}">Todos</a>
+                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_talle %}talle={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+                               class="filter-link full-width {% if not selected_color %}active{% endif %}">Todos los colores</a>
                             {% for color in colores %}
-                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}color={{ color.id }}{% if selected_talle %}&size={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}color={{ color.id }}{% if selected_talle %}&talle={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
                                class="filter-link {% if selected_color == color.id|stringformat:'s' %}active{% endif %} {% if color.id not in colores_con_stock %}out-of-stock{% endif %}">
-                                <span class="color-dot-filter {% if color.id not in colores_con_stock %}out-of-stock{% endif %}" style="background-color: {{ color.hex_code }};"></span>
-                                {{ color.name }}
+                                <span class="color-dot-filter" data-color="{{ color.hex_code }}"></span>
+                                {{ color.nombre }}
                             </a>
                             {% endfor %}
                         </div>
                     </div>
 
                     <!-- Talles -->
+                    <!-- Talles -->
                     <div class="filter-group">
                         <label>Talles</label>
                         <div class="filter-list">
-                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
-                               class="filter-link {% if not selected_talle %}active{% endif %}">Todos</a>
-                            {% for size in sizes %}
-                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}size={{ size.id }}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+                               class="filter-link full-width {% if not selected_talle %}active{% endif %}">Todos los talles</a>
+                            {% for size in talles %}
+                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %} {% if selected_color %}color={{ selected_color }}&{% endif %} talle={{ size.id }} {% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
                                class="filter-link {% if selected_talle == size.id|stringformat:'s' %}active{% endif %} {% if size.id not in talles_con_stock %}out-of-stock{% endif %}">
                                 {{ size.abbreviation }}
                             </a>
@@ -266,10 +380,10 @@
                     <div class="filter-group">
                         <label>Marcas</label>
                         <div class="filter-list">
-                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}{% endif %}" 
-                               class="filter-link {% if not selected_marca %}active{% endif %}">Todas</a>
+                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}talle={{ selected_talle }}{% endif %}" 
+                               class="filter-link full-width {% if not selected_marca %}active{% endif %}">Todas las marcas</a>
                             {% for marca in marcas %}
-                            <a href="?{% if selected_categoria %}categoria={{ selected_categoria }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}marca={{ marca.id }}" 
+                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %} {% if selected_color %}color={{ selected_color }}&{% endif %} {% if selected_talle %}talle={{ selected_talle }}&{% endif %} marca={{ marca.id }}" 
                                class="filter-link {% if selected_marca == marca.id|stringformat:'s' %}active{% endif %}">
                                 {{ marca.nombre }}
                             </a>
@@ -277,7 +391,7 @@
                         </div>
                     </div>
 
-                    {% if selected_categoria or selected_color or selected_talle or selected_marca %}
+                    {% if selected_categorias or selected_color or selected_talle or selected_marca %}
                     <a href="{% url 'productos' %}" class="btn btn-outline-danger btn-sm w-100 mt-2">
                         <i class="fas fa-times me-2"></i>Limpiar Filtros
                     </a>
@@ -286,7 +400,7 @@
             </div>
 
             <!-- Grilla de Productos -->
-            <div class="col-lg-9">
+            <div class="col-xl-10 col-lg-9">
                 {% if productos %}
                 <div class="product-grid-container">
                     {% for producto in productos %}
@@ -321,4 +435,39 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    document.getElementById('categorySearch').addEventListener('input', function(e) {
+        const term = e.target.value.toLowerCase();
+        const items = document.querySelectorAll('.subgroup-item');
+        const accordionItems = document.querySelectorAll('.accordion-item');
+
+        items.forEach(item => {
+            const name = item.getAttribute('data-name').toLowerCase();
+            if (name.includes(term)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        // Hide accordion items if no subgroups are visible
+        accordionItems.forEach(accItem => {
+            const visibleSubgroups = accItem.querySelectorAll('.subgroup-item[style="display: flex;"]');
+            if (visibleSubgroups.length === 0 && term !== '') {
+                accItem.style.display = 'none';
+            } else {
+                accItem.style.display = 'block';
+            }
+        });
+    });
+    // Aplicar colores a los circulitos de filtro (para evitar errores de validación CSS en el editor)
+    document.querySelectorAll('.color-dot-filter').forEach(function(dot) {
+        const color = dot.getAttribute('data-color');
+        if (color) dot.style.backgroundColor = color;
+    });
+</script>
 {% endblock %}

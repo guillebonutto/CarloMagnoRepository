@@ -8,7 +8,7 @@ def home(request):
     })
 
 def producto_list(request):
-    categoria_id = request.GET.get('categoria')
+    categoria_ids = request.GET.getlist('categoria')
     color_id = request.GET.get('color')
     talle_id = request.GET.get('talle')
     marca_id = request.GET.get('marca')
@@ -18,11 +18,11 @@ def producto_list(request):
     talles = Talle.objects.filter(esta_activo=True)
     marcas = Marca.objects.all()
     
-    productos = Producto.objects.select_related('categoria', 'marca').prefetch_related('colores', 'stock_items').all()
+    productos = Producto.objects.filter(esta_activo=True).select_related('categoria', 'marca').prefetch_related('colores', 'stock_items').all()
     
-    # Filtrar por categoría
-    if categoria_id:
-        productos = productos.filter(categoria_id=categoria_id)
+    # Filtrar por categorías (múltiples)
+    if categoria_ids:
+        productos = productos.filter(categoria_id__in=categoria_ids)
     
     # Filtrar por color
     if color_id:
@@ -40,13 +40,67 @@ def producto_list(request):
     colores_con_stock = Color.objects.filter(productostock__stock__gt=0).values_list('id', flat=True).distinct()
     talles_con_stock = Talle.objects.filter(productostock__stock__gt=0).values_list('id', flat=True).distinct()
     
+    # Mapeo Maestro UX/UI Premium
+    MASTER_GROUPS = {
+        'SUPERIORES': {
+            'Camisas': ['camisas', 'camisas m/c'],
+            'Remeras': ['remera', 'remeras'],
+            'Chombas & Polos': ['chombas'],
+            'Sweaters & Cardigans': ['sweaters', 'polera'],
+            'Chalecos': ['chaleco']
+        },
+        'INFERIORES': {
+            'Pantalones': ['pantalón lino', 'gabardina corte chino', 'poplin chino'],
+            'Jeans': ['jean'],
+            'Bermudas': ['bermudas'],
+            'Joggers': ['jogger'],
+            'Pantalones 7/8': ['7/8']
+        },
+        'EXTERIOR': {
+            'Camperas': ['campera algodón', 'campera lana', 'campera paño', 'campera impermeable'],
+            'Impermeables & Pilotines': ['pilotín', 'pilotin'],
+            'Sacos Sport / Blazers': ['saco sport']
+        },
+        'FORMAL': {
+            'Trajes & Ambos': ['ambo'],
+            'Corbatas & Pañuelos': ['corbatas']
+        },
+        'ACCESORIOS': {
+            'Cintos': ['cintos'],
+            'Medias & Ropa Interior': ['medias', 'bóxers'],
+            'Pulseras & Complementos': ['pulsera', 'pulsers']
+        }
+    }
+
+    # Agrupar categorías reales según el mapeo
+    categorias_grouped = {}
+    mapped_cat_ids = set()
+    
+    for group_name, subgroups in MASTER_GROUPS.items():
+        categorias_grouped[group_name] = {}
+        for subgroup_name, keywords in subgroups.items():
+            matching_cats = [c for c in categorias if any(k in c.nombre.lower() for k in keywords)]
+            if matching_cats:
+                categorias_grouped[group_name][subgroup_name] = matching_cats
+                for c in matching_cats:
+                    mapped_cat_ids.add(c.id)
+
+    # Añadir sección OTROS para lo que no encajó (para evitar que se pierdan productos)
+    otros_cats = [c for c in categorias if c.id not in mapped_cat_ids and c.nombre.lower() not in ['inicio', 'cat1']]
+    if otros_cats:
+        categorias_grouped['VARIOS'] = {'Otros Complementos': otros_cats}
+    
+    # Filtrar por categorías (múltiples)
+    if categoria_ids:
+        productos = productos.filter(categoria_id__in=categoria_ids)
+    
     return render(request, 'producto.html', {
         'productos': productos,
-        'categorias': categorias,
+        'categorias_grouped': categorias_grouped,
         'colores': colores,
         'talles': talles,
         'marcas': marcas,
-        'selected_categoria': categoria_id,
+        'selected_categorias': categoria_ids,
         'selected_color': color_id,
         'selected_talle': talle_id,
         'selected_marca': marca_id,

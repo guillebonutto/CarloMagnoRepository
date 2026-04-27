@@ -122,6 +122,7 @@ class Producto(models.Model):
         blank=True,
         verbose_name='Imagen principal'
     )
+    esta_activo = models.BooleanField(default=True, verbose_name='Está activo')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Última actualización')
 
