@@ -1,443 +1,244 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Carlo Magno - Elegancia y Estilo{% endblock %}
+{% block title %}Carlo Magno - Moda de Alta Calidad{% endblock %}
 
 {% block extra_css %}
 <style>
-  /* Hero principal */
-  .hero {
-    position: relative;
-    height: 90vh;
-    background: url("{% static 'images/hero-banner.jpg' %}") center/cover no-repeat;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    color: #fff;
-    padding-left: 10%;
-  }
+    /* Estética Marketplace Pro */
+    .index-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
 
-  .hero::after {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 100%);
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 1;
-    max-width: 600px;
-  }
-
-  .hero h1 {
-    font-size: 5rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    line-height: 1;
-    margin-bottom: 0;
-    letter-spacing: -2px;
-  }
-
-  .hero .brand-sub {
-    font-size: 2.5rem;
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    color: #d4af37; /* Gold */
-    margin-top: -10px;
-    margin-bottom: 20px;
-  }
-
-  .hero p {
-    font-size: 1.2rem;
-    margin-bottom: 35px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    opacity: 0.9;
-  }
-
-  .btn-luxury {
-    background-color: #d4af37;
-    color: black;
-    border: none;
-    padding: 18px 45px;
-    border-radius: 0;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    transition: all 0.3s;
-    text-decoration: none;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-  }
-
-  .btn-luxury:hover {
-    background-color: white;
-    color: black;
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-  }
-
-  /* Testimonios */
-  .testimonials {
-    padding: 100px 0;
-    background: #111;
-    color: white;
-  }
-
-  .testimonial-item {
-    text-align: center;
-    padding: 30px;
-  }
-
-  .testimonial-text {
-    font-size: 1.2rem;
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    margin-bottom: 25px;
-    line-height: 1.8;
-  }
-
-  .testimonial-author {
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-weight: 700;
-    color: #d4af37;
-  }
-
-  /* Trust Banner */
-  .trust-banner {
-    background: #111;
-    color: white;
-    padding: 40px 0;
-    border-bottom: 1px solid #333;
-  }
-
-  .trust-item {
-    text-align: center;
-    padding: 20px;
-  }
-
-  .trust-item i {
-    font-size: 2.5rem;
-    color: #d4af37;
-    margin-bottom: 15px;
-  }
-
-  .trust-item h6 {
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 5px;
-  }
-
-  .trust-item p {
-    font-size: 0.85rem;
-    color: #888;
-  }
-
-  /* Categorías destacadas */
-  .categorias {
-    padding: 80px 0;
-    background: white;
-  }
-
-  .section-title {
-    text-align: center;
-    margin-bottom: 60px;
-  }
-
-  .section-title h2 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    position: relative;
-    display: inline-block;
-    padding-bottom: 15px;
-  }
-
-  .section-title h2::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 25%;
-    width: 50%;
-    height: 3px;
-    background: #8b0000;
-  }
-
-  .categoria-card {
-    position: relative;
-    height: 450px;
-    overflow: hidden;
-    margin-bottom: 30px;
-    cursor: pointer;
-  }
-
-  .categoria-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.8s ease;
-  }
-
-  .categoria-card:hover img {
-    transform: scale(1.1);
-  }
-
-  .categoria-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 30px;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-    color: white;
-    text-align: center;
-  }
-
-  .categoria-overlay h4 {
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    font-weight: 700;
-  }
-
-  /* Productos destacados */
-  .productos-destacados {
-    padding: 80px 0;
-    background: #f9f9f9;
-  }
-
-  .producto-card {
-    background: white;
-    border: none;
-    border-radius: 0;
-    transition: all 0.3s;
-    text-align: center;
-    padding: 0;
-    margin-bottom: 30px;
-  }
-
-  .producto-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-  }
-
-  .producto-img-wrapper {
-    height: 350px;
-    overflow: hidden;
-    background: #f5f5f5;
-  }
-
-  .producto-img-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .producto-body {
-    padding: 20px;
-  }
-
-  .producto-body h5 {
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-  }
-
-  .producto-body .precio {
-    color: #8b0000;
-    font-weight: 800;
-    font-size: 1.2rem;
-  }
-
-  /* Mobile Fixes */
-  @media (max-width: 768px) {
-    .hero {
-        height: 70vh;
-        padding-left: 5%;
-        text-align: center;
+    /* Categorías Circulares (Estilo Instagram/AliExpress) */
+    .quick-categories {
+        display: flex;
+        overflow-x: auto;
+        gap: 25px;
+        padding: 20px 0;
+        scrollbar-width: none; /* Firefox */
         justify-content: center;
     }
-    .hero h1 {
-        font-size: 3rem;
+    .quick-categories::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+    .cat-circle-item {
+        flex: 0 0 auto;
+        text-align: center;
+        width: 80px;
+        text-decoration: none;
+        color: #333;
+        transition: transform 0.3s;
     }
-    .hero .brand-sub {
-        font-size: 1.8rem;
+    .cat-circle-item:hover { transform: translateY(-5px); color: #8b0000; }
+    
+    .cat-image-wrapper {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: #eee;
+        margin: 0 auto 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 2px solid #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-    .categoria-card {
-        height: 350px;
+    .cat-image-wrapper i { font-size: 1.5rem; color: #555; }
+    .cat-circle-item span { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; display: block; }
+
+    /* Banner Principal Compacto */
+    .promo-banner {
+        border-radius: 15px;
+        background: linear-gradient(45deg, #111, #444);
+        height: 300px;
+        margin-bottom: 40px;
+        display: flex;
+        align-items: center;
+        padding: 0 50px;
+        color: white;
+        position: relative;
+        overflow: hidden;
     }
-  }
+    .promo-content h2 { font-size: 3rem; font-weight: 900; margin: 0; }
+    .promo-content p { font-size: 1.2rem; opacity: 0.8; margin-bottom: 20px; }
+    .promo-badge { background: #8b0000; color: white; padding: 5px 15px; border-radius: 5px; font-weight: 800; margin-bottom: 15px; display: inline-block; }
+
+    /* Grilla de Productos (Alta Densidad) */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+    }
+    @media (max-width: 1200px) { .product-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 992px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 576px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+
+    .market-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s;
+        border: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .market-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+
+    .card-img-container { position: relative; padding-top: 130%; overflow: hidden; }
+    .card-img-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+    
+    .quick-add-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: white;
+        color: #111;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
+    .quick-add-btn:hover { background: #8b0000; color: white; transform: scale(1.1); }
+
+    .card-info { padding: 15px; flex-grow: 1; }
+    .card-title { font-size: 0.85rem; font-weight: 600; color: #444; height: 2.5em; overflow: hidden; margin-bottom: 8px; }
+    .card-price { font-size: 1.1rem; font-weight: 800; color: #8b0000; margin: 0; }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .section-title::after { content: ""; height: 2px; flex-grow: 1; background: #eee; }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="index-container">
+    
+    <!-- Categorías Rápidas -->
+    <div class="quick-categories mb-5">
+        {% for cat in categorias_principales %}
+        <a href="{% url 'productos' %}?categoria={{ cat.id }}" class="cat-circle-item">
+            <div class="cat-image-wrapper">
+                <i class="fas {% if 'remera' in cat.nombre|lower %}fa-tshirt{% elif 'pantalon' in cat.nombre|lower %}fa-socks{% else %}fa-tag{% endif %}"></i>
+            </div>
+            <span>{{ cat.nombre }}</span>
+        </a>
+        {% endfor %}
+        <a href="{% url 'productos' %}" class="cat-circle-item">
+            <div class="cat-image-wrapper" style="background: #111;">
+                <i class="fas fa-plus text-white"></i>
+            </div>
+            <span>VER TODO</span>
+        </a>
+    </div>
 
-<!-- HERO SECTION -->
-<section class="hero">
-  <div class="hero-content">
-    <p>Nueva Colección 2025</p>
-    <h1>Carlo Magno</h1>
-    <div class="brand-sub">Indumentaria</div>
-    <a href="{% url 'productos' %}" class="btn-luxury">Ver Colección</a>
-  </div>
-</section>
+    <!-- Banner de Ofertas -->
+    <div class="promo-banner shadow-sm">
+        <div class="promo-content">
+            <span class="promo-badge">HOT SALE - 30% OFF</span>
+            <h2>TEMPORADA 2026</h2>
+            <p>Elegancia que marca la diferencia en cada paso.</p>
+            <a href="{% url 'productos' %}" class="btn btn-light fw-bold px-4 py-2 rounded-pill">VER COLECCIÓN</a>
+        </div>
+    </div>
 
-<!-- TRUST BANNER -->
-<section class="trust-banner">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-4 trust-item">
-        <i class="fas fa-shipping-fast"></i>
-        <h6>Envíos Prioritarios</h6>
-        <p>Logística premium a todo el país.</p>
-      </div>
-      <div class="col-md-4 trust-item">
-        <i class="fas fa-shield-alt"></i>
-        <h6>Transacción Blindada</h6>
-        <p>Tus datos protegidos con tecnología bancaria.</p>
-      </div>
-      <div class="col-md-4 trust-item">
-        <i class="fas fa-crown"></i>
-        <h6>Sastrería de Autor</h6>
-        <p>Materiales importados y cortes hechos a medida.</p>
-      </div>
+    <!-- Grilla de Productos Principal -->
+    <h3 class="section-title">RECOMENDADO PARA VOS</h3>
+    
+    <div class="product-grid">
+        {% for prod in novedades %}
+        <div class="market-card">
+            <div class="card-img-container">
+                <a href="{% url 'producto_detail' prod.id %}">
+                    {% if prod.imagen %}
+                        <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}">
+                    {% else %}
+                        <img src="{% static 'images/placeholder.jpg' %}" alt="No image">
+                    {% endif %}
+                </a>
+                <button class="quick-add-btn" onclick="addToCart('{{ prod.id }}')">
+                    <i class="fas fa-cart-plus"></i>
+                </button>
+            </div>
+            <div class="card-info">
+                <p class="card-title">{{ prod.nombre }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <p class="card-price">${{ prod.precio }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-  </div>
-</section>
 
-<!-- CATEGORÍAS -->
-<section class="categorias container">
-  <div class="section-title">
-    <h2>Colecciones</h2>
-  </div>
-  <div class="row g-4">
-    <div class="col-md-4">
-      <a href="{% url 'productos' %}?categoria=remeras" class="categoria-card d-block">
-        <img src="{% static 'images/categoria-remeras.jpg' %}" alt="Remeras">
-        <div class="categoria-overlay">
-          <h4>Essential Tees</h4>
+    <!-- Beneficios (Trust Badges) -->
+    <div class="row mt-5 py-5 border-top text-center">
+        <div class="col-md-3 mb-4">
+            <i class="fas fa-truck fs-1 text-muted mb-3"></i>
+            <h6 class="fw-bold">ENVÍO RÁPIDO</h6>
+            <p class="small text-muted">A todo el país en 24-48hs.</p>
         </div>
-      </a>
-    </div>
-    <div class="col-md-4">
-      <a href="{% url 'productos' %}?categoria=camisas" class="categoria-card d-block">
-        <img src="{% static 'images/categoria-camisas.jpg' %}" alt="Camisas">
-        <div class="categoria-overlay">
-          <h4>Royal Shirts</h4>
+        <div class="col-md-3 mb-4">
+            <i class="fas fa-shield-alt fs-1 text-muted mb-3"></i>
+            <h6 class="fw-bold">COMPRA SEGURA</h6>
+            <p class="small text-muted">Protegemos tus datos y pagos.</p>
         </div>
-      </a>
-    </div>
-    <div class="col-md-4">
-      <a href="{% url 'productos' %}?categoria=pantalones" class="categoria-card d-block">
-        <img src="{% static 'images/categoria-pantalones.jpg' %}" alt="Pantalones">
-        <div class="categoria-overlay">
-          <h4>Tailored Pants</h4>
+        <div class="col-md-3 mb-4">
+            <i class="fas fa-exchange-alt fs-1 text-muted mb-3"></i>
+            <h6 class="fw-bold">CAMBIO FÁCIL</h6>
+            <p class="small text-muted">30 días para cambios sin costo.</p>
         </div>
-      </a>
+        <div class="col-md-3 mb-4">
+            <i class="fas fa-credit-card fs-1 text-muted mb-3"></i>
+            <h6 class="fw-bold">3 CUOTAS SIN INTERÉS</h6>
+            <p class="small text-muted">Con todas las tarjetas bancarias.</p>
+        </div>
     </div>
-  </div>
-</section>
+</div>
 
-<!-- PRODUCTOS DESTACADOS -->
-<section class="productos-destacados">
-  <div class="container">
-    <div class="section-title">
-      <h2>Selección del Mes</h2>
-    </div>
-    <div class="row g-4">
-      {% for producto in featured_productos %}
-      <div class="col-md-3">
-        <div class="producto-card">
-          <a href="{% url 'producto_detail' producto.id %}" class="producto-img-wrapper d-block">
-            {% if producto.imagen and producto.imagen.name %}
-              <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-            {% else %}
-              <img src="{% static 'images/p1.jpg' %}" alt="{{ producto.nombre }}" style="opacity: 0.5;">
-            {% endif %}
-          </a>
-          <div class="producto-body">
-            <h5>{{ producto.nombre }}</h5>
-            <p class="precio">${{ producto.precio }}</p>
-            <a href="{% url 'producto_detail' producto.id %}" class="btn btn-outline-dark btn-sm rounded-0">Ver Detalles</a>
-          </div>
-        </div>
-      </div>
-      {% empty %}
-      <!-- PLACEHOLDERS SI NO HAY PRODUCTOS -->
-      <div class="col-md-3">
-        <div class="producto-card">
-          <div class="producto-img-wrapper">
-            <img src="{% static 'images/p1.jpg' %}" alt="Product">
-          </div>
-          <div class="producto-body">
-            <h5>Camisa Luxury Burgundy</h5>
-            <p class="precio">$15.900</p>
-            <button class="btn btn-outline-dark btn-sm rounded-0">Ver Detalles</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="producto-card">
-          <div class="producto-img-wrapper">
-            <img src="{% static 'images/p2.jpg' %}" alt="Product">
-          </div>
-          <div class="producto-body">
-            <h5>Zapatos Oxford Premium</h5>
-            <p class="precio">$28.500</p>
-            <button class="btn btn-outline-dark btn-sm rounded-0">Ver Detalles</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="producto-card">
-          <div class="producto-img-wrapper">
-            <img src="{% static 'images/categoria-camisas.jpg' %}" alt="Product">
-          </div>
-          <div class="producto-body">
-            <h5>Saco Slim Fit Black</h5>
-            <p class="precio">$45.000</p>
-            <button class="btn btn-outline-dark btn-sm rounded-0">Ver Detalles</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="producto-card">
-          <div class="producto-img-wrapper">
-            <img src="{% static 'images/categoria-pantalones.jpg' %}" alt="Product">
-          </div>
-          <div class="producto-body">
-            <h5>Pantalón de Vestir Grey</h5>
-            <p class="precio">$12.200</p>
-            <button class="btn btn-outline-dark btn-sm rounded-0">Ver Detalles</button>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
+<script>
+function addToCart(productId) {
+    const formData = new FormData();
+    formData.append('producto_id', productId);
+    formData.append('cantidad', 1);
 
-<!-- TESTIMONIOS -->
-<section class="testimonials">
-  <div class="container">
-    <div class="section-title">
-      <h2 style="color: white;">Lo que dicen nuestros clientes</h2>
-    </div>
-    <div class="row">
-      <div class="col-md-4 testimonial-item">
-        <div class="testimonial-text">"La calidad de la tela es increíble. Se nota la diferencia en el primer uso. Sin duda, mi lugar de confianza."</div>
-        <div class="testimonial-author">Julián R.</div>
-      </div>
-      <div class="col-md-4 testimonial-item">
-        <div class="testimonial-text">"El entalle de las camisas es perfecto. Hacía tiempo que no encontraba algo que me quedara tan bien."</div>
-        <div class="testimonial-author">Marcos S.</div>
-      </div>
-      <div class="col-md-4 testimonial-item">
-        <div class="testimonial-text">"Excelente atención y el envío llegó antes de lo esperado. Muy conforme con la compra."</div>
-        <div class="testimonial-author">Fernando G.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
+    fetch('{% url "agregar_al_carrito" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success') {
+            // Si tienes una función para actualizar el contador del carrito en base.html, la llamamos aquí
+            if (typeof updateCartBadge === 'function') {
+                updateCartBadge(data.cart_count);
+            }
+            alert('¡Producto añadido al carrito!');
+            location.reload(); // Recargamos para ver los cambios en el mini-cart
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Hubo un problema al añadir el producto.');
+    });
+}
+</script>
 {% endblock %}

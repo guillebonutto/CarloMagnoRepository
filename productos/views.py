@@ -2,9 +2,13 @@ from django.shortcuts import render, get_object_or_404
 from .models import Producto, Categoria, Color, Talle, Marca
 
 def home(request):
-    featured_productos = Producto.objects.select_related('categoria', 'marca').prefetch_related('colores').all()[:6]
+    # Traemos los productos más recientes y activos (Estilo Novedades de Shein)
+    novedades = Producto.objects.filter(esta_activo=True).select_related('categoria', 'marca').order_by('-id')[:20]
+    categorias_principales = Categoria.objects.all()[:8] # Accesos rápidos
+    
     return render(request, 'index.html', {
-        'featured_productos': featured_productos
+        'novedades': novedades,
+        'categorias_principales': categorias_principales
     })
 
 def producto_list(request):

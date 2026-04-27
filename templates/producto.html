@@ -293,6 +293,40 @@
             position: static;
         }
     }
+
+    /* Estilos para la nueva barra de búsqueda */
+    .search-input-wrapper {
+        display: flex;
+        background: white;
+        border-radius: 50px;
+        padding: 5px;
+        border: 1px solid #eee;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    .search-input-wrapper:focus-within {
+        border-color: #8b0000;
+        box-shadow: 0 5px 20px rgba(139, 0, 0, 0.1) !important;
+    }
+    .search-icon-main {
+        padding: 0 20px;
+        color: #888;
+        font-size: 1.2rem;
+    }
+    .main-search-input {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 12px 0;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    .btn-search-main {
+        border-radius: 50px;
+        padding: 10px 30px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        background: #111;
+    }
 </style>
 {% endblock %}
 
@@ -401,6 +435,29 @@
 
             <!-- Grilla de Productos -->
             <div class="col-xl-10 col-lg-9">
+                <!-- Barra de Búsqueda Principal en Catálogo -->
+                <div class="product-search-header mb-4" id="mainSearchHeader">
+                    <form action="{% url 'productos' %}" method="GET" class="position-relative">
+                        <div class="search-input-wrapper shadow-sm">
+                            <i class="fas fa-search search-icon-main"></i>
+                            <input type="text" name="q" value="{{ query|default:'' }}" 
+                                   class="form-control main-search-input" 
+                                   placeholder="¿Qué estás buscando hoy?"
+                                   id="catalogSearchInput">
+                            <button type="submit" class="btn btn-dark btn-search-main">BUSCAR</button>
+                        </div>
+                        
+                        <!-- Badges de filtros activos (opcional, mejora UX) -->
+                        <div class="active-filters-display mt-2 d-flex flex-wrap gap-2">
+                            {% if query %}
+                                <span class="badge bg-light text-dark border p-2">
+                                    Búsqueda: "{{ query }}" 
+                                    <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}" class="text-danger ms-1"><i class="fas fa-times"></i></a>
+                                </span>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
                 {% if productos %}
                 <div class="product-grid-container">
                     {% for producto in productos %}
@@ -469,5 +526,24 @@
         const color = dot.getAttribute('data-color');
         if (color) dot.style.backgroundColor = color;
     });
+
+    // Lógica para el Sticky Search (pasar la búsqueda al header al hacer scroll)
+    const mainSearchHeader = document.getElementById('mainSearchHeader');
+    const stickySearchContainer = document.getElementById('stickySearchContainer');
+
+    if (mainSearchHeader && stickySearchContainer) {
+        window.addEventListener('scroll', function() {
+            const rect = mainSearchHeader.getBoundingClientRect();
+            // Si la barra principal ya no es visible en el viewport
+            if (rect.bottom < 0) {
+                stickySearchContainer.style.opacity = '1';
+                stickySearchContainer.style.transform = 'translateY(0)';
+                stickySearchContainer.classList.remove('d-none');
+            } else {
+                stickySearchContainer.style.opacity = '0';
+                stickySearchContainer.style.transform = 'translateY(-10px)';
+            }
+        });
+    }
 </script>
 {% endblock %}

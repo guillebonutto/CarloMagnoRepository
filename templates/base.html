@@ -13,86 +13,128 @@
 </head>
 
 <body>
-	<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #8b0000">
-		<div class="container-fluid">
-			<a class="navbar-brand d-flex align-items-center" href="{% url 'inicio' %}" style="gap: 10px">
-				<img src="{% static 'images/logo.png' %}" alt="Carlo Magno Logo"
-					style="height: 50px; filter: brightness(0) invert(1)" />
-			</a>
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarNav">
-				<ul class="navbar-nav ms-auto">
-					<li class="nav-item"><a class="nav-link" href="{% url 'inicio' %}">Inicio</a></li>
-					<li class="nav-item">
-						<a class="nav-link" href="{% url 'productos' %}">Productos</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="{% url 'contact' %}">Contacto</a>
-					</li>
-					<!-- Usuario autenticado -->
-					{% if user.is_authenticated %}
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-							data-bs-toggle="dropdown" aria-expanded="false">
-							<i class="fas fa-user-circle"></i> {{ user.first_name|default:user.username }}
-						</a>
-						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-							<li><a class="dropdown-item" href="{% url 'perfil_cliente' %}"><i class="fas fa-user"></i>
-									Mi Perfil</a></li>
-							<li><a class="dropdown-item" href="{% url 'perfil_cliente' %}"><i class="fas fa-box"></i>
-									Mis Pedidos</a></li>
-							<li>
-								<hr class="dropdown-divider">
-							</li>
-							<li><a class="dropdown-item" href="{% url 'logout_cliente' %}"><i
-										class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
-						</ul>
-					</li>
-					{% else %}
-					<!-- Usuario no autenticado -->
-					<li class="nav-item">
-						<a class="nav-link" href="{% url 'login_cliente' %}">
-							<i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link btn btn-outline-light ms-2" href="{% url 'registro_cliente' %}"
-							style="border-radius: 20px;">
-							<i class="fas fa-user-plus"></i> Registrarse
-						</a>
-					</li>
-					{% endif %}
-					<li class="nav-item">
-						<div class="cart-wrapper">
-							<div class="cart-icon" id="cartIcon">
-								<i class="fas fa-shopping-cart"></i>
-								<span class="cart-badge" id="cartBadge">{{ carrito_cantidad|default:0 }}</span>
-							</div>
-							<div class="cart-dropdown" id="cartDropdown">
-								<div class="cart-header">
-									Tu Carrito
-								</div>
-								<div class="cart-items" id="cartItems">
-									<!-- Los items se cargarán dinámicamente con JavaScript -->
-									<div class="cart-empty" id="emptyCart" style="display: none;">
-										<i class="fas fa-shopping-cart"></i>
-										<p>Tu carrito está vacío</p>
-									</div>
-								</div>
-								<div class="cart-summary" id="cartSummary" style="display: none;">
-									<div class="cart-total">
+	<!-- TOP BAR (Opcional pero muy AliExpress) -->
+	<div class="top-bar d-none d-lg-block text-white text-center py-1" style="background-color: #000; font-size: 0.75rem; letter-spacing: 1px;">
+		ENVÍOS A TODO EL PAÍS | 3 CUOTAS SIN INTERÉS | NUEVA TEMPORADA 2026
+	</div>
 
-									</div>
-								</div>
-							</div>
+	<nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm main-navbar" style="background-color: #8b0000; padding: 10px 0;">
+		<div class="container-fluid px-lg-5">
+			<!-- Logo a la izquierda -->
+			<a class="navbar-brand d-flex align-items-center" href="{% url 'inicio' %}" style="margin-right: 30px;">
+				<img src="{% static 'images/logo.png' %}" alt="Carlo Magno Logo" style="height: 45px; filter: brightness(0) invert(1)" />
+			</a>
+
+			<!-- BARRA DE BÚSQUEDA CENTRAL (Estilo Shein/AliExpress) -->
+			<div class="header-search-wrapper flex-grow-1 mx-lg-5 d-none d-md-block">
+				<form action="{% url 'productos' %}" method="GET" class="position-relative w-100">
+					<div class="input-group">
+						<input type="text" name="q" class="form-control border-0 py-2 px-4" 
+							   placeholder="Buscar remeras, camisas, pantalones..." 
+							   style="border-radius: 50px 0 0 50px; font-size: 0.9rem;">
+						<button class="btn btn-white border-0 bg-white px-4" type="submit" style="border-radius: 0 50px 50px 0; color: #8b0000;">
+							<i class="fas fa-search"></i>
+						</button>
+					</div>
+				</form>
+			</div>
+
+			<!-- BOTONES DERECHA (Iconos limpios) -->
+			<div class="nav-icons-wrapper d-flex align-items-center" style="gap: 20px;">
+				<!-- Buscador móvil -->
+				<a href="#" class="nav-link d-md-none text-white fs-5"><i class="fas fa-search"></i></a>
+
+				{% if user.is_authenticated %}
+				<div class="dropdown">
+					<a class="nav-link text-white d-flex align-items-center gap-2" href="#" id="userDropdown" data-bs-toggle="dropdown">
+						<i class="fas fa-user fs-5"></i>
+						<span class="d-none d-xl-inline" style="font-size: 0.85rem; font-weight: 600;">{{ user.first_name|default:user.username }}</span>
+					</a>
+					<ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3" style="border-radius: 10px;">
+						<li><a class="dropdown-item py-2" href="{% url 'perfil_cliente' %}"><i class="fas fa-box-open me-2"></i> Mis Pedidos</a></li>
+						<li><a class="dropdown-item py-2" href="{% url 'perfil_cliente' %}"><i class="fas fa-heart me-2"></i> Mis Favoritos</a></li>
+						<li><hr class="dropdown-divider"></li>
+						<li><a class="dropdown-item py-2 text-danger" href="{% url 'logout_cliente' %}"><i class="fas fa-sign-out-alt me-2"></i> Salir</a></li>
+					</ul>
+				</div>
+				{% else %}
+				<a href="{% url 'login_cliente' %}" class="nav-link text-white d-flex align-items-center gap-2">
+					<i class="fas fa-user fs-5"></i>
+					<span class="d-none d-xl-inline" style="font-size: 0.85rem; font-weight: 600;">INGRESAR</span>
+				</a>
+				{% endif %}
+
+				<!-- Carrito flotante -->
+				<div class="cart-wrapper position-relative" id="cartIconContainer">
+					<a href="#" class="nav-link text-white position-relative" id="cartTrigger">
+						<i class="fas fa-shopping-bag fs-4"></i>
+						<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-white text-danger border" 
+							  id="cartBadge" style="font-size: 0.65rem; padding: 0.35em 0.65em;">
+							{{ carrito_cantidad|default:0 }}
+						</span>
+					</a>
+					
+					<!-- Cart Dropdown (estilo mini-cart) -->
+					<div class="mini-cart-dropdown shadow-lg border-0 d-none" id="miniCart">
+						<div class="p-3 text-center border-bottom">
+							<h6 class="m-0 fw-bold">TU CARRITO</h6>
 						</div>
-					</li>
-				</ul>
+						<div class="cart-items-scroll p-2" id="miniCartItems" style="max-height: 300px; overflow-y: auto;">
+							<!-- Dinámico -->
+						</div>
+						<div class="p-3 bg-light rounded-bottom">
+							<a href="{% url 'checkout' %}" class="btn btn-dark w-100 fw-bold py-2" style="border-radius: 50px; letter-spacing: 1px;">FINALIZAR COMPRA</a>
+						</div>
+					</div>
+				</div>
+
+				<button class="navbar-toggler border-0 p-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+					<i class="fas fa-bars text-white fs-4"></i>
+				</button>
 			</div>
 		</div>
 	</nav>
+
+	<style>
+		/* Estilos Base Marketplace */
+		body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
+		.main-navbar { z-index: 1030; }
+		
+		/* Búsqueda Estilo Shein */
+		.header-search-wrapper .form-control:focus {
+			box-shadow: none;
+			background-color: #fff;
+		}
+		.header-search-wrapper .input-group {
+			box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+			border-radius: 50px;
+			overflow: hidden;
+		}
+
+		/* Mini Cart Dropdown */
+		.mini-cart-dropdown {
+			position: absolute;
+			top: 100%;
+			right: 0;
+			width: 320px;
+			background: white;
+			z-index: 1000;
+			margin-top: 15px;
+			border-radius: 12px;
+			overflow: hidden;
+		}
+		.cart-items-scroll::-webkit-scrollbar { width: 4px; }
+		.cart-items-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+
+		/* Nav Icons */
+		.nav-link { transition: transform 0.2s; }
+		.nav-link:hover { transform: scale(1.1); }
+		
+		/* Responsivo */
+		@media (max-width: 991px) {
+			.navbar-brand img { height: 35px; }
+		}
+	</style>
 
 	{% block content %}{% endblock %}
 
