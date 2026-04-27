@@ -1,81 +1,239 @@
 {% extends 'custom_admin/base.html' %}
 {% load static %}
-{% block title %}Dashboard - Panel deAdministración{% endblock %}
-{%block extra_css %}
+{% block title %}Dashboard - Panel de Administración{% endblock %}
+
+{% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+<style>
+    /* Estilos extra para métricas de venta */
+    .sales-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .sales-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border-left: 5px solid #8b0000;
+    }
+
+    .sales-card .label {
+        color: #888;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .sales-card .value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #333;
+        margin: 10px 0;
+    }
+
+    .charts-container {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .chart-box {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .recent-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .recent-table th {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 2px solid #eee;
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    .recent-table td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 0.9rem;
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-pagado {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .status-pendiente {
+        background: #fff3e0;
+        color: #ef6c00;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="main-content">
-	<div class="header">
-		<h1>Bienvenido, {{ user.username }} 👋</h1>
-		<a href="{% url 'logout' %}" class="logout-btn">Cerrar Sesión</a>
-	</div>
+    <div class="header d-flex justify-content-between align-items-center mb-4">
+        <h1>Centro de Control Carlo Magno</h1>
+        <div class="d-flex gap-3">
+            <span class="badge bg-dark p-2">{{ today|date:"d M Y" }}</span>
+            <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">Cerrar Sesión</a>
+        </div>
+    </div>
 
-	<div class="stats-grid">
-		<div class="stat-card">
-			<div class="icon">👔</div>
-			<div class="number">{{ total_productos }}</div>
-			<div class="label">Productos</div>
-		</div>
+    <!-- MÉTRICAS DE NEGOCIO -->
+    <div class="sales-stats">
+        <div class="sales-card">
+            <div class="label">Ventas Totales</div>
+            <div class="value">${{ ventas_totales|floatformat:2 }}</div>
+            <div class="small text-success fw-bold"><i class="fas fa-arrow-up"></i> Ingresos Netos</div>
+        </div>
+        <div class="sales-card" style="border-left-color: #2196f3;">
+            <div class="label">Pedidos Pagados</div>
+            <div class="value">{{ cantidad_pedidos }}</div>
+            <div class="small text-muted">Transacciones exitosas</div>
+        </div>
+        <div class="sales-card" style="border-left-color: #4caf50;">
+            <div class="label">Ticket Promedio</div>
+            <div class="value">${{ ticket_promedio|floatformat:2 }}</div>
+            <div class="small text-muted">Gasto por cliente</div>
+        </div>
+        <div class="sales-card" style="border-left-color: #9c27b0;">
+            <div class="label">Uso de Cupones</div>
+            <div class="value">{{ pedidos_con_cupon }}</div>
+            <div class="small text-muted">Efectividad de promos</div>
+        </div>
+    </div>
 
-		<div class="stat-card">
-			<div class="icon">📁</div>
-			<div class="number">{{ total_categories }}</div>
-			<div class="label">Categorías</div>
-		</div>
+    <div class="charts-container">
+        <!-- Gráfico Estacional -->
+        <div class="chart-box">
+            <h5 class="mb-4 fw-bold">Ventas por Estación del Año</h5>
+            <canvas id="seasonChart" height="150"></canvas>
+        </div>
 
-		<div class="stat-card">
-			<div class="icon">🎨</div>
-			<div class="number">{{ total_colors }}</div>
-			<div class="label">Colores</div>
-		</div>
+        <!-- Stock y Otros -->
+        <div class="chart-box">
+            <h5 class="mb-4 fw-bold">Estado del Inventario</h5>
+            <div class="d-flex align-items-center justify-content-center h-100">
+                <div class="text-center">
+                    <h1 class="display-1 fw-bold text-danger">{{ low_stock }}</h1>
+                    <p class="text-muted text-uppercase fw-bold">Productos con Stock Bajo</p>
+                    <a href="{% url 'stock' %}" class="btn btn-danger btn-sm rounded-pill px-4">Gestionar Stock</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-		<div class="stat-card">
-			<div class="icon">🏷️</div>
-			<div class="number">{{ total_brands }}</div>
-			<div class="label">Marcas</div>
-		</div>
-
-		<div class="stat-card">
-			<div class="icon">⚠️</div>
-			<div class="number">{{ low_stock }}</div>
-			<div class="label">Stock Bajo</div>
-		</div>
-	</div>
-
-	<div class="recent-productos">
-		<h2>Productos Recientes</h2>
-		{% for producto in recent_productos %}
-		<div class="product-item">
-			{% if producto.imagen %}
-			<img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" />
-			{% else %}
-			<div
-				style="
-					width: 60px;
-					height: 75px;
-					background: #f0f0f0;
-					border-radius: 8px;
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					margin-right: 15px;
-				"
-			>
-				📦
-			</div>
-			{% endif %}
-			<div class="product-info">
-				<h3>{{ producto.nombre }}</h3>
-				<p>{{ producto.categoria.nombre }} - ${{ product.precio }}</p>
-			</div>
-		</div>
-		{% empty %}
-		<p style="text-align: center; color: #999">No hay productos aún</p>
-		{% endfor %}
-	</div>
+    <!-- TABLA DE PEDIDOS RECIENTES -->
+    <div class="chart-box">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 fw-bold">Últimos Pedidos Recibidos</h5>
+            <a href="#" class="btn btn-link btn-sm text-dark">Ver todos los pedidos</a>
+        </div>
+        <table class="recent-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in recent_pedidos %}
+                <tr>
+                    <td>#{{ pedido.id }}</td>
+                    <td><strong>{{ pedido.nombre_completo }}</strong><br><small>{{ pedido.email }}</small></td>
+                    <td>{{ pedido.fecha_creacion|date:"d/m/Y" }}</td>
+                    <td>
+                        <span class="status-badge status-{{ pedido.estado_pago }}">
+                            {{ pedido.get_estado_pago_display|default:pedido.estado_pago }}
+                        </span>
+                    </td>
+                    <td class="fw-bold">${{ pedido.total }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-light border" title="Ver Detalle"><i
+                                class="fas fa-eye"></i></button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">No hay pedidos registrados todavía.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-{% load static %}
-<script src="{% static 'js/panel.js' %}"></script>
+
+<!-- Scripts para los gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('seasonChart').getContext('2d');
+
+        // Datos inyectados desde Django
+        const labels = ['Verano', 'Otoño', 'Invierno', 'Primavera'];
+        const data = [
+            parseFloat("{{ estaciones_data.Verano|default:0 }}"),
+            parseFloat("{{ estaciones_data.Otoño|default:0 }}"),
+            parseFloat("{{ estaciones_data.Invierno|default:0 }}"),
+            parseFloat("{{ estaciones_data.Primavera|default:0 }}")
+        ];
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Ventas por Estación ($)',
+                data: data,
+                backgroundColor: [
+                    'rgba(255, 159, 64, 0.7)', // Verano
+                    'rgba(255, 205, 86, 0.7)', // Otoño
+                    'rgba(54, 162, 235, 0.7)', // Invierno
+                    'rgba(75, 192, 192, 0.7)'  // Primavera
+                ],
+                borderColor: [
+                    'rgb(255, 159, 64)',
+                    'rgb(255, 205, 86)',
+                    'rgb(54, 162, 235)',
+                    'rgb(75, 192, 192)'
+                ],
+                borderWidth: 1,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+    });
+</script>
 {% endblock %}

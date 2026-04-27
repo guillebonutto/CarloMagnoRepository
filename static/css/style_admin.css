@@ -48,15 +48,26 @@ body {
 }
 
 .sidebar .active {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    border-left: 4px solid #25b9d7; /* Azul cian estilo PrestaShop */
+    border-radius: 0 8px 8px 0;
     transition: all 0.3s ease;
 }
 
 .menu-catalogos,
-.menu-clientes
+.menu-clientes,
 .menu-pedidos {
     position: relative;
+    margin-bottom: 5px;
+}
+
+.sidebar h6 {
+    padding: 25px 15px 10px;
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    opacity: 0.5;
+    color: #fff;
+    font-weight: 800;
 }
 
 .iconoFontAwe {
@@ -73,10 +84,32 @@ body {
     margin-top: 5px;
 }
 
-.menu-catalogos .main-link,
-.menu-clientes .main-link,
-.menu-pedidos .main-link {
+.menu-group .submenu {
+    padding-left: 15px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: 5px 0;
+    border-radius: 8px;
+}
+
+.menu-group .submenu a {
+    font-size: 0.85rem;
+    padding: 8px 15px;
+    opacity: 0.8;
+}
+
+.menu-group .submenu a:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.toggle-btn i.fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+.sidebar nav .nav-item a,
+.sidebar nav .main-link {
     font-weight: 600;
+    font-size: 0.95rem;
 }
 
 .main-content {

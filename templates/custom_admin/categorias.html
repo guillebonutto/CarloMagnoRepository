@@ -24,12 +24,8 @@
 			</div>
 
 			<div class="actions">
-				<a href="/admin/productos/category/{{ categoria.id }}/change/" class="btn-edit"
-					>✏️ Editar</a
-				>
-				<a href="/admin/productos/category/{{ categoria.id }}/delete/" class="btn-delete"
-					>🗑️ Eliminar</a
-				>
+				<a href="{% url 'editar_categoria' categoria.id %}" class="btn-edit">✏️ Editar</a>
+				<a href="{% url 'eliminar_categoria' categoria.id %}" class="btn-delete">🗑️ Eliminar</a>
 			</div>
 		</div>
 		{% endfor %}

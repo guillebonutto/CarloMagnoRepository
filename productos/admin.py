@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Categoria, Color, Talle, Marca, Producto, ProductoStock, Cliente, GrupoCliente, Direccion, Carrito, CarritoItem
+from .models import Categoria, Color, Talle, Marca, Producto, ProductoStock, Cliente, GrupoCliente, Direccion, Carrito, CarritoItem, Pedido, PedidoItem, Cupon
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
@@ -316,3 +316,32 @@ class CarritoItemAdmin(admin.ModelAdmin):
         else:
             return format_html('<span style="color: #4caf50;">✅ {} unidades</span>', stock)
     stock_disponible.short_description = 'Stock'
+
+# ========== ADMINISTRACIÓN DE VENTAS (NUEVO) ==========
+
+@admin.register(Cupon)
+class CuponAdmin(admin.ModelAdmin):
+    list_display = ['codigo', 'descuento_porcentaje', 'activo', 'fecha_inicio', 'fecha_fin']
+    list_editable = ['activo']
+    search_fields = ['codigo']
+
+class PedidoItemInline(admin.TabularInline):
+    model = PedidoItem
+    extra = 0
+    readonly_fields = ['producto', 'color', 'talle', 'cantidad', 'precio_unitario', 'get_subtotal']
+    
+    def get_subtotal(self, obj):
+        return f"${obj.get_subtotal()}"
+    get_subtotal.short_description = 'Subtotal'
+
+@admin.register(Pedido)
+class PedidoAdmin(admin.ModelAdmin):
+    list_display = ['id', 'nombre_completo', 'email', 'total', 'estado_pago', 'get_estacion_display', 'fecha_creacion']
+    list_filter = ['estado_pago', 'fecha_creacion', 'cupon']
+    search_fields = ['nombre_completo', 'email', 'mercadopago_id']
+    readonly_fields = ['fecha_creacion', 'get_estacion_display']
+    inlines = [PedidoItemInline]
+    
+    def get_estacion_display(self, obj):
+        return obj.get_estacion()
+    get_estacion_display.short_description = 'Estación'

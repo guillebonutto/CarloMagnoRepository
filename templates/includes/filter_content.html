@@ -1,0 +1,92 @@
+<h5 class="filter-title">Filtros</h5>
+
+<!-- Búsqueda de Categorías -->
+<div class="filter-group">
+    <label>Explorar</label>
+    <div class="mb-3">
+        <input type="text" id="{{ prefix|default:'' }}categorySearch" class="form-control form-control-sm" placeholder="¿Qué estás buscando?" style="border-radius: 0; border-color: #eee; font-size: 0.8rem; padding: 10px;">
+    </div>
+    
+    <div class="mb-3">
+        <a href="{% url 'productos' %}" class="subgroup-link {% if not selected_categorias %}active{% endif %}" style="font-weight: 700;">
+            TODOS LOS PRODUCTOS
+        </a>
+    </div>
+
+    <div class="accordion category-accordion" id="{{ prefix|default:'' }}categoryAccordion">
+        {% for group in categorias_grouped %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="{{ prefix|default:'' }}heading-{{ forloop.counter }}">
+                <button class="accordion-button {% if not group.is_active %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#{{ prefix|default:'' }}collapse-{{ forloop.counter }}" aria-expanded="{{ group.is_active|yesno:'true,false' }}" aria-controls="{{ prefix|default:'' }}collapse-{{ forloop.counter }}">
+                    {{ group.name }}
+                </button>
+            </h2>
+            <div id="{{ prefix|default:'' }}collapse-{{ forloop.counter }}" class="accordion-collapse collapse {% if group.is_active %}show{% endif %}" aria-labelledby="{{ prefix|default:'' }}heading-{{ forloop.counter }}" data-bs-parent="#{{ prefix|default:'' }}categoryAccordion">
+                <div class="accordion-body">
+                    <div class="subgroup-list">
+                        {% for subgroup_name, cats in group.subgroups.items %}
+                        <a href="?{% for cat in cats %}categoria={{ cat.id }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+                           class="subgroup-link subgroup-item {% if cats.0.id|stringformat:'s' in selected_categorias %}active{% endif %}"
+                           data-name="{{ subgroup_name }}">
+                            {{ subgroup_name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Colores -->
+<div class="filter-group">
+    <label>Colores</label>
+    <div class="filter-list">
+        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_talle %}talle={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+           class="filter-link full-width {% if not selected_color %}active{% endif %}">Todos los colores</a>
+        {% for color in colores %}
+        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}color={{ color.id }}{% if selected_talle %}&talle={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+           class="filter-link {% if selected_color == color.id|stringformat:'s' %}active{% endif %} {% if color.id not in colores_con_stock %}out-of-stock{% endif %}">
+            <span class="color-dot-filter" data-color="{{ color.hex_code }}"></span>
+            {{ color.nombre }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Talles -->
+<div class="filter-group">
+    <label>Talles</label>
+    <div class="filter-list">
+        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+           class="filter-link full-width {% if not selected_talle %}active{% endif %}">Todos los talles</a>
+        {% for size in talles %}
+        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %} {% if selected_color %}color={{ selected_color }}&{% endif %} talle={{ size.id }} {% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+           class="filter-link {% if selected_talle == size.id|stringformat:'s' %}active{% endif %} {% if size.id not in talles_con_stock %}out-of-stock{% endif %}">
+            {{ size.abbreviation }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Marcas -->
+<div class="filter-group">
+    <label>Marcas</label>
+    <div class="filter-list">
+        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}talle={{ selected_talle }}{% endif %}" 
+           class="filter-link full-width {% if not selected_marca %}active{% endif %}">Todas las marcas</a>
+        {% for marca in marcas %}
+        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %} {% if selected_color %}color={{ selected_color }}&{% endif %} {% if selected_talle %}talle={{ selected_talle }}&{% endif %} marca={{ marca.id }}" 
+           class="filter-link {% if selected_marca == marca.id|stringformat:'s' %}active{% endif %}">
+            {{ marca.nombre }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+{% if selected_categorias or selected_color or selected_talle or selected_marca %}
+<a href="{% url 'productos' %}" class="btn btn-outline-danger btn-sm w-100 mt-2">
+    <i class="fas fa-times me-2"></i>Limpiar Filtros
+</a>
+{% endif %}

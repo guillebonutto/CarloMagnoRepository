@@ -2,8 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from .models import Carrito, CarritoItem, Producto, Color, Talle, ProductoStock
+from .models import Carrito, CarritoItem, Producto, Color, Talle, ProductoStock, Pedido, PedidoItem, Cupon
 import json
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
 
 def get_or_create_cart(request):
     """Obtiene o crea un carrito para el usuario actual"""
@@ -303,7 +308,13 @@ def procesar_pago_tarjeta(request):
         
         # Si el pago fue aprobado
         if result.get("status") == "approved":
-            carrito.items.all().delete() # Vaciar el carrito
+            finalizar_compra_y_crear_pedido(
+                request, 
+                carrito, 
+                float(data.get("transaction_amount")),
+                email=data.get("payer", {}).get("email"),
+                mercadopago_id=str(result.get("id"))
+            )
             return JsonResponse({"success": True})
         else:
             status_detail = result.get("status_detail", "El pago no pudo ser aprobado")
@@ -312,10 +323,83 @@ def procesar_pago_tarjeta(request):
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
+def enviar_email_pedido(pedido):
+    """Envía el email de confirmación de pedido"""
+    subject = f'Confirmación de Pedido #{pedido.id} - Carlo Magno'
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = pedido.email
+
+    # Cargar el template HTML
+    html_content = render_to_string('emails/confirmacion_pedido.html', {'pedido': pedido})
+    text_content = strip_tags(html_content) # Versión texto plano
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+    msg.attach_alternative(html_content, "text/html")
+    
+    try:
+        msg.send()
+        return True
+    except Exception as e:
+        print(f"Error enviando email: {e}")
+        return False
+
+def finalizar_compra_y_crear_pedido(request, carrito, total, email=None, nombre=None, direccion=None, mercadopago_id=None):
+    """Lógica central para convertir carrito en pedido"""
+    # Si no vienen datos, intentamos sacarlos del usuario o sesión
+    if not email and request.user.is_authenticated:
+        email = request.user.email
+        nombre = f"{request.user.first_name} {request.user.last_name}"
+        # Aquí podrías buscar la dirección predeterminada del cliente
+        direccion = "Dirección registrada en perfil"
+
+    # Crear el pedido
+    pedido = Pedido.objects.create(
+        usuario=request.user if request.user.is_authenticated else None,
+        email=email or "cliente@ejemplo.com",
+        nombre_completo=nombre or "Cliente Carlo Magno",
+        direccion=direccion or "A coordinar",
+        total=total,
+        estado_pago='pagado',
+        mercadopago_id=mercadopago_id
+    )
+
+    # Mover items del carrito al pedido
+    for item in carrito.items.all():
+        PedidoItem.objects.create(
+            pedido=pedido,
+            producto=item.producto,
+            color=item.color,
+            talle=item.talle,
+            cantidad=item.cantidad,
+            precio_unitario=item.producto.precio
+        )
+        
+        # Opcional: Reducir stock real aquí
+        try:
+            stock_obj = ProductoStock.objects.get(producto=item.producto, color=item.color, talle=item.talle)
+            if stock_obj.stock >= item.cantidad:
+                stock_obj.stock -= item.cantidad
+                stock_obj.save()
+        except:
+            pass
+
+    # Vaciar carrito
+    carrito.items.all().delete()
+    
+    # Enviar Email
+    enviar_email_pedido(pedido)
+    
+    return pedido
+
 def pago_exitoso(request):
-    """Vista de retorno para pagos exitosos"""
+    """Vista de retorno para pagos exitosos (MercadoPago Redirect)"""
     carrito = get_or_create_cart(request)
-    carrito.items.all().delete() # Vaciar el carrito tras el pago
+    mp_id = request.GET.get('payment_id')
+    
+    # Solo procesamos si el carrito tiene items (para evitar duplicados al recargar)
+    if carrito.items.exists():
+        finalizar_compra_y_crear_pedido(request, carrito, carrito.get_total(), mercadopago_id=mp_id)
+    
     return render(request, 'pago_exitoso.html')
 
 def pago_fallido(request):

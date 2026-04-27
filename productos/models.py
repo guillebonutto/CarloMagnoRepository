@@ -412,3 +412,71 @@ class CarritoItem(models.Model):
             return stock.stock
         except ProductoStock.DoesNotExist:
             return 0
+
+# ========== MODELOS DE VENTAS Y PROMOCIONES (NUEVO) ==========
+
+class Cupon(models.Model):
+    codigo = models.CharField(max_length=50, unique=True, verbose_name='Código de Cupón')
+    descuento_porcentaje = models.PositiveIntegerField(default=0, verbose_name='Descuento (%)')
+    activo = models.BooleanField(default=True, verbose_name='Activo')
+    fecha_inicio = models.DateField(null=True, blank=True)
+    fecha_fin = models.DateField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Cupón de Descuento'
+        verbose_name_plural = 'Cupones de Descuento'
+
+    def __str__(self):
+        return f"{self.codigo} (-{self.descuento_porcentaje}%)"
+
+class Pedido(models.Model):
+    ESTADOS_PAGO = [
+        ('pendiente', 'Pendiente'),
+        ('pagado', 'Pagado'),
+        ('fallido', 'Fallido'),
+    ]
+
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Cliente')
+    email = models.EmailField(verbose_name='Email de Contacto')
+    nombre_completo = models.CharField(max_length=255, verbose_name='Nombre Completo')
+    direccion = models.TextField(verbose_name='Dirección de Envío')
+    total = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Total')
+    cupon = models.ForeignKey(Cupon, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Cupón Usado')
+    estado_pago = models.CharField(max_length=20, choices=ESTADOS_PAGO, default='pendiente')
+    mercadopago_id = models.CharField(max_length=100, blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Compra')
+
+    class Meta:
+        verbose_name = 'Pedido'
+        verbose_name_plural = 'Pedidos'
+        ordering = ['-fecha_creacion']
+
+    def __str__(self):
+        return f"Pedido #{self.id} - {self.nombre_completo}"
+
+    def get_estacion(self):
+        """Calcula la estación del año (Hemisferio Sur)"""
+        m = self.fecha_creacion.month
+        d = self.fecha_creacion.day
+        if (m == 12 and d >= 21) or m in [1, 2] or (m == 3 and d < 21):
+            return "Verano"
+        elif (m == 3 and d >= 21) or m in [4, 5] or (m == 6 and d < 21):
+            return "Otoño"
+        elif (m == 6 and d >= 21) or m in [7, 8] or (m == 9 and d < 21):
+            return "Invierno"
+        else:
+            return "Primavera"
+
+class PedidoItem(models.Model):
+    pedido = models.ForeignKey(Pedido, related_name='items', on_delete=models.CASCADE)
+    producto = models.ForeignKey(Producto, on_delete=models.SET_NULL, null=True)
+    color = models.ForeignKey(Color, on_delete=models.SET_NULL, null=True)
+    talle = models.ForeignKey(Talle, on_delete=models.SET_NULL, null=True)
+    cantidad = models.PositiveIntegerField(default=1)
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.cantidad} x {self.producto.nombre if self.producto else 'Producto eliminado'}"
+
+    def get_subtotal(self):
+        return self.precio_unitario * self.cantidad

@@ -1,86 +1,122 @@
 <!DOCTYPE html>
 {% load static %}
 <html lang="es">
-	<!DOCTYPE html>
-	<html lang="es">
-		<head>
-			<meta charset="UTF-8" />
-			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-			<title>{% block title %}{% endblock %}</title>
-			<link
-				href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-				rel="stylesheet"
-				integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-				crossorigin="anonymous"
-			/>
-			<link
-				rel="stylesheet"
-				href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-				integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
-				crossorigin="anonymous"
-				referrerpolicy="no-referrer"
-			/>
-			<link rel="stylesheet" href="{% static 'css/style_admin.css' %}" />
-			{% block extra_css %}
-            {% endblock %}
-		</head>
-		<body>
-			<header>
-				<div class="sidebar">
-					<img src="{% static 'images/logo.png' %}" alt="">
-					<nav>
-						<div class="iconoFontAwe {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-							<i class="fa-solid fa-home"></i>
-							<a href="{% url 'dashboard' %}">Inicio</a>
-						</div>
-						<h6>VENDER</h6>
-						<div class="menu-pedidos">
-							<div class="iconoFontAwe">
-								<i class="fa fa-list" aria-hidden="true"></i>
-								<a href="javascript:void(0)" class="main-link" id="toggle-pedidos"
-									>Pedidos ▾</a>
-							</div>
-							<div class="submenu-pedidos" id ="submenu-pedidos">
-								<a href="">🧾 Ver Pedidos</a>
-								<a href="">➕ Crear Pedido</a>
-							</div>
-						</div>
-						<div class="menu-catalogos">
-							<div class="iconoFontAwe">
-								<i class="fa fa-list" aria-hidden="true"></i>
-								<a href="javascript:void(0)" class="main-link" id="toggle-catalogos"
-									>Catálogo ▾</a
-								>
-							</div>
-							<div class="submenu-catalogos" id ="submenu-catalogos">
-								<a href="{% url 'admin_productos' %}" class="{% if request.resolver_match.url_name == 'admin_productos' %}active{% endif %}">📦 Productos</a>
-								<a href="{% url 'categorias' %}" class="{% if request.resolver_match.url_name == 'categorias' %}active{% endif %}">📁 Categorías</a>
-								<a href="{% url 'colores' %}" class="{% if request.resolver_match.url_name == 'colores' %}active{% endif %}">🎨 Colores</a>
-								<a href="{% url 'marcas' %}" class="{% if request.resolver_match.url_name == 'marcas' %}active{% endif %}">🏷️ Marcas y Proovedores</a>
-								<a href="{% url 'talles' %}" class="{% if request.resolver_match.url_name == 'talles' %}active{% endif %}">📏 Talles</a>
-								<a href="{% url 'stock' %}" class="{% if request.resolver_match.url_name == 'stock' %}active{% endif %}">📊 Stock</a>
-							</div>
-						</div>
-						<div class="menu-clientes">
-							<div class="iconoFontAwe">
-								<i class="fa-solid fa-user"></i>
-								<a href="javascript:void(0)" class="main-link" id="toggle-clientes"
-									>Clientes ▾</a
-								>
-							</div>
-							<div class="submenu-clientes" id="submenu-clientes">
-								<a href="{% url 'clientes' %}">📦 Clientes</a>
-								<a href="{% url 'direcciones' %}">📁 Direcciones</a>
-							</div>
-						</div>
-						<a href="/admin/" target="_blank">⚙️ Admin Django</a>
-						<a href="{% url 'inicio' %}">🏠 Ver sitio</a>
-					</nav>
-				</div>
-			</header>
-			<main>
-                {% block content %}{% endblock %}
-            </main>
-		</body>
-	</html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Panel de Control - Carlo Magno{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" href="{% static 'css/style_admin.css' %}" />
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-logo text-center py-3">
+            <img src="{% static 'images/logo.png' %}" alt="Carlo Magno" style="width: 80%; filter: invert(1);">
+        </div>
+        
+        <nav class="mt-2">
+            <!-- INICIO -->
+            <div class="nav-item">
+                <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-chart-line me-2"></i> Inicio
+                </a>
+            </div>
+
+            <h6>VENDER</h6>
+            
+            <!-- Pedidos -->
+            <div class="menu-group">
+                <a href="javascript:void(0)" class="main-link toggle-btn" data-target="submenu-pedidos">
+                    <i class="fas fa-shopping-basket me-2"></i> Pedidos <i class="fas fa-chevron-down ms-auto float-end mt-1 small"></i>
+                </a>
+                <div class="submenu" id="submenu-pedidos" style="display: none;">
+                    <a href="#"><i class="fas fa-list-ul me-2"></i> Ver Pedidos</a>
+                    <a href="#"><i class="fas fa-file-invoice me-2"></i> Facturas</a>
+                </div>
+            </div>
+
+            <!-- Catálogo -->
+            <div class="menu-group">
+                <a href="javascript:void(0)" class="main-link toggle-btn" data-target="submenu-catalogos">
+                    <i class="fas fa-tags me-2"></i> Catálogo <i class="fas fa-chevron-down ms-auto float-end mt-1 small"></i>
+                </a>
+                <div class="submenu" id="submenu-catalogos" style="display: block;">
+                    <a href="{% url 'admin_productos' %}" class="{% if request.resolver_match.url_name == 'admin_productos' %}active{% endif %}">📦 Productos</a>
+                    <a href="{% url 'categorias' %}" class="{% if request.resolver_match.url_name == 'categorias' %}active{% endif %}">📁 Categorías</a>
+                    <a href="{% url 'colores' %}" class="{% if request.resolver_match.url_name == 'colores' %}active{% endif %}">🎨 Colores</a>
+                    <a href="{% url 'marcas' %}" class="{% if request.resolver_match.url_name == 'marcas' %}active{% endif %}">🏷️ Marcas</a>
+                    <a href="{% url 'talles' %}" class="{% if request.resolver_match.url_name == 'talles' %}active{% endif %}">📏 Talles</a>
+                    <a href="{% url 'stock' %}" class="{% if request.resolver_match.url_name == 'stock' %}active{% endif %}">📊 Stock</a>
+                    <a href="#"><i class="fas fa-ticket-alt me-2"></i> Cupones</a>
+                </div>
+            </div>
+
+            <!-- Clientes -->
+            <div class="menu-group">
+                <a href="javascript:void(0)" class="main-link toggle-btn" data-target="submenu-clientes">
+                    <i class="fas fa-users me-2"></i> Clientes <i class="fas fa-chevron-down ms-auto float-end mt-1 small"></i>
+                </a>
+                <div class="submenu" id="submenu-clientes" style="display: none;">
+                    <a href="{% url 'clientes' %}">👤 Gestión Clientes</a>
+                    <a href="{% url 'direcciones' %}">📍 Direcciones</a>
+                </div>
+            </div>
+
+            <h6>PERSONALIZAR</h6>
+            <div class="nav-item">
+                <a href="{% url 'inicio' %}" target="_blank"><i class="fas fa-external-link-alt me-2"></i> Ver Tienda</a>
+            </div>
+
+            <h6>CONFIGURAR</h6>
+            <div class="nav-item">
+                <a href="/admin/" target="_blank"><i class="fas fa-cogs me-2"></i> Avanzado (Django)</a>
+            </div>
+            
+            <div class="nav-item mt-4">
+                <a href="{% url 'logout' %}" class="text-danger"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Lógica de Submenús (Estilo PrestaShop)
+            const toggleBtns = document.querySelectorAll('.toggle-btn');
+            
+            toggleBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const submenu = document.getElementById(targetId);
+                    const icon = this.querySelector('.fa-chevron-down');
+                    
+                    // Toggle visibility
+                    if (submenu.style.display === 'none') {
+                        submenu.style.display = 'block';
+                        icon.style.transform = 'rotate(180deg)';
+                    } else {
+                        submenu.style.display = 'none';
+                        icon.style.transform = 'rotate(0deg)';
+                    }
+                });
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
 </html>

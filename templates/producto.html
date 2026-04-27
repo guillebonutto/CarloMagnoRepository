@@ -11,92 +11,149 @@
         width: 100%;
     }
 
-    /* Sidebar Filters */
+    /* Sleek Mobile Filter Icon Button (Header) */
+    .header-filter-btn {
+        background: white;
+        border: none;
+        border-radius: 50px;
+        padding: 8px 16px;
+        color: #8b0000;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Sidebar Filters - Minimalist Refinement */
     .filter-sidebar {
         background: white;
-        padding: 30px;
+        padding: 20px;
         border-radius: 0;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        box-shadow: none;
         position: sticky;
         top: 20px;
-        border: 1px solid #eee;
+        border: none;
+        border-right: 1px solid #f0f0f0;
     }
 
     .filter-title {
-        font-weight: 800;
+        font-weight: 700;
         color: #111;
-        margin-bottom: 30px;
-        font-size: 1.1rem;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
         text-transform: uppercase;
-        letter-spacing: 2px;
-        border-bottom: 2px solid #8b0000;
-        padding-bottom: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        letter-spacing: 1.5px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        display: block;
     }
 
     .filter-group {
-        margin-bottom: 35px;
+        margin-bottom: 25px;
     }
 
     .filter-group label {
-        font-weight: 700;
-        color: #333;
+        font-weight: 600;
+        color: #999;
         display: block;
-        margin-bottom: 15px;
-        font-size: 0.85rem;
+        margin-bottom: 12px;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 1px;
     }
 
+    /* Accordion Style - Ultra Minimal */
+    .category-accordion .accordion-item {
+        border: none;
+        background: transparent;
+    }
+
+    .category-accordion .accordion-button {
+        padding: 10px 0;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #333;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none;
+        text-transform: uppercase;
+    }
+
+    .category-accordion .accordion-button::after {
+        width: 1rem;
+        height: 1rem;
+        background-size: 1rem;
+        filter: grayscale(1);
+        opacity: 0.5;
+    }
+
+    .category-accordion .accordion-body {
+        padding: 0 0 10px 0;
+    }
+
+    .subgroup-link {
+        display: block;
+        padding: 5px 0;
+        color: #666;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+        font-weight: 400;
+    }
+
+    .subgroup-link:hover {
+        color: #8b0000;
+        padding-left: 5px;
+    }
+
+    .subgroup-link.active {
+        color: #8b0000;
+        font-weight: 700;
+    }
+
     .filter-list {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 5px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
     .filter-link {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        padding: 6px 2px;
+        padding: 6px 12px;
         border: 1px solid #eee;
         background: #fff;
         color: #555;
         text-decoration: none;
-        font-size: 0.68rem;
-        transition: all 0.3s ease;
-        text-align: center;
-        min-height: 36px;
-        font-weight: 500;
-        overflow: hidden;
+        font-size: 0.75rem;
+        transition: all 0.2s ease;
+        border-radius: 0;
     }
 
     .filter-link:hover {
-        border-color: #8b0000;
-        color: #8b0000;
-        background: #fafafa;
+        border-color: #333;
+        color: #333;
     }
 
     .filter-link.active {
-        background: #8b0000;
+        background: #111;
         color: white;
-        border-color: #8b0000;
-        font-weight: 700;
+        border-color: #111;
     }
 
     .filter-link.full-width {
-        grid-column: span 3;
+        width: 100%;
+        justify-content: center;
     }
 
     .color-dot-filter {
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
         margin-right: 8px;
         border: 1px solid rgba(0,0,0,0.1);
-        flex-shrink: 0;
     }
 
     /* Product Cards */
@@ -145,12 +202,41 @@
         transform: scale(1.08);
     }
 
-    .product-info {
+    @media (max-width: 991px) {
+        .filter-sidebar {
+            display: none; /* Hide standard sidebar on mobile */
+        }
+        .product-grid-container {
+            grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+            gap: 10px;
+        }
+    }
+
+    /* Offcanvas Sidebar adjustments */
+    .offcanvas-filter {
+        width: 300px !important;
+    }
+    .offcanvas-header {
+        border-bottom: 1px solid #eee;
         padding: 20px;
+    }
+    .offcanvas-body {
+        padding: 0;
+    }
+    .offcanvas-body .filter-sidebar {
+        display: block;
+        width: 100%;
+        position: static;
+        box-shadow: none;
+        border: none;
+    }
+
+    .product-info {
+        padding: 15px;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
-        text-align: center;
+        text-align: left;
     }
 
     .product-category {
@@ -178,11 +264,14 @@
         font-weight: 800;
         color: #8b0000;
         margin-top: auto;
+        margin-bottom: 15px;
         letter-spacing: -0.5px;
     }
 
     .btn-view-details {
-        margin-top: 20px;
+        display: block;
+        width: 100%;
+        text-align: center;
         background: #111;
         color: white;
         border: none;
@@ -330,6 +419,13 @@
 </style>
 {% endblock %}
 
+{% block header_filter %}
+<!-- Este botón de filtro se inyecta en el header, junto a la barra de búsqueda (solo en móvil) -->
+<button class="header-filter-btn d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters">
+    <i class="fas fa-sliders-h"></i> <span class="d-none d-sm-inline">Filtros</span>
+</button>
+{% endblock %}
+
 {% block content %}
 <div class="products-page">
     <div class="container-fluid px-md-5">
@@ -337,127 +433,22 @@
             <!-- Sidebar de Filtros -->
             <div class="col-xl-2 col-lg-3">
                 <div class="filter-sidebar">
-                    <h5 class="filter-title"><i class="fas fa-filter me-2"></i>Filtros</h5>
-
-                    <!-- Búsqueda de Categorías -->
-                    <div class="filter-group">
-                        <label>Explorar</label>
-                        <div class="mb-3">
-                            <input type="text" id="categorySearch" class="form-control form-control-sm" placeholder="¿Qué estás buscando?" style="border-radius: 0; border-color: #eee; font-size: 0.8rem; padding: 10px;">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <a href="{% url 'productos' %}" class="subgroup-link {% if not selected_categorias %}active{% endif %}">
-                                <i class="fas fa-th-large me-2"></i>TODAS LAS PRENDAS
-                            </a>
-                        </div>
-
-                        <div class="accordion category-accordion" id="categoryAccordion">
-                            {% for group, subgroups in categorias_grouped.items %}
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="heading-{{ forloop.counter }}">
-                                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% endif %}" aria-controls="collapse-{{ forloop.counter }}">
-                                        {{ group }}
-                                    </button>
-                                </h2>
-                                <div id="collapse-{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading-{{ forloop.counter }}" data-bs-parent="#categoryAccordion">
-                                    <div class="accordion-body">
-                                        <div class="subgroup-list">
-                                            {% for subgroup_name, cats in subgroups.items %}
-                                            <a href="?{% for cat in cats %}categoria={{ cat.id }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
-                                               class="subgroup-link subgroup-item {% if cats.0.id|stringformat:'s' in selected_categorias %}active{% endif %}"
-                                               data-name="{{ subgroup_name }}">
-                                                {{ subgroup_name }}
-                                            </a>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <!-- Colores -->
-                    <div class="filter-group">
-                        <label>Colores</label>
-                        <div class="filter-list">
-                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_talle %}talle={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
-                               class="filter-link full-width {% if not selected_color %}active{% endif %}">Todos los colores</a>
-                            {% for color in colores %}
-                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}color={{ color.id }}{% if selected_talle %}&talle={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
-                               class="filter-link {% if selected_color == color.id|stringformat:'s' %}active{% endif %} {% if color.id not in colores_con_stock %}out-of-stock{% endif %}">
-                                <span class="color-dot-filter" data-color="{{ color.hex_code }}"></span>
-                                {{ color.nombre }}
-                            </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <!-- Talles -->
-                    <!-- Talles -->
-                    <div class="filter-group">
-                        <label>Talles</label>
-                        <div class="filter-list">
-                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
-                               class="filter-link full-width {% if not selected_talle %}active{% endif %}">Todos los talles</a>
-                            {% for size in talles %}
-                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %} {% if selected_color %}color={{ selected_color }}&{% endif %} talle={{ size.id }} {% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
-                               class="filter-link {% if selected_talle == size.id|stringformat:'s' %}active{% endif %} {% if size.id not in talles_con_stock %}out-of-stock{% endif %}">
-                                {{ size.abbreviation }}
-                            </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <!-- Marcas -->
-                    <div class="filter-group">
-                        <label>Marcas</label>
-                        <div class="filter-list">
-                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}talle={{ selected_talle }}{% endif %}" 
-                               class="filter-link full-width {% if not selected_marca %}active{% endif %}">Todas las marcas</a>
-                            {% for marca in marcas %}
-                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %} {% if selected_color %}color={{ selected_color }}&{% endif %} {% if selected_talle %}talle={{ selected_talle }}&{% endif %} marca={{ marca.id }}" 
-                               class="filter-link {% if selected_marca == marca.id|stringformat:'s' %}active{% endif %}">
-                                {{ marca.nombre }}
-                            </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    {% if selected_categorias or selected_color or selected_talle or selected_marca %}
-                    <a href="{% url 'productos' %}" class="btn btn-outline-danger btn-sm w-100 mt-2">
-                        <i class="fas fa-times me-2"></i>Limpiar Filtros
-                    </a>
-                    {% endif %}
+                    {% include 'includes/filter_content.html' with prefix='desk_' %}
                 </div>
             </div>
 
             <!-- Grilla de Productos -->
             <div class="col-xl-10 col-lg-9">
-                <!-- Barra de Búsqueda Principal en Catálogo -->
-                <div class="product-search-header mb-4" id="mainSearchHeader">
-                    <form action="{% url 'productos' %}" method="GET" class="position-relative">
-                        <div class="search-input-wrapper shadow-sm">
-                            <i class="fas fa-search search-icon-main"></i>
-                            <input type="text" name="q" value="{{ query|default:'' }}" 
-                                   class="form-control main-search-input" 
-                                   placeholder="¿Qué estás buscando hoy?"
-                                   id="catalogSearchInput">
-                            <button type="submit" class="btn btn-dark btn-search-main">BUSCAR</button>
-                        </div>
-                        
-                        <!-- Badges de filtros activos (opcional, mejora UX) -->
-                        <div class="active-filters-display mt-2 d-flex flex-wrap gap-2">
-                            {% if query %}
-                                <span class="badge bg-light text-dark border p-2">
-                                    Búsqueda: "{{ query }}" 
-                                    <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}" class="text-danger ms-1"><i class="fas fa-times"></i></a>
-                                </span>
-                            {% endif %}
-                        </div>
-                    </form>
+                <!-- Badges de filtros activos (opcional, mejora UX) -->
+                <div class="active-filters-display mb-3 d-flex flex-wrap gap-2">
+                    {% if query %}
+                        <span class="badge bg-light text-dark border p-2">
+                            Búsqueda: "{{ query }}" 
+                            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}" class="text-danger ms-1"><i class="fas fa-times"></i></a>
+                        </span>
+                    {% endif %}
                 </div>
+
                 {% if productos %}
                 <div class="product-grid-container">
                     {% for producto in productos %}
@@ -492,35 +483,60 @@
         </div>
     </div>
 </div>
+
+<!-- Offcanvas Sidebar para Móviles -->
+<div class="offcanvas offcanvas-start offcanvas-filter" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title fw-bold" id="offcanvasFiltersLabel">FILTRAR</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="filter-sidebar">
+            {% include 'includes/filter_content.html' with prefix='mob_' %}
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 {{ block.super }}
 <script>
-    document.getElementById('categorySearch').addEventListener('input', function(e) {
-        const term = e.target.value.toLowerCase();
-        const items = document.querySelectorAll('.subgroup-item');
-        const accordionItems = document.querySelectorAll('.accordion-item');
+    // Configurar ambos buscadores (Desktop y Móvil)
+    const setupCategorySearch = (inputId) => {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        
+        input.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            // Buscar solo dentro del contenedor padre (sidebar normal u offcanvas)
+            const container = input.closest('.filter-sidebar');
+            const items = container.querySelectorAll('.subgroup-item');
+            const accordionItems = container.querySelectorAll('.accordion-item');
 
-        items.forEach(item => {
-            const name = item.getAttribute('data-name').toLowerCase();
-            if (name.includes(term)) {
-                item.style.display = 'flex';
-            } else {
-                item.style.display = 'none';
-            }
-        });
+            items.forEach(item => {
+                const name = item.getAttribute('data-name').toLowerCase();
+                if (name.includes(term)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
 
-        // Hide accordion items if no subgroups are visible
-        accordionItems.forEach(accItem => {
-            const visibleSubgroups = accItem.querySelectorAll('.subgroup-item[style="display: flex;"]');
-            if (visibleSubgroups.length === 0 && term !== '') {
-                accItem.style.display = 'none';
-            } else {
-                accItem.style.display = 'block';
-            }
+            // Hide accordion items if no subgroups are visible
+            accordionItems.forEach(accItem => {
+                const visibleSubgroups = accItem.querySelectorAll('.subgroup-item[style="display: flex;"]');
+                if (visibleSubgroups.length === 0 && term !== '') {
+                    accItem.style.display = 'none';
+                } else {
+                    accItem.style.display = 'block';
+                }
+            });
         });
-    });
+    };
+
+    setupCategorySearch('desk_categorySearch');
+    setupCategorySearch('mob_categorySearch');
+
     // Aplicar colores a los circulitos de filtro (para evitar errores de validación CSS en el editor)
     document.querySelectorAll('.color-dot-filter').forEach(function(dot) {
         const color = dot.getAttribute('data-color');

@@ -5,8 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.forms import ModelForm
 from django import forms
-from productos.models import Producto, Categoria, Color, Marca, Talle, Cliente, Direccion, ProductoStock
+from productos.models import Producto, Categoria, Color, Marca, Talle, Cliente, Direccion, ProductoStock, Pedido, PedidoItem, Cupon
 from productos.forms import ProductoForm
+from django.db.models import Sum, Count, Avg
+from django.db.models.functions import ExtractMonth
 
 # Formularios
 # class ProductForm(ModelForm):
@@ -108,13 +110,40 @@ def dashboard(request):
     if not request.user.is_staff:
         return redirect('inicio')
     
+    # Métricas de Ventas Reales
+    ventas_totales = Pedido.objects.filter(estado_pago='pagado').aggregate(Sum('total'))['total__sum'] or 0
+    cantidad_pedidos = Pedido.objects.filter(estado_pago='pagado').count()
+    ticket_promedio = Pedido.objects.filter(estado_pago='pagado').aggregate(Avg('total'))['total__avg'] or 0
+    
+    # Ventas por Estación (Cálculo dinámico basado en los pedidos existentes)
+    estaciones = {
+        'Verano': 0,
+        'Otoño': 0,
+        'Invierno': 0,
+        'Primavera': 0
+    }
+    
+    pedidos_pagados = Pedido.objects.filter(estado_pago='pagado')
+    for p in pedidos_pagados:
+        estacion = p.get_estacion()
+        estaciones[estacion] += float(p.total)
+
+    # Impacto de Promociones
+    pedidos_con_cupon = Pedido.objects.filter(estado_pago='pagado', cupon__isnull=False).count()
+    
     context = {
         'total_productos': Producto.objects.count(),
         'total_categories': Categoria.objects.count(),
-        'total_colores': Color.objects.count(),
         'total_marcas': Marca.objects.count(),
         'low_stock': ProductoStock.objects.filter(stock__lt=5).count(),
-        'recent_productos': Producto.objects.order_by('-created_at')[:5],
+        
+        # Nuevas métricas Shein/AliExpress
+        'ventas_totales': ventas_totales,
+        'cantidad_pedidos': cantidad_pedidos,
+        'ticket_promedio': ticket_promedio,
+        'estaciones_data': estaciones,
+        'pedidos_con_cupon': pedidos_con_cupon,
+        'recent_pedidos': Pedido.objects.order_by('-fecha_creacion')[:5],
     }
     return render(request, 'custom_admin/dashboard.html', context)
 

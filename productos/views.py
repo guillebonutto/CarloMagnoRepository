@@ -77,22 +77,41 @@ def producto_list(request):
     }
 
     # Agrupar categorías reales según el mapeo
-    categorias_grouped = {}
+    categorias_grouped_list = []
     mapped_cat_ids = set()
     
+    # Convertir categoria_ids a enteros para comparar fácilmente
+    selected_cat_ints = [int(cid) for cid in categoria_ids if cid.isdigit()]
+    
     for group_name, subgroups in MASTER_GROUPS.items():
-        categorias_grouped[group_name] = {}
+        group_subgroups = {}
+        group_is_active = False
+        
         for subgroup_name, keywords in subgroups.items():
             matching_cats = [c for c in categorias if any(k in c.nombre.lower() for k in keywords)]
             if matching_cats:
-                categorias_grouped[group_name][subgroup_name] = matching_cats
+                group_subgroups[subgroup_name] = matching_cats
+                if any(c.id in selected_cat_ints for c in matching_cats):
+                    group_is_active = True
                 for c in matching_cats:
                     mapped_cat_ids.add(c.id)
+        
+        if group_subgroups:
+            categorias_grouped_list.append({
+                'name': group_name,
+                'subgroups': group_subgroups,
+                'is_active': group_is_active
+            })
 
-    # Añadir sección OTROS para lo que no encajó (para evitar que se pierdan productos)
+    # Añadir sección VARIOS para lo que no encajó
     otros_cats = [c for c in categorias if c.id not in mapped_cat_ids and c.nombre.lower() not in ['inicio', 'cat1']]
     if otros_cats:
-        categorias_grouped['VARIOS'] = {'Otros Complementos': otros_cats}
+        is_otros_active = any(c.id in selected_cat_ints for c in otros_cats)
+        categorias_grouped_list.append({
+            'name': 'VARIOS',
+            'subgroups': {'Otros Complementos': otros_cats},
+            'is_active': is_otros_active
+        })
     
     # Filtrar por categorías (múltiples)
     if categoria_ids:
@@ -100,7 +119,7 @@ def producto_list(request):
     
     return render(request, 'producto.html', {
         'productos': productos,
-        'categorias_grouped': categorias_grouped,
+        'categorias_grouped': categorias_grouped_list,
         'colores': colores,
         'talles': talles,
         'marcas': marcas,

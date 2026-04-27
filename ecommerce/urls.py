@@ -25,6 +25,7 @@ from custom_admin import views as admin_views
 from productos import cart_views
 from productos import cliente_auth
 from productos import vton_views
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,6 +34,9 @@ urlpatterns = [
     path('productos/<int:producto_id>/', producto_detail, name='producto_detail'),
     path('contacto/', contact, name='contact'),
     path('inicio/', lambda request: redirect('inicio')),
+    
+    # Redirección para evitar el 404 que reportaste en el admin
+    path('admin/productos/category/<path:path>', RedirectView.as_view(url='/admin/productos/categoria/%(path)s', permanent=True)),
 
     path('panel/', admin_views.dashboard, name='dashboard'),
     path('panel/login/', admin_views.iniciar_sesion, name='login'),
