@@ -41,32 +41,41 @@
 
 <!-- Colores -->
 <div class="filter-group">
-    <label>Colores</label>
-    <div class="filter-list">
-        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_talle %}talle={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
-           class="filter-link full-width {% if not selected_color %}active{% endif %}">Todos los colores</a>
-        {% for color in colores %}
-        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}color={{ color.id }}{% if selected_talle %}&talle={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
-           class="filter-link {% if selected_color == color.id|stringformat:'s' %}active{% endif %} {% if color.id not in colores_con_stock %}out-of-stock{% endif %}">
-            <span class="color-dot-filter" data-color="{{ color.hex_code }}"></span>
-            {{ color.nombre }}
-        </a>
-        {% endfor %}
+    <div class="d-flex justify-content-between align-items-center mb-1">
+        <label class="mb-0">Colores</label>
+        {% if selected_color %}
+            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_talle %}talle={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" class="text-danger small text-decoration-none">Quitar filtro</a>
+        {% endif %}
+    </div>
+    
+    <div class="color-selector-wrapper mx-auto mt-2" style="max-width: 100%;">
+        <div class="color-selector-container horizontal-scroll filter-color-carousel">
+            <div class="carousel-spacer"></div>
+            {% for color in colores %}
+            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}color={{ color.id }}{% if selected_talle %}&talle={{ selected_talle }}{% endif %}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+                 class="color-item filter-color-item {% if selected_color == color.id|stringformat:'s' %}active{% endif %} {% if color.id not in colores_con_stock %}out-of-stock{% endif %}"
+                 style="background: {{ color.hex_code }}; {% if color.hex_code == '#FFFFFF' or color.hex_code == '#ffffff' %}border: 1px solid #ccc;{% endif %}"
+                 title="{{ color.nombre }}"></a>
+            {% endfor %}
+            <div class="carousel-spacer"></div>
+        </div>
     </div>
 </div>
 
 <!-- Talles -->
 <div class="filter-group">
     <label>Talles</label>
-    <div class="filter-list">
-        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
-           class="filter-link full-width {% if not selected_talle %}active{% endif %}">Todos los talles</a>
-        {% for size in talles %}
-        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %} {% if selected_color %}color={{ selected_color }}&{% endif %} talle={{ size.id }} {% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
-           class="filter-link {% if selected_talle == size.id|stringformat:'s' %}active{% endif %} {% if size.id not in talles_con_stock %}out-of-stock{% endif %}">
-            {{ size.abbreviation }}
-        </a>
-        {% endfor %}
+    <div class="faded-edges-wrapper">
+        <div class="filter-list horizontal-scroll">
+            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+               class="filter-link {% if not selected_talle %}active{% endif %}">Todos los talles</a>
+            {% for size in talles %}
+            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %} {% if selected_color %}color={{ selected_color }}&{% endif %} talle={{ size.id }} {% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+               class="filter-link {% if selected_talle == size.id|stringformat:'s' %}active{% endif %} {% if size.id not in talles_con_stock %}out-of-stock{% endif %}">
+                {{ size.abbreviation }}
+            </a>
+            {% endfor %}
+        </div>
     </div>
 </div>
 

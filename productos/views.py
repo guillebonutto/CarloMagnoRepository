@@ -1,5 +1,51 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Producto, Categoria, Color, Talle, Marca
+import colorsys
+def sort_color_rainbow(color):
+    """
+    Orden lógico premium para filtros de color en indumentaria masculina.
+    """
+    try:
+        hex_code = str(color.hex_code).lstrip('#').upper()
+        if len(hex_code) == 3:
+            hex_code = ''.join(c * 2 for c in hex_code)
+
+        r = int(hex_code[0:2], 16) / 255.0
+        g = int(hex_code[2:4], 16) / 255.0
+        b = int(hex_code[4:6], 16) / 255.0
+
+        h, l, s = colorsys.rgb_to_hls(r, g, b)
+
+        # Neutros (blanco, beige, grises)
+        is_neutral = (s < 0.18) or (l < 0.15) or (l > 0.87)
+
+        if is_neutral:
+            if l > 0.58:      # Blancos y claros
+                return (0, -l, 0)           # Grupo 0: Neutros Claros
+            else:             # Grises y Negro
+                return (5, -l, 0)           # Grupo 5: Neutros Oscuros (al final)
+
+        # ====================== COLORES CROMÁTICOS ======================
+        # Orden: Cálidos → Verdes → Celeste → Azul
+
+        if h < 0.085 or h > 0.92:           # Rojo / Bordo
+            hue_group = 1
+        elif h < 0.20:                      # Naranja / Amarillo / Camel
+            hue_group = 2
+        elif h < 0.45:                      # Verdes (incluido Verde Militar)
+            hue_group = 3
+        elif h < 0.60:                      # CELESTE ← Aquí lo forzamos
+            hue_group = 4
+        elif h < 0.80:                      # Azul
+            hue_group = 5
+        else:                               # Rosa fuerte / Violeta
+            hue_group = 6
+
+        return (2, hue_group, -l)   # Grupo 2 = Colores cromáticos
+
+    except Exception:
+        return (6, 0, 0)
+
 
 def home(request):
     # Traemos los productos más recientes y activos (Estilo Novedades de Shein)
@@ -18,7 +64,9 @@ def producto_list(request):
     marca_id = request.GET.get('marca')
     
     categorias = Categoria.objects.all()
-    colores = Color.objects.filter(esta_activo=True)
+    colores = list(Color.objects.filter(esta_activo=True))
+    colores.sort(key=sort_color_rainbow)
+    
     talles = Talle.objects.filter(esta_activo=True)
     marcas = Marca.objects.all()
     
@@ -138,8 +186,10 @@ def producto_detail(request, producto_id):
     )
     stock_items = producto.stock_items.select_related('color', 'talle').filter(stock__gt=0)
     
-    # Obtener colores y talles disponibles
-    colores_disponibles = Color.objects.filter(productostock__producto=producto).distinct()
+    # Obtener colores y talles disponibles y ordenar con la función mejorada
+    colores_disponibles = list(Color.objects.filter(productostock__producto=producto).distinct())
+    colores_disponibles.sort(key=sort_color_rainbow)
+    
     talles_disponibles = Talle.objects.filter(productostock__producto=producto).distinct()
     
     return render(request, 'producto_detail.html', {

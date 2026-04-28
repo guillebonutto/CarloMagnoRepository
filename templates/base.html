@@ -273,6 +273,72 @@
 	</script>
 
 	<script src="{% static 'js/carrito.js' %}"></script>
+
+	<!-- Script para el Drag & Drop (Deslizar con el mouse) de listas horizontales -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		const sliders = document.querySelectorAll('.horizontal-scroll');
+		
+		sliders.forEach(slider => {
+			let isDown = false;
+			let startX;
+			let scrollLeft;
+
+			slider.addEventListener('mousedown', (e) => {
+				isDown = true;
+				slider.classList.add('active');
+				slider.style.scrollSnapType = 'none'; // Disable snap while dragging
+				startX = e.pageX - slider.offsetLeft;
+				scrollLeft = slider.scrollLeft;
+			});
+			
+			slider.addEventListener('mouseleave', () => {
+				isDown = false;
+				slider.classList.remove('active');
+				slider.style.scrollSnapType = ''; // Restore snap
+			});
+			
+			slider.addEventListener('mouseup', () => {
+				isDown = false;
+				slider.classList.remove('active');
+				slider.style.scrollSnapType = ''; // Restore snap
+			});
+			
+			slider.addEventListener('mousemove', (e) => {
+				if (!isDown) return;
+				e.preventDefault(); // Prevent native dragging of links/images
+				const x = e.pageX - slider.offsetLeft;
+				const walk = (x - startX); // Movimiento 1:1 natural
+				slider.scrollLeft = scrollLeft - walk;
+			});
+			
+			// Touch events for mobile
+			slider.addEventListener('touchstart', (e) => {
+				isDown = true;
+				slider.style.scrollSnapType = 'none';
+				startX = e.touches[0].pageX - slider.offsetLeft;
+				scrollLeft = slider.scrollLeft;
+			});
+			
+			slider.addEventListener('touchend', () => {
+				isDown = false;
+				slider.style.scrollSnapType = '';
+			});
+			
+			slider.addEventListener('touchmove', (e) => {
+				if (!isDown) return;
+				const x = e.touches[0].pageX - slider.offsetLeft;
+				const walk = (x - startX);
+				slider.scrollLeft = scrollLeft - walk;
+			});
+		});
+
+        // Prevenir comportamiento nativo de arrastrar links
+        document.querySelectorAll('.horizontal-scroll a').forEach(link => {
+            link.addEventListener('dragstart', (e) => e.preventDefault());
+        });
+	});
+	</script>
 	{% endblock %}
 
 	<!-- WhatsApp Floating Button -->

@@ -112,6 +112,12 @@
         color: #8b0000;
         font-weight: 700;
     }
+    .faded-edges-wrapper {
+        position: relative;
+        overflow: hidden;
+        -webkit-mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent);
+        mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent);
+    }
 
     .filter-list {
         display: flex;
@@ -119,6 +125,31 @@
         gap: 8px;
     }
 
+    .filter-list.horizontal-scroll {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 5px 15px; /* Padding para que la máscara no corte bruscamente */
+        scrollbar-width: none; /* Hide scrollbar Firefox */
+        cursor: grab;
+        scroll-snap-type: x mandatory;
+    }
+    
+    .filter-list.horizontal-scroll:active {
+        cursor: grabbing;
+    }
+
+    .filter-list.horizontal-scroll::-webkit-scrollbar {
+        display: none; /* Hide scrollbar Chrome/Safari */
+    }
+
+    .filter-list.horizontal-scroll .filter-link {
+        scroll-snap-align: center;
+        flex: 0 0 auto;
+        min-width: 130px; /* Ancho forzado para carrusel */
+        justify-content: center;
+        white-space: nowrap;
+    }
+    
     .filter-link {
         display: inline-flex;
         align-items: center;
@@ -154,6 +185,68 @@
         border-radius: 50%;
         margin-right: 8px;
         border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* 3D Color Carousel Styles para Filtro */
+    :root {
+        --filter-item-size: 40px;
+    }
+
+    .color-selector-wrapper {
+        position: relative;
+        width: 100%;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        user-select: none;
+        overflow: hidden;
+        -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+        mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    }
+
+    .color-selector-container {
+        display: flex;
+        align-items: center;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        width: 100%;
+        height: 100%;
+        -webkit-overflow-scrolling: touch;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+    .color-selector-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .color-item {
+        flex: 0 0 var(--filter-item-size);
+        height: var(--filter-item-size);
+        margin: 0 8px;
+        border-radius: 50%;
+        scroll-snap-align: center;
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.2s ease, border 0.2s ease;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        display: inline-block;
+        text-decoration: none;
+    }
+    
+    .color-item.active {
+        border: 3px solid #8B0000;
+        box-shadow: 0 0 15px rgba(139,0,0,0.4);
+    }
+    
+    .color-item.out-of-stock {
+        opacity: 0.2 !important;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .carousel-spacer {
+        flex: 0 0 calc(50% - (var(--filter-item-size) / 2) - 8px);
     }
 
     /* Product Cards */
