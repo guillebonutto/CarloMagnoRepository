@@ -654,5 +654,137 @@
             }
         });
     }
+
+    // ==========================================
+    // Lógica para Carrusel 3D del Filtro
+    // ==========================================
+    const filterColorContainers = document.querySelectorAll('.filter-color-carousel');
+    
+    filterColorContainers.forEach(container => {
+        const filterColorItems = container.querySelectorAll('.filter-color-item');
+        let scrollTimeout = null;
+        let lastSelectedHref = null;
+        
+        const updateFilterColorStyles = () => {
+            const containerRect = container.getBoundingClientRect();
+            const centerX = containerRect.left + containerRect.width / 2;
+            
+            let closestItem = null;
+            let minDistance = Infinity;
+            
+            filterColorItems.forEach((item) => {
+                const itemRect = item.getBoundingClientRect();
+                const itemCenterX = itemRect.left + itemRect.width / 2;
+                const distance = Math.abs(centerX - itemCenterX);
+                
+                let scale, opacity;
+
+                if (distance < 25) {
+                    scale = 1.3;
+                    opacity = 1;
+                    if(distance < minDistance) {
+                        minDistance = distance;
+                        closestItem = item;
+                    }
+                } else if (distance < 70) {
+                    scale = 0.9;
+                    opacity = 0.6;
+                } else {
+                    scale = 0.65;
+                    opacity = 0.3;
+                }
+
+                item.style.transform = `scale(${scale})`;
+                if(item.classList.contains('out-of-stock')) {
+                    item.style.opacity = '0.2';
+                } else {
+                    item.style.opacity = opacity;
+                }
+            });
+
+            // Si encontramos un item centrado, lo marcamos como activo visualmente
+            if (closestItem && minDistance < 30) {
+                filterColorItems.forEach(b => b.classList.remove('active'));
+                closestItem.classList.add('active');
+                
+                // Disparamos la auto-navegación si se quedó quieto en uno nuevo
+                const targetHref = closestItem.getAttribute('href');
+                if (targetHref && targetHref !== lastSelectedHref) {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        lastSelectedHref = targetHref;
+                        fetchProductsAndReplace(targetHref);
+                    }, 250); // 250ms de gracia al frenar
+                }
+            }
+        };
+
+        // Función AJAX para filtrar sin recargar la página
+        const fetchProductsAndReplace = (url) => {
+            const productGrid = document.querySelector('.col-xl-10.col-lg-9');
+            if(!productGrid) {
+                window.location.href = url;
+                return;
+            }
+            
+            productGrid.style.opacity = '0.3';
+            productGrid.style.pointerEvents = 'none';
+            productGrid.style.transition = 'opacity 0.2s ease';
+            
+            fetch(url)
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newGrid = doc.querySelector('.col-xl-10.col-lg-9');
+                    
+                    if (newGrid) {
+                        productGrid.innerHTML = newGrid.innerHTML;
+                        productGrid.style.opacity = '1';
+                        productGrid.style.pointerEvents = 'auto';
+                        window.history.pushState({}, '', url);
+                    } else {
+                        window.location.href = url;
+                    }
+                })
+                .catch(() => {
+                    window.location.href = url; // Fallback si falla
+                });
+        };
+
+        if(filterColorItems.length > 0) {
+            container.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                updateFilterColorStyles();
+            });
+            window.addEventListener('resize', updateFilterColorStyles);
+            
+            setTimeout(() => {
+                const activeItem = container.querySelector('.filter-color-item.active');
+                if(activeItem) {
+                    lastSelectedHref = activeItem.getAttribute('href');
+                    activeItem.scrollIntoView({ inline: 'center' });
+                } else {
+                    lastSelectedHref = filterColorItems[0].getAttribute('href');
+                    filterColorItems[0].scrollIntoView({ inline: 'center' });
+                }
+                updateFilterColorStyles();
+            }, 100);
+            
+            // Permitir clic para filtrar en el acto
+            filterColorItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    item.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+                    const targetHref = item.getAttribute('href');
+                    if (targetHref !== lastSelectedHref) {
+                        fetchProductsAndReplace(targetHref);
+                        lastSelectedHref = targetHref;
+                    }
+                });
+            });
+        }
+    });
+
 </script>
 {% endblock %}
