@@ -19,6 +19,18 @@
 	</div>
 	{% endif %}
 
+    {% if form.errors and not form.non_field_errors %}
+        <div class="alert alert-danger">Hay errores en el formulario. Por favor, revísalo.</div>
+    {% endif %}
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
 	<div class="form-container">
 		<form method="POST" enctype="multipart/form-data">
 			{% csrf_token %}

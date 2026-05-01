@@ -29,7 +29,13 @@
 			</div>
 
 			<div class="form-group">
-				<label for="{{ form.descripcion.id_for_label }}">Descripción *</label>
+				<label for="{{ form.parent.id_for_label }}">Categoría Padre (Subcategoría de...)</label>
+				{{ form.parent }} {{ form.parent.errors }}
+				<small class="text-muted">Deja vacío si es una categoría principal.</small>
+			</div>
+
+			<div class="form-group">
+				<label for="{{ form.descripcion.id_for_label }}">Descripción</label>
 				{{ form.descripcion }} {{ form.descripcion.errors }}
 			</div>
 

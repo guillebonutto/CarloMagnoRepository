@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
-from PIL import Image
+from PIL import Image, ImageOps
 from django_countries.fields import CountryField
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -10,6 +10,14 @@ import sys
 class Categoria(models.Model):
     nombre = models.CharField(max_length=100, verbose_name='Nombre')
     descripcion = models.TextField(blank=True, verbose_name='Descripción')
+    parent = models.ForeignKey(
+        'self', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name='subcategorias', 
+        verbose_name='Categoría Padre'
+    )
 
     class Meta:
         verbose_name = 'Categoría'
@@ -17,6 +25,8 @@ class Categoria(models.Model):
         ordering = ['nombre']
 
     def __str__(self):
+        if self.parent:
+            return f"{self.parent.nombre} > {self.nombre}"
         return self.nombre
 
 
@@ -90,8 +100,10 @@ class Producto(models.Model):
     )
     categoria = models.ForeignKey(
         Categoria, 
-        on_delete=models.PROTECT, 
-        related_name='categorias',
+        on_delete=models.SET_NULL, 
+        null=True,
+        blank=True,
+        related_name='productos',
         verbose_name='Categoría'
     )
     marca = models.ForeignKey(
@@ -135,16 +147,26 @@ class Producto(models.Model):
         return self.nombre
     
     def save(self, *args, **kwargs):
-        """Redimensionar imagen automáticamente antes de guardar"""
-        if self.imagen:
+        """Redimensionar imagen y auto-categorizar si es necesario"""
+        # _committed=False significa que es un archivo nuevo recién subido (no el que ya está en disco)
+        if self.imagen and not getattr(self.imagen, '_committed', True):
             self.imagen = self.resize_image(self.imagen)
+        
+        # Auto-categorizar "Ambos" si no tiene categoría
+        if not self.categoria and 'ambo' in self.nombre.lower():
+            try:
+                self.categoria = Categoria.objects.get(nombre='Ambos')
+            except:
+                pass
+
         super().save(*args, **kwargs)
     
     def resize_image(self, image_field):
         """Redimensiona la imagen a 450x563px manteniendo proporción con fondo blanco"""
         try:
-            # Abrir la imagen
+            # Abrir la imagen y corregir orientación EXIF (evita que se rote 90º)
             img = Image.open(image_field)
+            img = ImageOps.exif_transpose(img)
             
             # Convertir a RGB si es necesario (para PNG con transparencia)
             if img.mode in ('RGBA', 'LA', 'P'):
@@ -180,10 +202,10 @@ class Producto(models.Model):
             
             return InMemoryUploadedFile(
                 output,
-                'ImageField',
+                'imagen',
                 new_name,
                 'image/png',
-                sys.getsizeof(output),
+                output.getbuffer().nbytes,
                 None
             )
         except Exception as e:

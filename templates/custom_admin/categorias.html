@@ -17,6 +17,9 @@
 		{% for categoria in categories %}
 		<div class="category-card">
 			<h3>📁 {{ categoria.nombre }}</h3>
+            {% if categoria.parent %}
+                <p class="text-muted mb-1"><small>Subcategoría de: {{ categoria.parent.nombre }}</small></p>
+            {% endif %}
 			<p>{{ categoria.descripcion|default:"Sin descripción" }}</p>
 
 			<div class="category-stats">

@@ -22,7 +22,7 @@ from django.db.models.functions import ExtractMonth
 class CategoryForm(ModelForm):
     class Meta:
         model = Categoria
-        fields = ['nombre', 'descripcion']
+        fields = ['nombre', 'parent', 'descripcion']
 
 class ColorForm(ModelForm):
     class Meta:
@@ -153,8 +153,53 @@ def productos(request):
     if not request.user.is_staff:
         return redirect('home')
     
-    productos = Producto.objects.select_related('categoria', 'marca').all()
-    return render(request, 'custom_admin/productos.html', {'productos': productos})
+    # Obtener parámetros de filtrado y ordenamiento
+    sort_by = request.GET.get('sort', 'nombre')
+    direction = request.GET.get('direction', 'asc')
+    cat_filter = request.GET.get('categoria')
+    marca_filter = request.GET.get('marca')
+    
+    # Queryset base
+    productos_qs = Producto.objects.select_related('categoria', 'marca').all()
+    
+    # Aplicar filtros
+    if cat_filter and cat_filter.isdigit():
+        try:
+            from django.db.models import Q
+            # Filtramos por la categoría seleccionada O por cualquier subcategoría que la tenga como padre
+            subcategorias_ids = Categoria.objects.filter(parent_id=cat_filter).values_list('id', flat=True)
+            productos_qs = productos_qs.filter(Q(categoria_id=cat_filter) | Q(categoria_id__in=subcategorias_ids))
+        except Exception:
+            pass
+    if marca_filter and marca_filter.isdigit():
+        productos_qs = productos_qs.filter(marca_id=marca_filter)
+    
+    # Mapeo de campos para evitar inyección o errores
+    sort_map = {
+        'nombre': 'nombre',
+        'precio': 'precio',
+        'categoria': 'categoria__nombre',
+        'marca': 'marca__nombre',
+        'fecha': 'created_at'
+    }
+    
+    db_field = sort_map.get(sort_by, 'nombre')
+    if direction == 'desc':
+        db_field = f'-{db_field}'
+        
+    productos_qs = productos_qs.order_by(db_field)
+    
+    context = {
+        'productos': productos_qs,
+        'categorias': Categoria.objects.all().order_by('parent__nombre', 'nombre'),
+        'marcas': Marca.objects.all(),
+        'current_sort': sort_by,
+        'current_direction': direction,
+        'current_cat': cat_filter,
+        'current_marca': marca_filter,
+    }
+    
+    return render(request, 'custom_admin/productos.html', context)
 
 @login_required(login_url='login')
 def agregar_producto(request):
@@ -167,6 +212,8 @@ def agregar_producto(request):
             form.save()
             messages.success(request, '✅ Producto creado exitosamente')
             return redirect('admin_productos')
+        else:
+            messages.error(request, '❌ Error al crear el producto. Por favor revisa los datos ingresados.')
     else:
         form = ProductoForm()
     
@@ -189,6 +236,8 @@ def editar_producto(request, pk):
             form.save()
             messages.success(request, '✅ Producto actualizado exitosamente')
             return redirect('admin_productos')
+        else:
+            messages.error(request, '❌ Error al actualizar el producto. Por favor revisa los datos ingresados.')
     else:
         form = ProductoForm(instance=product)
     

@@ -6,7 +6,8 @@ class ProductoForm(forms.ModelForm):
     colores = forms.ModelMultipleChoiceField(
         queryset=Color.objects.all(),
         widget=forms.CheckboxSelectMultiple(),
-        label="Colores disponibles"
+        label="Colores disponibles",
+        required=False
     )
 
     class Meta:

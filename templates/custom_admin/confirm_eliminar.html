@@ -1,0 +1,37 @@
+{% extends 'custom_admin/base.html' %}
+
+{% block title %}Confirmar Eliminación - Panel de Control{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h4 class="card-title fw-bold mb-2">¿Confirmar eliminación?</h4>
+                    <p class="text-muted mb-1">Estás a punto de eliminar el siguiente {{ type }}:</p>
+                    <p class="fw-semibold fs-5 mb-4">{{ object }}</p>
+                    <p class="text-danger small mb-4">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Esta acción no se puede deshacer.
+                    </p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-3 justify-content-center">
+                            <a href="javascript:history.back()" class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-arrow-left me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger px-4">
+                                <i class="fas fa-trash me-1"></i> Sí, eliminar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
