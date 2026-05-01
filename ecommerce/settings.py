@@ -94,3 +94,27 @@ MERCADO_PAGO_ACCESS_TOKEN = "APP_USR-7762497834204355-042410-ec020e65e4436130b4f
 
 # Wavespeed AI
 WAVESPEED_API_TOKEN = "953d8203e32cf8dfa905e5e848793beba21295defdf928876d07efe86199f050"
+
+# Upload Limits para VTON (20 MB en el servidor, validamos 15 MB en el código)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20971520   # 20 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520   # 20 MB
+
+# ========== CONFIGURACIÓN DE EMAIL ==========
+_email_user = os.environ.get('EMAIL_HOST_USER', '')
+_email_pass = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+if DEBUG and not _email_user:
+    # En desarrollo: muestra el email en la consola del servidor (no envía nada real)
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # En producción: envía via Gmail SMTP
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = _email_user
+    EMAIL_HOST_PASSWORD = _email_pass
+    DEFAULT_FROM_EMAIL = _email_user
+
+# Token de reset de contraseña expira en 1 hora
+PASSWORD_RESET_TIMEOUT = 3600

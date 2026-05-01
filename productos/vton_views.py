@@ -7,10 +7,24 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+from django.contrib.auth.decorators import login_required  # kept for potential future use
 from .models import Producto
+
+# Máximo 15 MB en base64 para la imagen del usuario (equivale a ~11 MB de imagen real)
+MAX_USER_IMAGE_B64_BYTES = 15 * 1024 * 1024
+ALLOWED_IMAGE_PREFIXES = (
+    'data:image/jpeg;base64,',
+    'data:image/jpg;base64,',
+    'data:image/png;base64,',
+    'data:image/webp;base64,',
+)
 
 @csrf_exempt
 def vton_generate(request):
+    # Requiere que el usuario esté autenticado (devuelve JSON, no redirect)
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "message": "Debés iniciar sesión para usar el Probador Virtual."}, status=401)
+    
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -19,6 +33,16 @@ def vton_generate(request):
             
             if not user_image_b64 or not producto_id:
                 return JsonResponse({"success": False, "message": "Faltan datos de imagen o producto"})
+            
+            # === VALIDACIONES DE SEGURIDAD ===
+            # 1. Validar tipo MIME (solo imágenes reales)
+            if not any(user_image_b64.startswith(prefix) for prefix in ALLOWED_IMAGE_PREFIXES):
+                return JsonResponse({"success": False, "message": "Tipo de archivo no permitido. Solo JPG, PNG o WEBP."})
+            
+            # 2. Validar tamaño máximo del base64
+            if len(user_image_b64.encode('utf-8')) > MAX_USER_IMAGE_B64_BYTES:
+                return JsonResponse({"success": False, "message": "La imagen es demasiado grande. Máximo 10 MB."})
+            # =================================
                 
             producto = get_object_or_404(Producto, id=producto_id)
             if not producto.imagen:

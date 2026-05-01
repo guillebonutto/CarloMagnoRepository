@@ -58,7 +58,7 @@
 				<div class="color-options">
 					{% for checkbox in form.colores %}
 						{{ checkbox.tag }}
-						<span class="color-box" style="background-color: {{ checkbox.choice_label|safe }};"></span>
+						<span class="color-box" data-color-hex="{{ checkbox.choice_label|safe }}"></span>
 					{% endfor %}
 				</div>
 			</div>
@@ -79,5 +79,11 @@
 	</div>
 </div>
 {% load static %}
+<script>
+    // Aplicar colores desde data-attributes para evitar errores de parser CSS en el template
+    document.querySelectorAll('[data-color-hex]').forEach(el => {
+        el.style.backgroundColor = el.dataset.colorHex;
+    });
+</script>
 <script src="{% static 'js/panel.js' %}"></script>
 {% endblock %}

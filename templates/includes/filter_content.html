@@ -25,7 +25,7 @@
                 <div class="accordion-body">
                     <div class="subgroup-list">
                         {% for subgroup_name, cats in group.subgroups.items %}
-                        <a href="?{% for cat in cats %}categoria={{ cat.id }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}size={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
+                        <a href="?{% for cat in cats %}categoria={{ cat.id }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}talle={{ selected_talle }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
                            class="subgroup-link subgroup-item {% if cats.0.id|stringformat:'s' in selected_categorias %}active{% endif %}"
                            data-name="{{ subgroup_name }}">
                             {{ subgroup_name }}
@@ -70,7 +70,7 @@
             <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_marca %}marca={{ selected_marca }}{% endif %}" 
                class="filter-link {% if not selected_talle %}active{% endif %}">Todos los talles</a>
             {% for size in talles %}
-            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %} {% if selected_color %}color={{ selected_color }}&{% endif %} talle={{ size.id }} {% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
+            <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}talle={{ size.id }}{% if selected_marca %}&marca={{ selected_marca }}{% endif %}" 
                class="filter-link {% if selected_talle == size.id|stringformat:'s' %}active{% endif %} {% if size.id not in talles_con_stock %}out-of-stock{% endif %}">
                 {{ size.abbreviation }}
             </a>
@@ -86,7 +86,7 @@
         <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}talle={{ selected_talle }}{% endif %}" 
            class="filter-link full-width {% if not selected_marca %}active{% endif %}">Todas las marcas</a>
         {% for marca in marcas %}
-        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %} {% if selected_color %}color={{ selected_color }}&{% endif %} {% if selected_talle %}talle={{ selected_talle }}&{% endif %} marca={{ marca.id }}" 
+        <a href="?{% for cid in selected_categorias %}categoria={{ cid }}&{% endfor %}{% if selected_color %}color={{ selected_color }}&{% endif %}{% if selected_talle %}talle={{ selected_talle }}&{% endif %}marca={{ marca.id }}" 
            class="filter-link {% if selected_marca == marca.id|stringformat:'s' %}active{% endif %}">
             {{ marca.nombre }}
         </a>

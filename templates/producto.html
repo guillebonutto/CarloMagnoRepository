@@ -525,7 +525,7 @@
         <div class="row">
             <!-- Sidebar de Filtros -->
             <div class="col-xl-2 col-lg-3">
-                <div class="filter-sidebar">
+                <div class="filter-sidebar" id="desktopSidebar">
                     {% include 'includes/filter_content.html' with prefix='desk_' %}
                 </div>
             </div>
@@ -584,7 +584,7 @@
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-        <div class="filter-sidebar">
+        <div class="filter-sidebar" id="mobileSidebar">
             {% include 'includes/filter_content.html' with prefix='mob_' %}
         </div>
     </div>
@@ -594,197 +594,196 @@
 {% block extra_js %}
 {{ block.super }}
 <script>
-    // Configurar ambos buscadores (Desktop y Móvil)
-    const setupCategorySearch = (inputId) => {
-        const input = document.getElementById(inputId);
-        if (!input) return;
-        
-        input.addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase();
-            // Buscar solo dentro del contenedor padre (sidebar normal u offcanvas)
-            const container = input.closest('.filter-sidebar');
-            const items = container.querySelectorAll('.subgroup-item');
-            const accordionItems = container.querySelectorAll('.accordion-item');
+    // =========================================================
+    // FILTROS - Arquitectura con Event Delegation
+    // Un solo listener en document. No se acumulan listeners.
+    // =========================================================
 
-            items.forEach(item => {
-                const name = item.getAttribute('data-name').toLowerCase();
-                if (name.includes(term)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
+    let currentScrollTimeout = null;
+    let lastUrlFiltered = window.location.search || '?';
+    let isFetching = false;
+    let carouselInitializing = false; // Bloquea auto-fetch durante re-init del carrusel
 
-            // Hide accordion items if no subgroups are visible
-            accordionItems.forEach(accItem => {
-                const visibleSubgroups = accItem.querySelectorAll('.subgroup-item[style="display: flex;"]');
-                if (visibleSubgroups.length === 0 && term !== '') {
-                    accItem.style.display = 'none';
-                } else {
-                    accItem.style.display = 'block';
+    // ---- Función AJAX central ----
+    const fetchProductsAndReplace = (url) => {
+        // Cancelar cualquier fetch pendiente del carrusel antes de procesar este click
+        clearTimeout(currentScrollTimeout);
+        if (isFetching || url === lastUrlFiltered) return;
+        isFetching = true;
+        lastUrlFiltered = url;
+
+        const productGrid = document.querySelector('.col-xl-10.col-lg-9');
+        const deskSidebar = document.getElementById('desktopSidebar');
+        const mobSidebar  = document.getElementById('mobileSidebar');
+
+        if (!productGrid) { window.location.href = url; return; }
+
+        productGrid.style.opacity = '0.4';
+        productGrid.style.pointerEvents = 'none';
+
+        fetch(url)
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Grilla
+                const newGrid = doc.querySelector('.col-xl-10.col-lg-9');
+                if (newGrid) {
+                    productGrid.innerHTML = newGrid.innerHTML;
+                    window.history.pushState({}, '', url);
                 }
+
+                // Sidebars (links se actualizan automáticamente con los filtros activos)
+                const newDesk = doc.getElementById('desktopSidebar');
+                const newMob  = doc.getElementById('mobileSidebar');
+                if (newDesk && deskSidebar) deskSidebar.innerHTML = newDesk.innerHTML;
+                if (newMob  && mobSidebar)  mobSidebar.innerHTML  = newMob.innerHTML;
+
+                // Reinicializar solo el carrusel visual (no los listeners)
+                initCarouselStyles();
+
+                productGrid.style.opacity = '1';
+                productGrid.style.pointerEvents = 'auto';
+            })
+            .catch(err => {
+                console.error("AJAX Error:", err);
+                window.location.href = url;
+            })
+            .finally(() => { isFetching = false; });
+    };
+
+    // ---- Event Delegation global ----
+    document.addEventListener('click', (e) => {
+        // 1. Color items del carrusel
+        const colorItem = e.target.closest('.filter-color-item');
+        if (colorItem) {
+            e.preventDefault();
+            const url = colorItem.getAttribute('href');
+            if (url && url !== lastUrlFiltered) {
+                // NO llamamos scrollIntoView aquí — evita disparar scroll → auto-fetch incorrecto
+                fetchProductsAndReplace(url);
+            }
+            return;
+        }
+
+        // 2. Links de categorías, talles, marcas y "Limpiar"
+        const filterLink = e.target.closest('.filter-sidebar a.subgroup-link, .filter-sidebar a.filter-link, .filter-sidebar a.btn-outline-danger');
+        if (filterLink) {
+            const url = filterLink.getAttribute('href');
+            if (url && url !== '#' && !url.startsWith('javascript:')) {
+                e.preventDefault();
+
+                // Cancela cualquier scroll pendiente del carrusel
+                clearTimeout(currentScrollTimeout);
+
+                fetchProductsAndReplace(url);
+
+                // Cerrar offcanvas en móvil
+                const offcanvas = document.getElementById('offcanvasFilters');
+                if (offcanvas && offcanvas.classList.contains('show')) {
+                    const bsOff = bootstrap.Offcanvas.getInstance(offcanvas);
+                    if (bsOff) bsOff.hide();
+                }
+            }
+            return;
+        }
+    });
+
+    // ---- Estilos 3D del carrusel (sin fetch, sin clonar el nodo) ----
+    const initCarouselStyles = () => {
+        document.querySelectorAll('.filter-color-carousel').forEach(container => {
+            const items = container.querySelectorAll('.filter-color-item');
+
+            const updateStyles = (isManualScroll = false) => {
+                const rect = container.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                let closestItem = null, minDist = Infinity;
+
+                items.forEach(item => {
+                    const ir = item.getBoundingClientRect();
+                    const dist = Math.abs(centerX - (ir.left + ir.width / 2));
+                    let scale = 0.65, opacity = 0.3;
+
+                    if (dist < 25)       { scale = 1.3; opacity = 1; if (dist < minDist) { minDist = dist; closestItem = item; } }
+                    else if (dist < 70)  { scale = 0.9; opacity = 0.6; }
+
+                    item.style.transform = `scale(${scale})`;
+                    item.style.opacity   = item.classList.contains('out-of-stock') ? '0.2' : opacity;
+                });
+
+                // Solo auto-filtrar si es scroll manual del usuario (no inicialización)
+                if (isManualScroll && !carouselInitializing && closestItem && minDist < 30) {
+                    items.forEach(b => b.classList.remove('active'));
+                    closestItem.classList.add('active');
+
+                    const url = closestItem.getAttribute('href');
+                    if (url && url !== lastUrlFiltered) {
+                        clearTimeout(currentScrollTimeout);
+                        currentScrollTimeout = setTimeout(() => fetchProductsAndReplace(url), 500);
+                    }
+                }
+            };
+
+            // Evitar agregar listener de scroll duplicado usando un atributo guardián
+            if (!container.dataset.scrollBound) {
+                container.dataset.scrollBound = '1';
+                container.addEventListener('scroll', () => updateStyles(true));
+            }
+
+            // Centrar activo inicial — bloqueamos auto-fetch durante este scroll
+            carouselInitializing = true;
+            const active = container.querySelector('.filter-color-item.active');
+            if (active) active.scrollIntoView({ inline: 'center', block: 'nearest' });
+            updateStyles(false);
+            // Liberar el bloqueo después de que termine cualquier animación de scroll
+            setTimeout(() => { carouselInitializing = false; }, 700);
+        });
+    };
+
+    // ---- Buscador de categorías ----
+    const initCategorySearch = () => {
+        document.querySelectorAll('.filter-sidebar input[id$="categorySearch"]').forEach(input => {
+            input.addEventListener('input', function() {
+                const term = this.value.toLowerCase().trim();
+                const sidebar = this.closest('.filter-sidebar');
+                if (!sidebar) return;
+
+                sidebar.querySelectorAll('.subgroup-item').forEach(item => {
+                    item.style.display = item.getAttribute('data-name').toLowerCase().includes(term) ? 'flex' : 'none';
+                });
+                sidebar.querySelectorAll('.accordion-item').forEach(acc => {
+                    const hasVisible = acc.querySelectorAll('.subgroup-item:not([style*="none"])').length > 0;
+                    acc.style.display = (!term || hasVisible) ? 'block' : 'none';
+                    if (term && hasVisible) {
+                        const col = acc.querySelector('.accordion-collapse');
+                        if (col && !col.classList.contains('show')) {
+                            try { new bootstrap.Collapse(col, { show: true }); } catch(e) {}
+                        }
+                    }
+                });
             });
         });
     };
 
-    setupCategorySearch('desk_categorySearch');
-    setupCategorySearch('mob_categorySearch');
-
-    // Aplicar colores a los circulitos de filtro (para evitar errores de validación CSS en el editor)
-    document.querySelectorAll('.color-dot-filter').forEach(function(dot) {
-        const color = dot.getAttribute('data-color');
-        if (color) dot.style.backgroundColor = color;
-    });
-
-    // Lógica para el Sticky Search (pasar la búsqueda al header al hacer scroll)
-    const mainSearchHeader = document.getElementById('mainSearchHeader');
-    const stickySearchContainer = document.getElementById('stickySearchContainer');
-
-    if (mainSearchHeader && stickySearchContainer) {
-        window.addEventListener('scroll', function() {
-            const rect = mainSearchHeader.getBoundingClientRect();
-            // Si la barra principal ya no es visible en el viewport
-            if (rect.bottom < 0) {
-                stickySearchContainer.style.opacity = '1';
-                stickySearchContainer.style.transform = 'translateY(0)';
-                stickySearchContainer.classList.remove('d-none');
-            } else {
-                stickySearchContainer.style.opacity = '0';
-                stickySearchContainer.style.transform = 'translateY(-10px)';
-            }
+    // ---- Sticky Search ----
+    const initStickySearch = () => {
+        const header = document.getElementById('mainSearchHeader');
+        const sticky = document.getElementById('stickySearchContainer');
+        if (!header || !sticky) return;
+        window.addEventListener('scroll', () => {
+            const visible = header.getBoundingClientRect().bottom > 0;
+            sticky.style.opacity    = visible ? '0' : '1';
+            sticky.style.transform  = visible ? 'translateY(-10px)' : 'translateY(0)';
+            if (!visible) sticky.classList.remove('d-none');
         });
-    }
+    };
 
-    // ==========================================
-    // Lógica para Carrusel 3D del Filtro
-    // ==========================================
-    const filterColorContainers = document.querySelectorAll('.filter-color-carousel');
-    
-    filterColorContainers.forEach(container => {
-        const filterColorItems = container.querySelectorAll('.filter-color-item');
-        let scrollTimeout = null;
-        let lastSelectedHref = null;
-        
-        const updateFilterColorStyles = () => {
-            const containerRect = container.getBoundingClientRect();
-            const centerX = containerRect.left + containerRect.width / 2;
-            
-            let closestItem = null;
-            let minDistance = Infinity;
-            
-            filterColorItems.forEach((item) => {
-                const itemRect = item.getBoundingClientRect();
-                const itemCenterX = itemRect.left + itemRect.width / 2;
-                const distance = Math.abs(centerX - itemCenterX);
-                
-                let scale, opacity;
-
-                if (distance < 25) {
-                    scale = 1.3;
-                    opacity = 1;
-                    if(distance < minDistance) {
-                        minDistance = distance;
-                        closestItem = item;
-                    }
-                } else if (distance < 70) {
-                    scale = 0.9;
-                    opacity = 0.6;
-                } else {
-                    scale = 0.65;
-                    opacity = 0.3;
-                }
-
-                item.style.transform = `scale(${scale})`;
-                if(item.classList.contains('out-of-stock')) {
-                    item.style.opacity = '0.2';
-                } else {
-                    item.style.opacity = opacity;
-                }
-            });
-
-            // Si encontramos un item centrado, lo marcamos como activo visualmente
-            if (closestItem && minDistance < 30) {
-                filterColorItems.forEach(b => b.classList.remove('active'));
-                closestItem.classList.add('active');
-                
-                // Disparamos la auto-navegación si se quedó quieto en uno nuevo
-                const targetHref = closestItem.getAttribute('href');
-                if (targetHref && targetHref !== lastSelectedHref) {
-                    clearTimeout(scrollTimeout);
-                    scrollTimeout = setTimeout(() => {
-                        lastSelectedHref = targetHref;
-                        fetchProductsAndReplace(targetHref);
-                    }, 250); // 250ms de gracia al frenar
-                }
-            }
-        };
-
-        // Función AJAX para filtrar sin recargar la página
-        const fetchProductsAndReplace = (url) => {
-            const productGrid = document.querySelector('.col-xl-10.col-lg-9');
-            if(!productGrid) {
-                window.location.href = url;
-                return;
-            }
-            
-            productGrid.style.opacity = '0.3';
-            productGrid.style.pointerEvents = 'none';
-            productGrid.style.transition = 'opacity 0.2s ease';
-            
-            fetch(url)
-                .then(res => res.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newGrid = doc.querySelector('.col-xl-10.col-lg-9');
-                    
-                    if (newGrid) {
-                        productGrid.innerHTML = newGrid.innerHTML;
-                        productGrid.style.opacity = '1';
-                        productGrid.style.pointerEvents = 'auto';
-                        window.history.pushState({}, '', url);
-                    } else {
-                        window.location.href = url;
-                    }
-                })
-                .catch(() => {
-                    window.location.href = url; // Fallback si falla
-                });
-        };
-
-        if(filterColorItems.length > 0) {
-            container.addEventListener('scroll', () => {
-                clearTimeout(scrollTimeout);
-                updateFilterColorStyles();
-            });
-            window.addEventListener('resize', updateFilterColorStyles);
-            
-            setTimeout(() => {
-                const activeItem = container.querySelector('.filter-color-item.active');
-                if(activeItem) {
-                    lastSelectedHref = activeItem.getAttribute('href');
-                    activeItem.scrollIntoView({ inline: 'center' });
-                } else {
-                    lastSelectedHref = filterColorItems[0].getAttribute('href');
-                    filterColorItems[0].scrollIntoView({ inline: 'center' });
-                }
-                updateFilterColorStyles();
-            }, 100);
-            
-            // Permitir clic para filtrar en el acto
-            filterColorItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    item.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-                    const targetHref = item.getAttribute('href');
-                    if (targetHref !== lastSelectedHref) {
-                        fetchProductsAndReplace(targetHref);
-                        lastSelectedHref = targetHref;
-                    }
-                });
-            });
-        }
+    // ---- Init ----
+    document.addEventListener('DOMContentLoaded', () => {
+        initCategorySearch();
+        initStickySearch();
+        initCarouselStyles();
     });
-
 </script>
 {% endblock %}

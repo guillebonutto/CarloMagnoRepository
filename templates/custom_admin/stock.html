@@ -33,7 +33,7 @@
 						<span class="color-badge">
 							<span
 								class="color-dot"
-								style="background-color: {{ item.color.hex_code }};"
+								data-color-hex="{{ item.color.hex_code }}"
 							></span>
 							{{ item.color.nombre }}
 						</span>
@@ -68,5 +68,11 @@
 	{% endif %}
 </div>
 {% load static %}
+<script>
+    // Aplicar colores desde data-attributes para evitar errores de parser CSS en el template
+    document.querySelectorAll('[data-color-hex]').forEach(el => {
+        el.style.backgroundColor = el.dataset.colorHex;
+    });
+</script>
 <script src="{% static 'js/panel.js' %}"></script>
 {% endblock %}

@@ -26,6 +26,7 @@ from productos import cart_views
 from productos import cliente_auth
 from productos import vton_views
 from django.views.generic import RedirectView
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -90,6 +91,28 @@ urlpatterns = [
     path('logout/', cliente_auth.logout_cliente, name='logout_cliente'),
     path('perfil/', cliente_auth.perfil_cliente, name='perfil_cliente'),
     path('perfil/editar/', cliente_auth.editar_perfil, name='editar_perfil'),
+
+    # ===== RECUPERACIÓN DE CONTRASEÑA (Django built-in, token HMAC seguro) =====
+    path('password/reset/',
+        auth_views.PasswordResetView.as_view(
+            template_name='password_reset.html',
+            email_template_name='email/password_reset_email.txt',
+            html_email_template_name='email/password_reset_email.html',
+            subject_template_name='email/password_reset_subject.txt',
+        ),
+        name='password_reset'),
+    path('password/reset/enviado/',
+        auth_views.PasswordResetDoneView.as_view(
+            template_name='password_reset_done.html'),
+        name='password_reset_done'),
+    path('password/reset/<uidb64>/<token>/',
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name='password_reset_confirm.html'),
+        name='password_reset_confirm'),
+    path('password/reset/completo/',
+        auth_views.PasswordResetCompleteView.as_view(
+            template_name='password_reset_complete.html'),
+        name='password_reset_complete'),
     # path('perfil/direccion/agregar/', cliente_auth.agregar_direccion, name='agregar_direccion'),
     # path('perfil/direccion/<int:direccion_id>/editar/', cliente_auth.editar_direccion, name='editar_direccion'),
     # path('perfil/direccion/<int:direccion_id>/eliminar/', cliente_auth.eliminar_direccion, name='eliminar_direccion'),
