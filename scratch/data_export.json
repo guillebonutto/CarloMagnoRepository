@@ -1,0 +1,1028 @@
+{
+  "products": [
+    {
+      "id_product": "156",
+      "product_name": "Pantalón de Gabardina",
+      "category_name": "Pantalones",
+      "price": "89900.00",
+      "reference": null,
+      "description_short": "Pantalón de Gabardina"
+    },
+    {
+      "id_product": "155",
+      "product_name": "Piloto",
+      "category_name": "Camperas",
+      "price": "450000.00",
+      "reference": null,
+      "description_short": "<p>pilotin impermeable 7/8.</p>"
+    },
+    {
+      "id_product": "153",
+      "product_name": "Ambo liso slim",
+      "category_name": "Ambos",
+      "price": "490000.00",
+      "reference": null,
+      "description_short": "Ambo liso slim"
+    },
+    {
+      "id_product": "152",
+      "product_name": "saco sport",
+      "category_name": "Sacos/Blazers",
+      "price": "390000.00",
+      "reference": null,
+      "description_short": "<p>Saco sport slim</p>"
+    },
+    {
+      "id_product": "151",
+      "product_name": "saco sport slim",
+      "category_name": "Sacos/Blazers",
+      "price": "390000.00",
+      "reference": null,
+      "description_short": "saco sport slim"
+    },
+    {
+      "id_product": "150",
+      "product_name": "saco sport",
+      "category_name": "Sacos/Blazers",
+      "price": "390000.00",
+      "reference": null,
+      "description_short": "<p>Saco sport doble bolsillo slim</p>"
+    },
+    {
+      "id_product": "148",
+      "product_name": "campera impermeable",
+      "category_name": "Camperas",
+      "price": "153000.00",
+      "reference": null,
+      "description_short": "campera impermeable"
+    },
+    {
+      "id_product": "147",
+      "product_name": "camisa sport",
+      "category_name": "Camisas",
+      "price": "90000.00",
+      "reference": null,
+      "description_short": "camisa sport"
+    },
+    {
+      "id_product": "146",
+      "product_name": "sweater",
+      "category_name": "Sweaters & Chalecos",
+      "price": "110000.00",
+      "reference": null,
+      "description_short": "sweater"
+    },
+    {
+      "id_product": "143",
+      "product_name": "campera",
+      "category_name": "Camperas",
+      "price": "110000.00",
+      "reference": null,
+      "description_short": "campera"
+    },
+    {
+      "id_product": "141",
+      "product_name": "campera",
+      "category_name": "Camperas",
+      "price": "390000.00",
+      "reference": null,
+      "description_short": "campera"
+    },
+    {
+      "id_product": "134",
+      "product_name": "Chaleco",
+      "category_name": "Sweaters & Chalecos",
+      "price": "150000.00",
+      "reference": null,
+      "description_short": "Chaleco"
+    },
+    {
+      "id_product": "128",
+      "product_name": "campera lana",
+      "category_name": "Camperas",
+      "price": "145000.00",
+      "reference": null,
+      "description_short": "campera lana"
+    },
+    {
+      "id_product": "127",
+      "product_name": "Campera",
+      "category_name": "Camperas",
+      "price": "390000.00",
+      "reference": null,
+      "description_short": "Campera"
+    },
+    {
+      "id_product": "125",
+      "product_name": "Camisa Sport",
+      "category_name": "Camisas",
+      "price": "90000.00",
+      "reference": null,
+      "description_short": "Camisa Sport"
+    },
+    {
+      "id_product": "121",
+      "product_name": "Campera algodón .",
+      "category_name": "Camperas",
+      "price": "132000.00",
+      "reference": null,
+      "description_short": "<p>Campera algodón cuello universitario.</p>"
+    },
+    {
+      "id_product": "120",
+      "product_name": "Chomba manga larga",
+      "category_name": "Chombas",
+      "price": "42000.00",
+      "reference": null,
+      "description_short": "<p>Chomba manga larga lisa .</p>"
+    },
+    {
+      "id_product": "119",
+      "product_name": "Polerón pura lana .",
+      "category_name": "Sweaters & Chalecos",
+      "price": "90000.00",
+      "reference": null,
+      "description_short": "<p>Polerón pura lana .</p>"
+    },
+    {
+      "id_product": "118",
+      "product_name": "Campera micro polar",
+      "category_name": "Camperas",
+      "price": "120000.00",
+      "reference": null,
+      "description_short": "<p>Campera micro polar .</p>"
+    },
+    {
+      "id_product": "117",
+      "product_name": "Campera corta paño liso",
+      "category_name": "Camperas",
+      "price": "350000.00",
+      "reference": null,
+      "description_short": "<p>Campera paño corta liso .</p>"
+    },
+    {
+      "id_product": "116",
+      "product_name": "Campera algodón",
+      "category_name": "Camperas",
+      "price": "49000.00",
+      "reference": null,
+      "description_short": "<p>Campera algodón.</p>"
+    },
+    {
+      "id_product": "115",
+      "product_name": "Suéter medio cierre merino",
+      "category_name": "Sweaters & Chalecos",
+      "price": "149000.00",
+      "reference": null,
+      "description_short": "<p>Suéter medio cierre .</p>"
+    },
+    {
+      "id_product": "113",
+      "product_name": "Saco sport pura lana",
+      "category_name": "Sacos/Blazers",
+      "price": "490000.00",
+      "reference": null,
+      "description_short": "<p>Saco sport dos botones</p>"
+    },
+    {
+      "id_product": "108",
+      "product_name": "Poleron",
+      "category_name": "Sweaters & Chalecos",
+      "price": "90000.00",
+      "reference": null,
+      "description_short": "<p>Poleron de Lana</p>"
+    },
+    {
+      "id_product": "103",
+      "product_name": "Camisas",
+      "category_name": "Camisas",
+      "price": "59000.00",
+      "reference": null,
+      "description_short": "Camisas"
+    },
+    {
+      "id_product": "102",
+      "product_name": "Camisas Manga corta.",
+      "category_name": "Camisas",
+      "price": "75000.00",
+      "reference": null,
+      "description_short": "<p>Camisas M/C Fantasía</p>"
+    },
+    {
+      "id_product": "100",
+      "product_name": "Camisa Manga Corta",
+      "category_name": "Camisas",
+      "price": "75000.00",
+      "reference": null,
+      "description_short": "<p>Camisa M/C Fantasia.</p>"
+    },
+    {
+      "id_product": "98",
+      "product_name": "Remera Lisa",
+      "category_name": "Remeras",
+      "price": "20000.00",
+      "reference": null,
+      "description_short": "<p>Remera lisa</p>"
+    },
+    {
+      "id_product": "95",
+      "product_name": "Chombas lisa Pique.",
+      "category_name": "Chombas",
+      "price": "69900.00",
+      "reference": null,
+      "description_short": "<p>Chombas Pique</p>"
+    },
+    {
+      "id_product": "93",
+      "product_name": "Chombas de Jersey",
+      "category_name": "Chombas",
+      "price": "79900.00",
+      "reference": null,
+      "description_short": "<p>Chombas jersey</p>"
+    },
+    {
+      "id_product": "92",
+      "product_name": "Medias",
+      "category_name": "Medias",
+      "price": "24900.00",
+      "reference": null,
+      "description_short": "Medias fantasia"
+    },
+    {
+      "id_product": "91",
+      "product_name": "Chomba pique",
+      "category_name": "Chombas",
+      "price": "69900.00",
+      "reference": null,
+      "description_short": "<p>Chombas pique lisa</p>"
+    },
+    {
+      "id_product": "89",
+      "product_name": "Chomba Pique lisa",
+      "category_name": "Chombas",
+      "price": "49900.00",
+      "reference": null,
+      "description_short": "<p>Chomba lisa pique</p>"
+    },
+    {
+      "id_product": "83",
+      "product_name": "Pantalón Lino.",
+      "category_name": "Pantalones",
+      "price": "169000.00",
+      "reference": null,
+      "description_short": "<p>Pantalón Lino.</p>"
+    },
+    {
+      "id_product": "82",
+      "product_name": "Bermuda Gabardina",
+      "category_name": "Pantalones",
+      "price": "69000.00",
+      "reference": null,
+      "description_short": "<p>Bermuda Gabardina.</p>"
+    },
+    {
+      "id_product": "81",
+      "product_name": "Bermuda Algodon",
+      "category_name": "Pantalones",
+      "price": "69000.00",
+      "reference": null,
+      "description_short": "<p>Bermuda algodón.</p>"
+    },
+    {
+      "id_product": "79",
+      "product_name": "Chomba Pique.",
+      "category_name": "Chombas",
+      "price": "69900.00",
+      "reference": null,
+      "description_short": "<p>Chomba Pique</p>"
+    },
+    {
+      "id_product": "78",
+      "product_name": "Remeras manga corta",
+      "category_name": "Remeras",
+      "price": "20000.00",
+      "reference": null,
+      "description_short": "<p>Remera manga corta.</p>"
+    },
+    {
+      "id_product": "75",
+      "product_name": "Camisa Lisa Vestir",
+      "category_name": "Camisas",
+      "price": "59000.00",
+      "reference": null,
+      "description_short": "<p>Camisa Vestir</p>"
+    },
+    {
+      "id_product": "74",
+      "product_name": "Camisa Clásica Fantasia.",
+      "category_name": "Camisas",
+      "price": "59000.00",
+      "reference": null,
+      "description_short": "<p>Camisa Fantasia clasica</p>"
+    },
+    {
+      "id_product": "71",
+      "product_name": "Poplin Chino",
+      "category_name": "Pantalones",
+      "price": "120000.00",
+      "reference": null,
+      "description_short": "<p>Pantalon Poplin corte chino</p>"
+    },
+    {
+      "id_product": "70",
+      "product_name": "Joggers Algodón.",
+      "category_name": "Pantalones",
+      "price": "21900.00",
+      "reference": null,
+      "description_short": "Joggers Algodón."
+    },
+    {
+      "id_product": "69",
+      "product_name": "Camisa Fantasía Slim",
+      "category_name": "Camisas",
+      "price": "59000.00",
+      "reference": null,
+      "description_short": "Camisa Fantasía Slim"
+    },
+    {
+      "id_product": "68",
+      "product_name": "7/8 Paño.",
+      "category_name": "Pantalones",
+      "price": "150000.00",
+      "reference": null,
+      "description_short": "<p>7/8 Paño.</p>"
+    },
+    {
+      "id_product": "67",
+      "product_name": "7/8 Gabardina.",
+      "category_name": "Pantalones",
+      "price": "150000.00",
+      "reference": null,
+      "description_short": "<p>7/8 Gabardina.</p>"
+    },
+    {
+      "id_product": "65",
+      "product_name": "Camisa Lisa Slim",
+      "category_name": "Camisas",
+      "price": "90000.00",
+      "reference": null,
+      "description_short": "<p>Camisa Lisa</p>"
+    },
+    {
+      "id_product": "64",
+      "product_name": "Camisa Lisa Clásica",
+      "category_name": "Camisas",
+      "price": "59000.00",
+      "reference": null,
+      "description_short": "<p>Camisa Lisa Clasica.</p>"
+    },
+    {
+      "id_product": "60",
+      "product_name": "Jogger Gabardina discontinuos",
+      "category_name": "Pantalones",
+      "price": "29900.00",
+      "reference": null,
+      "description_short": "Jogger gabardina"
+    },
+    {
+      "id_product": "59",
+      "product_name": "Cintos",
+      "category_name": "Cintos",
+      "price": "11900.00",
+      "reference": null,
+      "description_short": "Cinto"
+    },
+    {
+      "id_product": "58",
+      "product_name": "Boxer",
+      "category_name": "Ropa Interior",
+      "price": "24900.00",
+      "reference": null,
+      "description_short": "Boxers"
+    },
+    {
+      "id_product": "57",
+      "product_name": "Chomba Fantasia.",
+      "category_name": "Chombas",
+      "price": "42000.00",
+      "reference": null,
+      "description_short": "<p>Chomba algodón.</p>"
+    },
+    {
+      "id_product": "56",
+      "product_name": "Chaleco Sport",
+      "category_name": "Sweaters & Chalecos",
+      "price": "39900.00",
+      "reference": null,
+      "description_short": "<p>Chaleco.</p>"
+    },
+    {
+      "id_product": "55",
+      "product_name": "Ambo",
+      "category_name": "Ambos",
+      "price": "590000.00",
+      "reference": null,
+      "description_short": "Ambo"
+    },
+    {
+      "id_product": "54",
+      "product_name": "Remera Manga Larga",
+      "category_name": "Remeras",
+      "price": "20000.00",
+      "reference": null,
+      "description_short": "<p>Remera manga larga.</p>"
+    },
+    {
+      "id_product": "53",
+      "product_name": "Jeans Rochas",
+      "category_name": "Pantalones",
+      "price": "120000.00",
+      "reference": null,
+      "description_short": "<p>Jeans.</p>"
+    },
+    {
+      "id_product": "49",
+      "product_name": "Media Polera Algodón.",
+      "category_name": "Sweaters & Chalecos",
+      "price": "19900.00",
+      "reference": null,
+      "description_short": "Media Polera algodón"
+    },
+    {
+      "id_product": "47",
+      "product_name": "Camisas Sport con Bolsillo",
+      "category_name": "Camisas",
+      "price": "59000.00",
+      "reference": null,
+      "description_short": "<p>Camisa clásica , algodón y polyester.</p>"
+    },
+    {
+      "id_product": "42",
+      "product_name": "Pantalón Gabardina",
+      "category_name": "Pantalones",
+      "price": "89900.00",
+      "reference": null,
+      "description_short": "Pantalón Gabardina"
+    },
+    {
+      "id_product": "41",
+      "product_name": "Campera Sport",
+      "category_name": "Camperas",
+      "price": "49000.00",
+      "reference": null,
+      "description_short": "Campera Sport"
+    },
+    {
+      "id_product": "39",
+      "product_name": "Corbata",
+      "category_name": "Corbatas",
+      "price": "24900.00",
+      "reference": null,
+      "description_short": "Corbata"
+    },
+    {
+      "id_product": "38",
+      "product_name": "Camisa de Vestir Regular",
+      "category_name": "Camisas",
+      "price": "59000.00",
+      "reference": null,
+      "description_short": "Camisa de vestir algodón y polyester"
+    },
+    {
+      "id_product": "37",
+      "product_name": "Saco Sport",
+      "category_name": "Sacos/Blazers",
+      "price": "390000.00",
+      "reference": null,
+      "description_short": "<p>Saco Sport.</p>"
+    },
+    {
+      "id_product": "24",
+      "product_name": "Jean clásico cinco bolsillos",
+      "category_name": "Pantalones",
+      "price": "89900.00",
+      "reference": null,
+      "description_short": "<p>Jean regular.</p>"
+    },
+    {
+      "id_product": "1",
+      "product_name": "Camisa",
+      "category_name": "Camisas",
+      "price": "130000.00",
+      "reference": null,
+      "description_short": "1"
+    }
+  ],
+  "variants": [
+    {
+      "id_product": "121",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "3"
+    },
+    {
+      "id_product": "121",
+      "attr_name": "Gris pardo",
+      "attr_group": "color",
+      "quantity": "3"
+    },
+    {
+      "id_product": "120",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "120",
+      "attr_name": "Verde",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "120",
+      "attr_name": "Celeste",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "119",
+      "attr_name": "Bordo",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "119",
+      "attr_name": "Beige",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "119",
+      "attr_name": "Gris pardo",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "118",
+      "attr_name": "Gris",
+      "attr_group": "color",
+      "quantity": "4"
+    },
+    {
+      "id_product": "118",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "4"
+    },
+    {
+      "id_product": "117",
+      "attr_name": "Camel",
+      "attr_group": "color",
+      "quantity": "2"
+    },
+    {
+      "id_product": "117",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "0"
+    },
+    {
+      "id_product": "113",
+      "attr_name": "Gris",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "108",
+      "attr_name": "Beige",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "108",
+      "attr_name": "Bordo",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "103",
+      "attr_name": "Verde",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "103",
+      "attr_name": "Gris",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "98",
+      "attr_name": "Rosa",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "98",
+      "attr_name": "Amarillo",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "98",
+      "attr_name": "Celeste",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "95",
+      "attr_name": "Gris",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "95",
+      "attr_name": "Verde",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "93",
+      "attr_name": "Rojo",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "93",
+      "attr_name": "Blanco",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "93",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "93",
+      "attr_name": "Gris",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "91",
+      "attr_name": "Rojo",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "91",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "89",
+      "attr_name": "Celeste",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "89",
+      "attr_name": "Blanco",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "89",
+      "attr_name": "Rojo",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "89",
+      "attr_name": "Bordo",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "89",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "83",
+      "attr_name": "Beige",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "82",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "82",
+      "attr_name": "Beige",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "81",
+      "attr_name": "Blanco",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "81",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "81",
+      "attr_name": "Verde",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "81",
+      "attr_name": "Verde Militar",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "79",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "79",
+      "attr_name": "Rojo",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "79",
+      "attr_name": "Gris",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "79",
+      "attr_name": "Rosa",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "78",
+      "attr_name": "Blanco",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "78",
+      "attr_name": "Gris",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "78",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "75",
+      "attr_name": "Rosa",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "71",
+      "attr_name": "Camel",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "71",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "70",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "0"
+    },
+    {
+      "id_product": "70",
+      "attr_name": "Verde",
+      "attr_group": "color",
+      "quantity": "0"
+    },
+    {
+      "id_product": "70",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "0"
+    },
+    {
+      "id_product": "68",
+      "attr_name": "Beige",
+      "attr_group": "color",
+      "quantity": "3"
+    },
+    {
+      "id_product": "67",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "0"
+    },
+    {
+      "id_product": "67",
+      "attr_name": "Beige",
+      "attr_group": "color",
+      "quantity": "0"
+    },
+    {
+      "id_product": "65",
+      "attr_name": "Blanco",
+      "attr_group": "color",
+      "quantity": "20"
+    },
+    {
+      "id_product": "60",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "60",
+      "attr_name": "Camel",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "59",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "15"
+    },
+    {
+      "id_product": "56",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "0"
+    },
+    {
+      "id_product": "56",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "0"
+    },
+    {
+      "id_product": "55",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "55",
+      "attr_name": "Gris",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "55",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "54",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "54",
+      "attr_name": "Gris pardo",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "53",
+      "attr_name": "Gris",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "53",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "53",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "47",
+      "attr_name": "Blanco",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "47",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "47",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "42",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "42",
+      "attr_name": "Beige",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "42",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "10"
+    },
+    {
+      "id_product": "38",
+      "attr_name": "Blanco",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "38",
+      "attr_name": "Celeste",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "38",
+      "attr_name": "Gris",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "38",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "38",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "24",
+      "attr_name": "Azul",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "24",
+      "attr_name": "Gris",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "24",
+      "attr_name": "Negro",
+      "attr_group": "color",
+      "quantity": "5"
+    },
+    {
+      "id_product": "1",
+      "attr_name": "red",
+      "attr_group": "color",
+      "quantity": "10"
+    }
+  ]
+}
