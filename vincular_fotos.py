@@ -16,19 +16,19 @@ def vincular_imagenes():
         24: "product_24_Bk45lxY_450x563.png",
         37: "product_37_KpeKnM2_450x563.png",
         38: "product_38_xomiVNj_450x563.png",
-        39: "product_39_lT2xFEj_450x563.png",
+        39: "accesorios_2_450x563.png", # Accesorios
         41: "product_41_Dt1IHC2_450x563.png",
-        42: "product_42_5e2uGdU_450x563.png",
+        42: "pantalon_de_garbadina__450x563.png", # Pantalón Gabardina
         47: "product_47_Sa23R7U_450x563.png",
         49: "product_49_NC1NKwj_450x563.png",
-        53: "product_53_ijn9Hyt_450x563.png",
-        54: "product_54_fA4Soqp_450x563.png",
+        53: "jeans_rochas_2_450x563.png", # Jeans Rochas
+        54: "remera_manga_larga_450x563.png", # Remera Manga Larga
         55: "product_55_LXJMLXR_450x563.png",
         56: "product_56_v3ILWRe_450x563.png",
         57: "product_57_GIKmEpJ_450x563.png",
-        58: "product_58_Or87ht9_450x563.png",
+        58: "boxer_450x563.png", # Boxer
         59: "product_59_qoPS05H_450x563.png",
-        60: "product_60_F9T34c9_450x563.png",
+        60: "jogger_garbardina_discontnuos_450x563.png", # Jogger
         64: "product_64_NTCNJg4_450x563.png",
         65: "product_65_y68pSmm_450x563.png",
         67: "product_67_rKtjmNW_450x563.png",
@@ -36,16 +36,16 @@ def vincular_imagenes():
         69: "product_69_6ZnKwRQ_450x563.png",
         70: "product_70_3ILYTod_450x563.png",
         71: "product_71_eLgj7Tq_450x563.png",
-        74: "product_74_zdwNLdp_450x563.png",
+        74: "camisa_clasica_fantasia_3_450x563.png", # Camisa Clásica Fantasía
         75: "product_75_NQaMl1X_450x563.png",
         78: "product_78_88JkH3x_450x563.png",
-        79: "product_79_11VZed8_450x563.png",
+        79: "chomba_pique_450x563.png", # Chomba Piqué
         81: "product_81_b2QuRJD_450x563.png",
         82: "product_82_Fbjg78d_450x563.png",
         83: "product_83_2UTvOKu_450x563.png",
-        89: "product_89_hjzohRG_450x563.png",
+        89: "chomba_lisa_pique_3_450x563.png", # Chomba Lisa Piqué
         91: "product_91_uXiudfD_450x563.png",
-        92: "product_92_tclBOTD_450x563.png",
+        92: "medias_450x563.png", # Medias
         93: "product_93_1S5nFFJ_450x563.png",
         95: "product_95_mrDl5JC_450x563.png",
         98: "product_98_DBx7wtV_450x563.png",
