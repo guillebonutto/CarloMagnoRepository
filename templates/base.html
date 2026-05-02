@@ -13,32 +13,42 @@
 </head>
 
 <body>
-	<!-- TOP BAR (Opcional pero muy AliExpress) -->
-	<div class="top-bar d-none d-lg-block text-white text-center py-1"
-		style="background-color: #000; font-size: 0.75rem; letter-spacing: 1px;">
-		ENVÍOS A TODO EL PAÍS | 3 CUOTAS SIN INTERÉS | NUEVA TEMPORADA 2026
+	<!-- TOP BAR -->
+	<div class="top-bar text-white text-center py-2 fw-bold"
+		style="background-color: #8b0000; font-size: 0.85rem; letter-spacing: 1px;">
+		<i class="fas fa-bolt"></i> OFERTA RELÁMPAGO: 50% OFF - TERMINA EN 02:45:12 <i class="fas fa-bolt"></i>
 	</div>
 
-	<nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm main-navbar"
-		style="background-color: #8b0000; padding: 10px 0;">
-		<div class="container-fluid px-lg-5 d-flex flex-wrap align-items-center">
+	<nav class="navbar navbar-expand-lg sticky-top main-navbar"
+		style="background-color: #ffffff; padding: 15px 0; border-bottom: 1px solid #f0f0f0;">
+		<div class="container-fluid px-lg-5 d-flex flex-wrap align-items-center justify-content-between">
 			<!-- Logo a la izquierda -->
-			<a class="navbar-brand d-flex align-items-center order-1" href="{% url 'inicio' %}"
-				style="margin-right: 30px;">
+			<a class="navbar-brand d-flex align-items-center order-1" href="{% url 'inicio' %}" style="margin-right: 30px;">
 				<img src="{% static 'images/logo.png' %}" alt="Carlo Magno Logo"
-					style="height: 45px; filter: brightness(0) invert(1)" />
+					style="height: 45px; filter: brightness(0) invert(15%) sepia(80%) saturate(6000%) hue-rotate(350deg);" />
 			</a>
 
-			<!-- BOTONES DERECHA (Iconos limpios) -->
-			<div class="nav-icons-wrapper d-flex align-items-center order-2 order-lg-3 ms-auto ms-lg-0"
-				style="gap: 20px;">
+			<!-- BARRA DE BÚSQUEDA CENTRAL -->
+			<div class="header-search-wrapper order-3 order-lg-2 mt-3 mt-lg-0 mx-lg-4 d-flex align-items-center"
+				id="mainHeaderSearch" style="flex: 1; max-width: 600px;">
+				<form action="{% url 'productos' %}" method="GET" class="w-100">
+					<div class="input-group" style="background-color: #f5f5f5; border-radius: 8px;">
+						<input type="text" name="q" class="form-control border-0 bg-transparent py-2 px-3"
+							placeholder="Buscar en la colección..." style="box-shadow: none; font-size: 0.9rem;">
+						<button class="btn border-0 bg-transparent px-3" type="submit" style="color: #666;">
+							<i class="fas fa-search"></i>
+						</button>
+					</div>
+				</form>
+			</div>
 
+			<!-- BOTONES DERECHA -->
+			<div class="nav-icons-wrapper d-flex align-items-center order-2 order-lg-3 gap-3">
 				{% if user.is_authenticated %}
 				<div class="dropdown">
-					<a class="nav-link text-white d-flex align-items-center gap-2" href="#" id="userDropdown"
+					<a class="nav-link text-dark d-flex align-items-center gap-2" href="#" id="userDropdown"
 						data-bs-toggle="dropdown">
-						<i class="fas fa-user fs-5"></i>
-						<span class="d-none d-xl-inline" style="font-size: 0.85rem; font-weight: 600;">{{ user.first_name|default:user.username }}</span>
+						<i class="far fa-user fs-5"></i>
 					</a>
 					<ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3" style="border-radius: 10px;">
 						<li><a class="dropdown-item py-2" href="{% url 'perfil_cliente' %}"><i
@@ -53,19 +63,18 @@
 					</ul>
 				</div>
 				{% else %}
-				<a href="{% url 'login_cliente' %}" class="nav-link text-white d-flex align-items-center gap-2">
-					<i class="fas fa-user fs-5"></i>
-					<span class="d-none d-xl-inline" style="font-size: 0.85rem; font-weight: 600;">INGRESAR</span>
+				<a href="{% url 'login_cliente' %}" class="nav-link text-dark">
+					<i class="far fa-user fs-5"></i>
 				</a>
 				{% endif %}
 
 				<!-- Carrito flotante -->
 				<div class="cart-wrapper position-relative" id="cartIconContainer">
-					<a href="#" class="nav-link text-white position-relative" id="cartTrigger">
-						<i class="fas fa-shopping-bag fs-4"></i>
+					<a href="#" class="nav-link text-dark position-relative" id="cartTrigger">
+						<i class="fas fa-shopping-cart fs-5"></i>
 						<span
-							class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-white text-danger border"
-							id="cartBadge" style="font-size: 0.65rem; padding: 0.35em 0.65em;">
+							class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger text-white border border-white"
+							id="cartBadge" style="font-size: 0.6rem; padding: 0.35em 0.5em; top: -5px !important;">
 							{{ carrito_cantidad|default:0 }}
 						</span>
 					</a>
@@ -80,31 +89,25 @@
 							<!-- Dinámico -->
 						</div>
 						<div class="p-3 bg-light rounded-bottom">
-							<a href="{% url 'checkout' %}" class="btn btn-dark w-100 fw-bold py-2"
-								style="border-radius: 50px; letter-spacing: 1px;">FINALIZAR COMPRA</a>
+							<a href="{% url 'checkout' %}" class="btn w-100 fw-bold py-2 text-white"
+								style="border-radius: 5px; letter-spacing: 1px; background-color: #8b0000;">FINALIZAR COMPRA</a>
 						</div>
 					</div>
 				</div>
 			</div>
-
-			<!-- BARRA DE BÚSQUEDA CENTRAL Y FILTRO MÓVIL (Estilo Shein/AliExpress) -->
-			<div class="header-search-wrapper order-3 order-lg-2 flex-grow-1 mt-3 mt-lg-0 mx-lg-4 d-flex align-items-center gap-2"
-				id="mainHeaderSearch">
-				{% block header_filter %}{% endblock %}
-				<form action="{% url 'productos' %}" method="GET" class="position-relative w-100">
-					<div class="input-group">
-						<input type="text" name="q" class="form-control border-0 py-2 px-4"
-							placeholder="Buscar remeras, camisas, pantalones..."
-							style="border-radius: 50px 0 0 50px; font-size: 0.9rem;">
-						<button class="btn btn-white border-0 bg-white px-4" type="submit"
-							style="border-radius: 0 50px 50px 0; color: #8b0000;">
-							<i class="fas fa-search"></i>
-						</button>
-					</div>
-				</form>
-			</div>
 		</div>
 	</nav>
+
+	<!-- SECONDARY NAV -->
+	<div class="secondary-nav d-none d-lg-flex justify-content-center align-items-center py-2" style="background: #fff; border-bottom: 1px solid #eee;">
+		<div class="d-flex gap-4" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+			<a href="{% url 'productos' %}" style="color: #8b0000; text-decoration: none; border-bottom: 2px solid #8b0000; padding-bottom: 2px;">OFERTAS</a>
+			<a href="{% url 'productos' %}?categoria=79&categoria=96&categoria=78" style="color: #555; text-decoration: none;">TRAJES</a>
+			<a href="{% url 'productos' %}?categoria=73" style="color: #555; text-decoration: none;">CAMISAS</a>
+			<a href="{% url 'productos' %}?categoria=76" style="color: #555; text-decoration: none;">ACCESORIOS</a>
+			<a href="{% url 'productos' %}" style="color: #555; text-decoration: none;">NOVEDADES</a>
+		</div>
+	</div>
 
 	<style>
 		/* Estilos Base Marketplace */
@@ -182,126 +185,62 @@
 	{% block content %}{% endblock %}
 
 	<!-- FOOTER PRINCIPAL -->
-	<footer class="main-footer">
+	<footer class="main-footer pt-5 pb-3" style="background-color: #fafafa; border-top: 1px solid #eee;">
 		<div class="container">
 			<div class="row">
 				<!-- Sobre Nosotros -->
-				<div class="col-lg-3 col-md-6 footer-section">
-					<h5>Carlo Magno</h5>
-					<p
-						style="font-size: 13px; color: #d4af37; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">
-						Calidad premium en indumentaria masculina.
+				<div class="col-lg-3 col-md-6 footer-section mb-4">
+					<img src="{% static 'images/logo.png' %}" alt="Carlo Magno Logo" style="height: 40px; margin-bottom: 20px; filter: brightness(0) invert(15%) sepia(80%) saturate(6000%) hue-rotate(350deg);" />
+					<p style="font-size: 13px; color: #666; line-height: 1.6;">
+						Vistiendo al hombre moderno con precisión y legado desde 1984. Técnicas tradicionales y velocidad de comercio electrónico.
 					</p>
-					<p style="font-size: 13px; color: #bbb; line-height: 1.6;">
-						Carlo Magno nace de la pasión por vestir al hombre moderno con elegancia auténtica.
-						Seleccionamos cuidadosamente telas de alta calidad y apostamos a un corte impecable que combina
-						tradición sastrera con un estilo contemporáneo y sofisticado.
-					</p>
-					<p style="font-size: 13px; color: #bbb; line-height: 1.6; font-style: italic;">
-						Aquí no vendemos ropa. Vendemos presencia.
-					</p>
-					<div class="social-icons">
-						<a href="https://facebook.com" target="_blank" aria-label="Facebook"><i
-								class="fab fa-facebook-f"></i></a>
-						<a href="https://instagram.com" target="_blank" aria-label="Instagram"><i
-								class="fab fa-instagram"></i></a>
-						<a href="https://tiktok.com" target="_blank" aria-label="TikTok"><i
-								class="fab fa-tiktok"></i></a>
-						<a href="https://twitter.com" target="_blank" aria-label="Twitter"><i
-								class="fab fa-twitter"></i></a>
+					<div class="social-icons mt-3">
+						<a href="#" style="color: #666; font-size: 1.2rem; margin-right: 15px;"><i class="fab fa-instagram"></i></a>
+						<a href="#" style="color: #666; font-size: 1.2rem; margin-right: 15px;"><i class="fab fa-facebook"></i></a>
+						<a href="#" style="color: #666; font-size: 1.2rem; margin-right: 15px;"><i class="fas fa-globe"></i></a>
 					</div>
 				</div>
 
-				<!-- Ayuda & Apoyo -->
-				<div class="col-lg-2 col-md-6 footer-section">
-					<h5>Ayuda</h5>
-					<ul>
-						<li><a href="#">Información de Envío</a></li>
-						<li><a href="#">Devoluciones</a></li>
-						<li><a href="#">Cómo Comprar</a></li>
-						<li><a href="#">Rastrear Pedido</a></li>
-						<li><a href="#">Guía de Talles</a></li>
+				<!-- Customer Support -->
+				<div class="col-lg-3 col-md-6 footer-section mb-4">
+					<h6 style="font-weight: 600; color: #111; margin-bottom: 20px;">ATENCIÓN AL CLIENTE</h6>
+					<ul style="list-style: none; padding: 0;">
+						<li style="margin-bottom: 10px;"><a href="{% url 'productos' %}" style="color: #666; text-decoration: none; font-size: 13px;">Pago Seguro</a></li>
+						<li style="margin-bottom: 10px;"><a href="{% url 'productos' %}" style="color: #666; text-decoration: none; font-size: 13px;">Envíos a todo el país</a></li>
+						<li style="margin-bottom: 10px;"><a href="{% url 'productos' %}" style="color: #666; text-decoration: none; font-size: 13px;">Cambios fáciles en 30 días</a></li>
 					</ul>
 				</div>
 
-				<!-- Servicio al Cliente -->
-				<div class="col-lg-2 col-md-6 footer-section">
-					<h5>Servicio</h5>
-					<ul>
-						<li><a href="{% url 'contact' %}">Contáctenos</a></li>
-						<li><a href="#">Formas de Pago</a></li>
-						<li><a href="#">Puntos de Retiro</a></li>
-						<li><a href="#">Preguntas Frecuentes</a></li>
-					</ul>
-				</div>
-
-				<!-- Contacto -->
-				<div class="col-lg-2 col-md-6 footer-section">
-					<h5>Contacto</h5>
-					<ul class="contact-list">
-						<li>
-							<i class="fas fa-map-marker-alt"></i>
-							<a href="https://www.google.com/maps/place/CARLO+MAGNO/@-31.4146665,-64.1819471,15z/data=!4m15!1m8!3m7!1s0x9432a29cde0c5bbd:0x127d42fc6c61865d!2sCARLO+MAGNO!8m2!3d-31.4147099!4d-64.181681!10e5!16s%2Fg%2F11df81fy6f!3m5!1s0x9432a29cde0c5bbd:0x127d42fc6c61865d!8m2!3d-31.4147099!4d-64.181681!16s%2Fg%2F11df81fy6f?entry=ttu&g_ep=EgoyMDI2MDQyMi4wIKXMDSoASAFQAw%3D%3D"
-								target="_blank" rel="noopener noreferrer">
-								Rivadavia 150 Local 2
-							</a>
-						</li>
-						<li class="mt-2">
-							<i class="fas fa-envelope"></i>
-							<a href="mailto:carlomagnocordoba@gmail.com">
-								Soporte Online
-							</a>
-						</li>
-						<li class="mt-2">
-							<i class="fab fa-whatsapp"></i>
-							<a href="https://wa.me/5493516681071" target="_blank">
-								Centro de Atención
-							</a>
-						</li>
+				<!-- Quick Links -->
+				<div class="col-lg-3 col-md-6 footer-section mb-4">
+					<h6 style="font-weight: 600; color: #111; margin-bottom: 20px;">ENLACES RÁPIDOS</h6>
+					<ul style="list-style: none; padding: 0;">
+						<li style="margin-bottom: 10px;"><a href="{% url 'productos' %}" style="color: #666; text-decoration: none; font-size: 13px;">Guía de Talles</a></li>
+						<li style="margin-bottom: 10px;"><a href="{% url 'productos' %}" style="color: #666; text-decoration: none; font-size: 13px;">Contáctanos</a></li>
+						<li style="margin-bottom: 10px;"><a href="{% url 'productos' %}" style="color: #666; text-decoration: none; font-size: 13px;">Política de Privacidad</a></li>
 					</ul>
 				</div>
 
 				<!-- Newsletter -->
-				<div class="col-lg-3 col-md-12 footer-section">
-					<h5>Newsletter</h5>
-					<p style="font-size: 12px; color: #888;">Suscribite para recibir colecciones exclusivas.</p>
-					<div class="newsletter-form">
-						<input type="email" placeholder="Tu Email" />
-						<button type="submit"><i class="fas fa-paper-plane"></i></button>
+				<div class="col-lg-3 col-md-6 footer-section mb-4">
+					<h6 style="font-weight: 600; color: #111; margin-bottom: 20px;">UNIRSE AL CLUB</h6>
+					<p style="font-size: 13px; color: #666; margin-bottom: 15px;">Suscríbete para acceso anticipado a ofertas y tips exclusivos de sastrería.</p>
+					<div class="newsletter-form d-flex">
+						<input type="email" placeholder="Dirección de Email" style="border: 1px solid #ddd; padding: 8px 12px; font-size: 13px; width: 100%; border-right: none; outline: none;" />
+						<button type="submit" style="background-color: #8b0000; color: white; border: none; padding: 8px 20px; font-size: 13px; font-weight: 600;">UNIRME</button>
 					</div>
-				</div>
-			</div>
-
-			<!-- Métodos de Pago y QR -->
-			<div class="row mt-4 pt-4 border-top border-secondary">
-				<div class="col-md-8 col-12">
-					<div class="payment-methods">
-						<img src="{% static 'images/visa-logo-svgrepo-com.svg' %}" alt="Visa" />
-						<img src="{% static 'images/mastercard-2-logo-svgrepo-com.svg' %}" alt="Mastercard" />
-						<img src="{% static 'images/PayPal_logo.svg' %}" alt="PayPal" />
-						<img src="{% static 'images/American_Express_Logo.svg' %}" alt="American Express" />
-					</div>
-				</div>
-				<div class="col-md-4 col-12 text-md-end text-center mt-3 mt-md-0">
-					<img src="{% static 'images/qr-Fiscal.jpg' %}" alt="QR Data Fiscal" class="qr-fiscal"
-						style="max-width: 100px;" />
 				</div>
 			</div>
 
 			<!-- Footer Bottom -->
-			<div class="footer-bottom">
-				<p>© Carlo Magno Indumentaria. Todos los derechos reservados.</p>
-				<div class="footer-links">
-					<a href="#">Privacidad</a>
-					<span>|</span>
-					<a href="#">Términos</a>
-					<span>|</span>
-					<a href="#">Cookies</a>
+			<div class="row mt-4 pt-4 border-top">
+				<div class="col-md-6 col-12 text-center text-md-start">
+					<p style="color: #888; font-size: 12px; margin: 0;">© 2024 Carlo Magno. Traditional Tailoring Meets Modern Speed.</p>
 				</div>
-				<div class="country-selector">
-					<i class="fas fa-map-marker-alt"></i>
-					<a href="https://www.google.com/maps/place/CARLO+MAGNO/@-31.4146665,-64.1819471,15z/data=!4m15!1m8!3m7!1s0x9432a29cde0c5bbd:0x127d42fc6c61865d!2sCARLO+MAGNO!8m2!3d-31.4147099!4d-64.181681!10e5!16s%2Fg%2F11df81fy6f!3m5!1s0x9432a29cde0c5bbd:0x127d42fc6c61865d!8m2!3d-31.4147099!4d-64.181681!16s%2Fg%2F11df81fy6f?entry=ttu&g_ep=EgoyMDI2MDQyMi4wIKXMDSoASAFQAw%3D%3D"
-						target="_blank" rel="noopener noreferrer"> Córdoba, Argentina</a>
+				<div class="col-md-6 col-12 text-center text-md-end mt-3 mt-md-0">
+					<i class="far fa-credit-card fs-4 mx-2" style="color: #ccc;"></i>
+					<i class="fas fa-money-bill-wave fs-4 mx-2" style="color: #ccc;"></i>
+					<i class="fas fa-university fs-4 mx-2" style="color: #ccc;"></i>
 				</div>
 			</div>
 		</div>

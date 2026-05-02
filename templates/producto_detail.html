@@ -99,6 +99,128 @@
         vertical-align: middle;
         border: 1px solid rgba(0,0,0,0.1);
     }
+    
+    /* Layout and Typography */
+    .product-title {
+        font-weight: 900;
+        color: #5a0000;
+        text-transform: uppercase;
+        font-size: 2rem;
+        margin-bottom: 5px;
+    }
+    
+    .rating-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    .rating-row i { color: #d4af37; font-size: 1rem; }
+    .rating-text { font-size: 0.8rem; color: #888; }
+    
+    .price-row { margin-bottom: 15px; display: flex; align-items: baseline; gap: 15px; }
+    .current-price { font-size: 1.8rem; font-weight: 900; color: #8b0000; margin: 0; }
+    .old-price { font-size: 1rem; color: #999; text-decoration: line-through; margin: 0; }
+    
+    .urgency-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background-color: #f8e9e9;
+        color: #8b0000;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .stock-left { font-size: 0.8rem; font-weight: 700; color: #8b0000; margin-bottom: 25px; display: block; }
+    
+    .selector-label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #111;
+        letter-spacing: 1px;
+    }
+    
+    .trust-badges-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+    }
+    .trust-badge-item {
+        text-align: center;
+        font-size: 0.7rem;
+        color: #111;
+        font-weight: 600;
+        flex: 1;
+    }
+    .trust-badge-item i { display: block; font-size: 1.5rem; color: #8b0000; margin-bottom: 8px; }
+
+    .thumbnails-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .thumbnail-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+    .thumbnail-img.active { border-color: #8b0000; }
+    .thumbnail-video {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f5f5;
+        cursor: pointer;
+    }
+    
+    .section-header {
+        font-size: 1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #111;
+        margin-bottom: 20px;
+    }
+
+    .bundle-box {
+        background: #fafafa;
+        padding: 30px;
+        margin-top: 40px;
+    }
+    .bundle-items {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .bundle-item { text-align: center; }
+    .bundle-item img { width: 80px; height: 100px; object-fit: cover; margin-bottom: 5px; border: 1px solid #eee; }
+    .bundle-item span { font-size: 0.7rem; color: #555; }
+    .bundle-plus { color: #aaa; font-weight: bold; }
+    
+    .bundle-total-box {
+        background: white;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    
+    .review-card {
+        border: 1px solid #eee;
+        padding: 20px;
+        height: 100%;
+        background: white;
+    }
+    .review-card img { width: 100%; height: auto; margin-bottom: 15px; border-radius: 4px; }
+    .review-text { font-style: italic; font-size: 0.9rem; color: #555; }
 </style>
 {% endblock %}
 
@@ -106,32 +228,58 @@
 <div class="container mt-5">
     <div class="row">
         <!-- Imagen del Producto -->
-        <div class="col-md-6">
-            {% if producto.imagen %}
-                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-fluid rounded">
-            {% else %}
-                <div class="text-center p-5 bg-light rounded">
-                    <i class="fas fa-image fa-5x text-muted"></i>
-                </div>
-            {% endif %}
+        <div class="col-md-7 mb-4">
+            <div style="position: relative;">
+                <span class="badge bg-dark" style="position: absolute; top: 15px; left: 15px; font-size: 0.8rem; z-index: 2;">-40% OFF</span>
+                {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-fluid w-100" style="object-fit: cover; aspect-ratio: 4/5; background: #e0e0e0;">
+                {% else %}
+                    <div class="d-flex align-items-center justify-content-center bg-light w-100" style="aspect-ratio: 4/5;">
+                        <i class="fas fa-image fa-5x text-muted"></i>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="thumbnails-row">
+                {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" class="thumbnail-img active">
+                {% endif %}
+                <img src="{% static 'images/placeholder.jpg' %}" class="thumbnail-img">
+                <img src="{% static 'images/placeholder.jpg' %}" class="thumbnail-img">
+                <img src="{% static 'images/placeholder.jpg' %}" class="thumbnail-img">
+                <div class="thumbnail-video"><i class="far fa-play-circle fs-3 text-muted"></i></div>
+            </div>
         </div>
 
         <!-- Información del Producto -->
-        <div class="col-md-6">
-            <h1>{{ producto.nombre }}</h1>
-            <p class="text-muted">{{ producto.categoria.nombre }}</p>
-            <h3 class="text-danger">${{ producto.precio }}</h3>
+        <div class="col-md-5">
+            <h1 class="product-title">{{ producto.nombre }}</h1>
             
-            <p class="mt-3">{{ producto.descripcion }}</p>
+            <div class="rating-row">
+                <div>
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                </div>
+                <span class="rating-text">(128 Opiniones)</span>
+            </div>
 
+            <div class="price-row">
+                <p class="current-price">${{ producto.precio }}</p>
+                <p class="old-price">$70.000,00</p>
+            </div>
+            
+            <div class="urgency-badge">
+                <i class="fas fa-fire"></i> 15 vendidos en la última hora
+            </div>
+            <span class="stock-left">¡Solo quedan 5 unidades!</span>
+            
             <!-- Selección de Color (Carrusel 3D) -->
             <div class="mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="form-label mb-0"><strong>Color:</strong></label>
-                    <span id="selected-color-name" class="fw-bold" style="color: #8B0000; text-transform: uppercase; font-size: 0.9rem;">Desliza o toca un color</span>
+                <div class="d-flex align-items-center mb-1">
+                    <span class="selector-label">COLOR:</span>
+                    <span id="selected-color-name" class="ms-2" style="font-size: 0.75rem; text-transform: uppercase; color: #555;">Desliza o toca un color</span>
                 </div>
                 
-                <div class="color-selector-wrapper mx-auto">
+                <div class="color-selector-wrapper" style="margin-left: -20px;">
                     <div class="color-selector-container horizontal-scroll" id="color-selector-container">
                         <div class="carousel-spacer"></div>
                         {% for color in colores_disponibles %}
@@ -146,14 +294,17 @@
             </div>
 
             <!-- Selección de Talle -->
-            <div class="mb-3">
-                <label class="form-label"><strong>Talle:</strong></label>
-                <div class="faded-edges-wrapper single-item-container">
-                    <div class="d-flex gap-2 horizontal-scroll py-2">
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="selector-label">TALLE:</span>
+                    <a href="#" style="font-size: 0.75rem; color: #8b0000; text-decoration: underline;">Guía de Talles</a>
+                </div>
+                <div class="faded-edges-wrapper single-item-container" style="width: 100%;">
+                    <div class="d-flex gap-2 horizontal-scroll py-2 px-0">
                         {% for talle in talles_disponibles %}
                         <button class="btn btn-outline-secondary talle-selector" 
                                 data-talle-id="{{ talle.id }}"
-                                style="border-radius: 50px;">
+                                style="border-radius: 4px; flex: 1; min-width: 60px;">
                             {{ talle.abbreviation }}
                         </button>
                         {% endfor %}
@@ -161,22 +312,133 @@
                 </div>
             </div>
 
-            <!-- Cantidad -->
-            <div class="mb-3">
-                <label class="form-label"><strong>Cantidad:</strong></label>
-                <input type="number" id="cantidadInput" class="form-control" value="1" min="1" style="width: 100px;">
-            </div>
+            <!-- Cantidad (Oculta para mantener diseño minimalista, dejamos fijo en 1 o podemos mantenerlo) -->
+            <input type="hidden" id="cantidadInput" value="1">
 
             <!-- Botón Agregar al Carrito -->
-            <button id="btnAgregarCarrito" class="btn btn-primary btn-lg w-100 mb-2" 
-                    style="background-color: #8B0000; border: none;">
-                <i class="fas fa-shopping-cart"></i> Agregar al Carrito
+            <button id="btnAgregarCarrito" class="btn btn-lg w-100 mb-3 fw-bold" 
+                    style="background-color: #5a0000; color: white; border: none; font-size: 0.9rem; letter-spacing: 1px;">
+                <i class="fas fa-shopping-bag me-2"></i> AGREGAR AL CARRITO
             </button>
 
             <!-- Botón Pruébatelo virtualmente -->
-            <button class="btn btn-outline-dark btn-lg w-100" data-bs-toggle="modal" data-bs-target="#vtonModal">
-                <i class="fas fa-magic"></i> Pruébatelo virtualmente con IA
+            <button class="btn btn-outline-dark w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#vtonModal"
+                    style="border-color: #ccc; font-size: 0.9rem; padding: 12px;">
+                <i class="fas fa-magic me-2"></i> Probar con IA
             </button>
+            
+            <!-- Trust Badges -->
+            <div class="trust-badges-row">
+                <div class="trust-badge-item">
+                    <i class="fas fa-truck"></i>
+                    Envío Rápido Gratis
+                </div>
+                <div class="trust-badge-item">
+                    <i class="fas fa-shield-alt"></i>
+                    Pago Seguro
+                </div>
+                <div class="trust-badge-item">
+                    <i class="far fa-credit-card"></i>
+                    3 Cuotas sin Interés
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comprados Juntos -->
+    <div class="bundle-box">
+        <h4 class="section-header">COMPRADOS JUNTOS HABITUALMENTE</h4>
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="bundle-items">
+                    <div class="bundle-item">
+                        {% if producto.imagen %}
+                            <img src="{{ producto.imagen.url }}">
+                        {% else %}
+                            <img src="{% static 'images/placeholder.jpg' %}">
+                        {% endif %}
+                        <br><span>Este Artículo</span>
+                    </div>
+                    <span class="bundle-plus">+</span>
+                    <div class="bundle-item">
+                        <img src="{% static 'images/placeholder.jpg' %}">
+                        <br><span>Traje Slim Fit</span>
+                    </div>
+                    <span class="bundle-plus">+</span>
+                    <div class="bundle-item">
+                        <img src="{% static 'images/placeholder.jpg' %}">
+                        <br><span>Corbata Seda</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bundle-total-box">
+                    <span style="font-size: 0.75rem; color: #555;">Precio del Paquete:</span>
+                    <h3 style="font-weight: 900; color: #5a0000; margin: 5px 0 15px;">$158.000,00</h3>
+                    <button class="btn btn-sm w-100 fw-bold text-white" style="background-color: #8b0000;">AGREGAR 3 ARTÍCULOS AL CARRITO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Opiniones -->
+    <div class="mt-5 mb-5">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h4 class="section-header mb-1">OPINIONES DE CLIENTES</h4>
+                <div class="rating-row mb-0">
+                    <div>
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                    </div>
+                    <span class="fw-bold">4.9 / 5.0</span>
+                </div>
+            </div>
+            <a href="#" style="font-size: 0.75rem; font-weight: 800; color: #111; text-decoration: underline; text-transform: uppercase;">ESCRIBIR UNA OPINIÓN</a>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="review-card">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div style="width: 30px; height: 30px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem;">M</div>
+                        <div>
+                            <span class="d-block fw-bold" style="font-size: 0.8rem;">Marcos G.</span>
+                            <span style="font-size: 0.65rem; color: #888;">Compra Verificada</span>
+                        </div>
+                    </div>
+                    <img src="{% static 'images/placeholder.jpg' %}">
+                    <p class="review-text">"Excelente calidad, el color bordó es aún mejor en persona. Calce perfecto."</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="review-card">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div style="width: 30px; height: 30px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem;">J</div>
+                        <div>
+                            <span class="d-block fw-bold" style="font-size: 0.8rem;">Julián R.</span>
+                            <span style="font-size: 0.65rem; color: #888;">Compra Verificada</span>
+                        </div>
+                    </div>
+                    <img src="{% static 'images/placeholder.jpg' %}">
+                    <p class="review-text">"La textura es premium. Lo usé para una reunión casual y recibí varios cumplidos."</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="review-card">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div style="width: 30px; height: 30px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem;">D</div>
+                        <div>
+                            <span class="d-block fw-bold" style="font-size: 0.8rem;">Daniel S.</span>
+                            <span style="font-size: 0.65rem; color: #888;">Compra Verificada</span>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <i class="fas fa-star" style="color: #d4af37; font-size: 0.8rem;"></i><i class="fas fa-star" style="color: #d4af37; font-size: 0.8rem;"></i><i class="fas fa-star" style="color: #d4af37; font-size: 0.8rem;"></i><i class="fas fa-star" style="color: #d4af37; font-size: 0.8rem;"></i><i class="fas fa-star" style="color: #d4af37; font-size: 0.8rem;"></i>
+                    </div>
+                    <p class="fw-bold mb-1" style="font-size: 0.85rem;">¡Envío rápido!</p>
+                    <p class="review-text">"Llegó en 24 horas. El packaging también era muy premium. Definitivamente compraré más colores."</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -413,10 +675,14 @@
     // Agregar estilos para botones activos
     const style = document.createElement('style');
     style.textContent = `
-        .color-selector.active, .talle-selector.active {
-            background-color: #8B0000 !important;
+        .color-selector.active {
+            border: 3px solid #5a0000 !important;
+            box-shadow: 0 0 15px rgba(90,0,0,0.4) !important;
+        }
+        .talle-selector.active {
+            background-color: #5a0000 !important;
             color: white !important;
-            border-color: #8B0000 !important;
+            border-color: #5a0000 !important;
         }
         .color-selector, .talle-selector {
             transition: all 0.3s;

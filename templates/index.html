@@ -11,59 +11,155 @@
         padding: 20px;
     }
 
-    /* Categorías Circulares (Estilo Instagram/AliExpress) */
+    /* Categorías Cuadradas Modernas */
     .quick-categories {
         display: flex;
         overflow-x: auto;
-        gap: 25px;
-        padding: 20px 0;
-        scrollbar-width: none; /* Firefox */
+        gap: 30px;
+        padding: 30px 0;
+        scrollbar-width: none;
         justify-content: center;
     }
-    .quick-categories::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
-    .cat-circle-item {
+    .quick-categories::-webkit-scrollbar {
+        display: none;
+    }
+
+    .cat-square-item {
         flex: 0 0 auto;
         text-align: center;
-        width: 80px;
+        width: 85px;
         text-decoration: none;
-        color: #333;
+        color: #111;
         transition: transform 0.3s;
     }
-    .cat-circle-item:hover { transform: translateY(-5px); color: #8b0000; }
-    
+
+    .cat-square-item:hover {
+        transform: translateY(-5px);
+    }
+
     .cat-image-wrapper {
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
-        background: #eee;
+        width: 85px;
+        height: 85px;
+        border-radius: 12px;
+        background: #f8f9fa;
         margin: 0 auto 10px;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        border: 2px solid #fff;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        border: 1px solid #eaeaea;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s;
     }
-    .cat-image-wrapper i { font-size: 1.5rem; color: #555; }
-    .cat-circle-item span { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; display: block; }
 
-    /* Banner Principal Compacto */
+    .cat-image-wrapper i {
+        font-size: 2rem;
+        color: #555;
+    }
+
+    .cat-square-item:hover .cat-image-wrapper {
+        border-color: #8b0000;
+        box-shadow: 0 6px 15px rgba(139, 0, 0, 0.15);
+    }
+
+    .cat-square-item span {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: block;
+        letter-spacing: 0.5px;
+    }
+
+    /* Banner Principal Premium */
     .promo-banner {
-        border-radius: 15px;
-        background: linear-gradient(45deg, #111, #444);
-        height: 300px;
-        margin-bottom: 40px;
+        border-radius: 12px;
+        background: linear-gradient(to right, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 100%),
+        url('{% static "images/banner_bg.png" %}');
+        background-color: #1a1a1a;
+        /* Fallback */
+        background-size: cover;
+        background-position: center;
+        height: 450px;
+        margin-bottom: 50px;
         display: flex;
         align-items: center;
-        padding: 0 50px;
+        padding: 0 60px;
         color: white;
         position: relative;
         overflow: hidden;
     }
-    .promo-content h2 { font-size: 3rem; font-weight: 900; margin: 0; }
-    .promo-content p { font-size: 1.2rem; opacity: 0.8; margin-bottom: 20px; }
-    .promo-badge { background: #8b0000; color: white; padding: 5px 15px; border-radius: 5px; font-weight: 800; margin-bottom: 15px; display: inline-block; }
+
+    .promo-content {
+        max-width: 600px;
+    }
+
+    .promo-content h2 {
+        font-size: 4rem;
+        font-weight: 900;
+        margin: 0;
+        font-style: italic;
+        letter-spacing: -1px;
+        text-transform: uppercase;
+    }
+
+    .promo-content p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 30px;
+        font-weight: 500;
+    }
+
+    .promo-badge {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .promo-badge i {
+        color: #8b0000;
+    }
+
+    .timer-block {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        margin-top: 30px;
+    }
+
+    .timer-item {
+        text-align: center;
+    }
+
+    .timer-val {
+        font-size: 1.8rem;
+        font-weight: 800;
+        display: block;
+        line-height: 1;
+    }
+
+    .timer-label {
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.7;
+    }
+
+    .timer-sep {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-top: -15px;
+    }
 
     /* Grilla de Productos (Alta Densidad) */
     .product-grid {
@@ -71,9 +167,25 @@
         grid-template-columns: repeat(5, 1fr);
         gap: 20px;
     }
-    @media (max-width: 1200px) { .product-grid { grid-template-columns: repeat(4, 1fr); } }
-    @media (max-width: 992px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 576px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+
+    @media (max-width: 1200px) {
+        .product-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @media (max-width: 992px) {
+        .product-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .product-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+    }
 
     .market-card {
         background: white;
@@ -85,33 +197,159 @@
         flex-direction: column;
         height: 100%;
     }
-    .market-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 
-    .card-img-container { position: relative; padding-top: 130%; overflow: hidden; }
-    .card-img-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-    
+    .market-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-img-container {
+        position: relative;
+        padding-top: 100%;
+        overflow: hidden;
+        background: #f5f5f5;
+    }
+
+    .card-img-container img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .badge-top-left {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .badge-top-right {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .product-badge {
+        padding: 4px 8px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        border-radius: 3px;
+        color: white;
+    }
+
+    .badge-liquidation {
+        background-color: #8b0000;
+    }
+
+    .badge-bestseller {
+        background-color: #d4af37;
+        color: #111;
+    }
+
+    .badge-discount {
+        background-color: #111;
+    }
+
+    .badge-new {
+        background-color: #8b0000;
+    }
+
     .quick-add-btn {
         position: absolute;
-        bottom: 10px;
-        right: 10px;
+        bottom: 15px;
+        right: 15px;
         background: white;
         color: #111;
-        width: 40px;
-        height: 40px;
+        width: 35px;
+        height: 35px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
         cursor: pointer;
         transition: all 0.2s;
         border: none;
+        z-index: 2;
     }
-    .quick-add-btn:hover { background: #8b0000; color: white; transform: scale(1.1); }
 
-    .card-info { padding: 15px; flex-grow: 1; }
-    .card-title { font-size: 0.85rem; font-weight: 600; color: #444; height: 2.5em; overflow: hidden; margin-bottom: 8px; }
-    .card-price { font-size: 1.1rem; font-weight: 800; color: #8b0000; margin: 0; }
+    .quick-add-btn:hover {
+        background: #111;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .card-info {
+        padding: 15px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #111;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .card-rating {
+        font-size: 0.75rem;
+        color: #888;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .card-rating i {
+        color: #d4af37;
+    }
+
+    .card-price-row {
+        display: flex;
+        flex-direction: column;
+        margin-top: auto;
+    }
+
+    .card-price {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: #8b0000;
+        margin: 0;
+    }
+
+    .card-price-old {
+        font-size: 0.75rem;
+        color: #999;
+        text-decoration: line-through;
+        margin-right: 5px;
+    }
+
+    .card-discount-pct {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #8b0000;
+    }
+
+    .stock-status {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #28a745;
+        margin-top: 8px;
+    }
 
     .section-title {
         font-size: 1.5rem;
@@ -121,124 +359,161 @@
         align-items: center;
         gap: 10px;
     }
-    .section-title::after { content: ""; height: 2px; flex-grow: 1; background: #eee; }
+
+    .section-title::after {
+        content: "";
+        height: 2px;
+        flex-grow: 1;
+        background: #eee;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="index-container">
-    
+
     <!-- Categorías Rápidas -->
     <div class="quick-categories mb-5">
-        {% for cat in categorias_principales %}
-        <a href="{% url 'productos' %}?categoria={{ cat.id }}" class="cat-circle-item">
-            <div class="cat-image-wrapper">
-                <i class="fas {% if 'remera' in cat.nombre|lower %}fa-tshirt{% elif 'pantalon' in cat.nombre|lower %}fa-socks{% else %}fa-tag{% endif %}"></i>
-            </div>
-            <span>{{ cat.nombre }}</span>
+        <a href="{% url 'productos' %}?categoria=79&categoria=96&categoria=78" class="cat-square-item">
+            <div class="cat-image-wrapper"><i class="fas fa-user-tie"></i></div>
+            <span>TRAJES</span>
         </a>
-        {% endfor %}
-        <a href="{% url 'productos' %}" class="cat-circle-item">
-            <div class="cat-image-wrapper" style="background: #111;">
-                <i class="fas fa-plus text-white"></i>
-            </div>
-            <span>VER TODO</span>
+        <a href="{% url 'productos' %}?categoria=73" class="cat-square-item">
+            <div class="cat-image-wrapper"><i class="fas fa-tshirt"></i></div>
+            <span>CAMISAS</span>
+        </a>
+        <a href="{% url 'productos' %}?categoria=76" class="cat-square-item">
+            <div class="cat-image-wrapper"><i class="fas fa-glasses"></i></div>
+            <span>ACCESORIOS</span>
+        </a>
+        <a href="{% url 'productos' %}" class="cat-square-item">
+            <div class="cat-image-wrapper" style="background: #8b0000; border-color: #8b0000;"><i
+                    class="far fa-star text-white"></i></div>
+            <span style="color: #8b0000;">NOVEDADES</span>
         </a>
     </div>
 
     <!-- Banner de Ofertas -->
     <div class="promo-banner shadow-sm">
         <div class="promo-content">
-            <span class="promo-badge">HOT SALE - 30% OFF</span>
+            <span class="promo-badge"><i class="fas fa-fire"></i> HOT SALE - 50% OFF</span>
             <h2>TEMPORADA 2026</h2>
-            <p>Elegancia que marca la diferencia en cada paso.</p>
-            <a href="{% url 'productos' %}" class="btn btn-light fw-bold px-4 py-2 rounded-pill">VER COLECCIÓN</a>
+            <p>Eleva tu presencia con sastrería de clase mundial. Solo para audaces.</p>
+            <div class="d-flex align-items-center gap-4">
+                <a href="{% url 'productos' %}" class="btn fw-bold px-4 py-2"
+                    style="background-color: #8b0000; color: white; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px;">COMPRAR
+                    AHORA</a>
+                <div class="timer-block">
+                    <div class="timer-item"><span class="timer-val">02</span><span class="timer-label">HRS</span></div>
+                    <span class="timer-sep">:</span>
+                    <div class="timer-item"><span class="timer-val">45</span><span class="timer-label">MIN</span></div>
+                    <span class="timer-sep">:</span>
+                    <div class="timer-item"><span class="timer-val">12</span><span class="timer-label">SEG</span></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Grilla de Productos Principal -->
-    <h3 class="section-title">RECOMENDADO PARA VOS</h3>
-    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="section-title mb-0" style="font-size: 1.2rem; font-style: italic; color: #8b0000;"><i
+                class="fas fa-chart-line me-2"></i> OFERTAS DESTACADAS</h3>
+        <a href="{% url 'productos' %}"
+            style="color: #8b0000; font-weight: 600; text-decoration: none; font-size: 0.9rem;">Ver Todo</a>
+    </div>
+
     <div class="product-grid">
         {% for prod in novedades %}
         <div class="market-card">
             <div class="card-img-container">
+                <div class="badge-top-left">
+                    {% if forloop.counter|divisibleby:2 %}
+                    <span class="product-badge badge-liquidation">LIQUIDACIÓN</span>
+                    {% else %}
+                    <span class="product-badge badge-new">NUEVA TEMPORADA</span>
+                    {% endif %}
+                    {% if prod.descuento %}
+                    <span class="product-badge badge-discount">-{{ prod.descuento }}% OFF</span>
+                    {% endif %}
+                </div>
+                <div class="badge-top-right">
+                    <span class="product-badge badge-bestseller">MÁS VENDIDO</span>
+                </div>
                 <a href="{% url 'producto_detail' prod.id %}">
                     {% if prod.imagen %}
-                        <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}">
+                    <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}">
                     {% else %}
-                        <img src="{% static 'images/placeholder.jpg' %}" alt="No image">
+                    <img src="{% static 'images/placeholder.jpg' %}" alt="No image">
                     {% endif %}
                 </a>
-                <button class="quick-add-btn" onclick="addToCart('{{ prod.id }}')">
+                <button class="quick-add-btn" onclick="window.location.href='{% url "producto_detail" prod.id %}'" title="Ver opciones">
                     <i class="fas fa-cart-plus"></i>
                 </button>
             </div>
             <div class="card-info">
                 <p class="card-title">{{ prod.nombre }}</p>
-                <div class="d-flex justify-content-between align-items-center">
-                    <p class="card-price">${{ prod.precio }}</p>
+                <div class="card-rating">
+                    <i class="fas fa-star"></i> 4.9 (1.2k)
                 </div>
+                <div class="card-price-row">
+                    <p class="card-price">${{ prod.precio }}</p>
+                    {% if prod.precio_original %}
+                    <div>
+                        <span class="card-price-old">${{ prod.precio_original }}</span>
+                        <span class="card-discount-pct">-40% OFF</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <span class="stock-status">Últimas unidades</span>
             </div>
         </div>
         {% endfor %}
     </div>
 
     <!-- Beneficios (Trust Badges) -->
-    <div class="row mt-5 py-5 border-top text-center">
-        <div class="col-md-3 mb-4">
-            <i class="fas fa-truck fs-1 text-muted mb-3"></i>
-            <h6 class="fw-bold">ENVÍO RÁPIDO</h6>
-            <p class="small text-muted">A todo el país en 24-48hs.</p>
+    <div class="row mt-5 pt-4">
+        <div class="col-md-4 mb-4">
+            <div class="d-flex align-items-center p-4 bg-white" style="border: 1px solid #f0f0f0; border-radius: 8px;">
+                <div class="me-3"
+                    style="background: #f8e9e9; color: #8b0000; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                    <i class="fas fa-truck fs-4"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">ENVÍO RÁPIDO</h6>
+                    <p class="small text-muted mb-0" style="font-size: 0.8rem;">Entrega en 24-48hs hábiles.</p>
+                </div>
+            </div>
         </div>
-        <div class="col-md-3 mb-4">
-            <i class="fas fa-shield-alt fs-1 text-muted mb-3"></i>
-            <h6 class="fw-bold">COMPRA SEGURA</h6>
-            <p class="small text-muted">Protegemos tus datos y pagos.</p>
+        <div class="col-md-4 mb-4">
+            <div class="d-flex align-items-center p-4 bg-white" style="border: 1px solid #f0f0f0; border-radius: 8px;">
+                <div class="me-3"
+                    style="background: #f8e9e9; color: #8b0000; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                    <i class="fas fa-shield-alt fs-4"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">COMPRA SEGURA</h6>
+                    <p class="small text-muted mb-0" style="font-size: 0.8rem;">Encriptación SSL y pagos seguros.</p>
+                </div>
+            </div>
         </div>
-        <div class="col-md-3 mb-4">
-            <i class="fas fa-exchange-alt fs-1 text-muted mb-3"></i>
-            <h6 class="fw-bold">CAMBIO FÁCIL</h6>
-            <p class="small text-muted">30 días para cambios sin costo.</p>
-        </div>
-        <div class="col-md-3 mb-4">
-            <i class="fas fa-credit-card fs-1 text-muted mb-3"></i>
-            <h6 class="fw-bold">3 CUOTAS SIN INTERÉS</h6>
-            <p class="small text-muted">Con todas las tarjetas bancarias.</p>
+        <div class="col-md-4 mb-4">
+            <div class="d-flex align-items-center p-4 bg-white" style="border: 1px solid #f0f0f0; border-radius: 8px;">
+                <div class="me-3"
+                    style="background: #f8e9e9; color: #8b0000; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                    <i class="far fa-credit-card fs-4"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">3 CUOTAS SIN INTERÉS</h6>
+                    <p class="small text-muted mb-0" style="font-size: 0.8rem;">Aceptamos todas las tarjetas
+                        principales.</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-function addToCart(productId) {
-    const formData = new FormData();
-    formData.append('producto_id', productId);
-    formData.append('cantidad', 1);
-
-    fetch('{% url "agregar_al_carrito" %}', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.status === 'success') {
-            // Si tienes una función para actualizar el contador del carrito en base.html, la llamamos aquí
-            if (typeof updateCartBadge === 'function') {
-                updateCartBadge(data.cart_count);
-            }
-            alert('¡Producto añadido al carrito!');
-            location.reload(); // Recargamos para ver los cambios en el mini-cart
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Hubo un problema al añadir el producto.');
-    });
-}
+    // La función de agregar al carrito rápida fue reemplazada por redirección al detalle del producto,
+    // ya que el carrito requiere obligatoriamente seleccionar talle y color.
 </script>
 {% endblock %}
