@@ -10,3 +10,4 @@ gunicorn==23.0.0
 whitenoise==6.9.0
 dj-database-url==2.1.0
 psycopg2-binary==2.9.10
+django-supabase-storage==0.1.3
