@@ -694,3 +694,7 @@ def stock(request):
     
     stock_items = ProductoStock.objects.select_related('producto', 'color', 'talle').all()
     return render(request, 'custom_admin/stock.html', {'stock_items': stock_items})
+
+def health_check(request):
+    from django.http import HttpResponse
+    return HttpResponse("OK", content_type="text/plain")
