@@ -62,6 +62,8 @@ def producto_list(request):
     color_id = request.GET.get('color')
     talle_id = request.GET.get('talle')
     marca_id = request.GET.get('marca')
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
     
     categorias = Categoria.objects.all()
     colores = list(Color.objects.filter(esta_activo=True))
@@ -70,11 +72,21 @@ def producto_list(request):
     talles = Talle.objects.filter(esta_activo=True)
     marcas = Marca.objects.all()
     
-    productos = Producto.objects.filter(esta_activo=True).select_related('categoria', 'marca').prefetch_related('colores', 'stock_items').all()
+    productos = Producto.objects.filter(esta_activo=True).select_related('categoria', 'marca').prefetch_related('colores', 'stock_items')
     
-    # Filtrar por categorías (múltiples)
+    # Filtrar por categorías (incluyendo subcategorías recursivamente)
+    all_cat_ids = set()
     if categoria_ids:
-        productos = productos.filter(categoria_id__in=categoria_ids)
+        all_cat_ids = set([int(cid) for cid in categoria_ids if cid.isdigit()])
+        # Expandimos para incluir hijos (hasta 3 niveles de profundidad)
+        curr_ids = list(all_cat_ids)
+        for _ in range(3):
+            next_ids = Categoria.objects.filter(parent_id__in=curr_ids).values_list('id', flat=True)
+            if not next_ids: break
+            all_cat_ids.update(next_ids)
+            curr_ids = list(next_ids)
+        
+        productos = productos.filter(categoria_id__in=all_cat_ids)
     
     # Filtrar por color
     if color_id:
@@ -87,40 +99,61 @@ def producto_list(request):
     # Filtrar por marca
     if marca_id:
         productos = productos.filter(marca_id=marca_id)
+
+    # Filtrar por precio
+    if min_price:
+        productos = productos.filter(precio__gte=min_price)
+    if max_price:
+        productos = productos.filter(precio__lte=max_price)
+
+    # Determinar rango de precios real para el slider
+    from django.db.models import Min, Max
+    precio_min_db = Producto.objects.filter(esta_activo=True).aggregate(Min('precio'))['precio__min'] or 0
+    precio_max_db = Producto.objects.filter(esta_activo=True).aggregate(Max('precio'))['precio__max'] or 0
     
-    # Determinar qué colores y talles tienen stock disponible (en general o según filtros)
-    colores_con_stock = Color.objects.filter(productostock__stock__gt=0).values_list('id', flat=True).distinct()
-    talles_con_stock = Talle.objects.filter(productostock__stock__gt=0).values_list('id', flat=True).distinct()
+    # Redondear para estética
+    precio_min_db = int(precio_min_db)
+    precio_max_db = int(precio_max_db)
     
-    # Mapeo Maestro UX/UI Premium
+    # Determinar qué colores y talles tienen stock disponible REAL (filtrado por el resto de los filtros)
+    base_productos = Producto.objects.filter(esta_activo=True)
+    if all_cat_ids:
+        base_productos = base_productos.filter(categoria_id__in=all_cat_ids)
+    if marca_id:
+        base_productos = base_productos.filter(marca_id=marca_id)
+    if min_price:
+        base_productos = base_productos.filter(precio__gte=min_price)
+    if max_price:
+        base_productos = base_productos.filter(precio__lte=max_price)
+    
+    colores_con_stock = Color.objects.filter(productostock__stock__gt=0, productos__in=base_productos).values_list('id', flat=True).distinct()
+    talles_con_stock = Talle.objects.filter(productostock__stock__gt=0, productos__in=base_productos).values_list('id', flat=True).distinct()
+    
+    # Mapeo Maestro UX/UI Premium - Estructura completa y visible
     MASTER_GROUPS = {
         'SUPERIORES': {
-            'Camisas': ['camisas', 'camisas m/c'],
-            'Remeras': ['remera', 'remeras'],
-            'Chombas & Polos': ['chombas'],
-            'Sweaters & Cardigans': ['sweaters', 'polera'],
-            'Chalecos': ['chaleco']
+            'Camisas': ['camisa'],
+            'Remeras': ['remera'],
+            'Chombas': ['chomba'],
+            'Sweaters & Chalecos': ['sweater', 'polera', 'pullover', 'chaleco']
         },
         'INFERIORES': {
-            'Pantalones': ['pantalón lino', 'gabardina corte chino', 'poplin chino'],
-            'Jeans': ['jean'],
-            'Bermudas': ['bermudas'],
-            'Joggers': ['jogger'],
-            'Pantalones 7/8': ['7/8']
+            'Pantalones & Jeans': ['pantalón', 'pantalon', 'gabardina', 'chino', 'lino', 'jean'],
+            'Bermudas & Joggers': ['bermuda', 'jogger']
         },
-        'EXTERIOR': {
-            'Camperas': ['campera algodón', 'campera lana', 'campera paño', 'campera impermeable'],
-            'Impermeables & Pilotines': ['pilotín', 'pilotin'],
-            'Sacos Sport / Blazers': ['saco sport']
-        },
-        'FORMAL': {
-            'Trajes & Ambos': ['ambo'],
-            'Corbatas & Pañuelos': ['corbatas']
+        'SACOS Y ABRIGOS': {
+            'Sacos & Blazers': ['saco', 'blazer', 'ambo', 'traje'],
+            'Camperas': ['campera', 'pilotin', 'impermeable']
         },
         'ACCESORIOS': {
-            'Cintos': ['cintos'],
-            'Medias & Ropa Interior': ['medias', 'bóxers'],
-            'Pulseras & Complementos': ['pulsera', 'pulsers']
+            'Cintos': ['cinto'],
+            'Corbatas & Pañuelos': ['corbata', 'pañuelo', 'pasador', 'pisa corbata'],
+            'Gemelos & Complementos': ['mancuernilla', 'gemelos'], # Quitamos 'accesorios' para que no sea tan broad
+            'Medias & Ropa Interior': ['media', 'bóxer', 'boxer']
+        },
+        'REGALOS': {
+            'Gift Cards': ['gift card'],
+            'Kits & Otros': ['kit', 'regalo']
         }
     }
 
@@ -136,6 +169,7 @@ def producto_list(request):
         group_is_active = False
         
         for subgroup_name, keywords in subgroups.items():
+            # Mostramos todas las categorías que coincidan con los keywords, tengan productos o no
             matching_cats = [c for c in categorias if any(k in c.nombre.lower() for k in keywords)]
             if matching_cats:
                 group_subgroups[subgroup_name] = matching_cats
@@ -151,19 +185,23 @@ def producto_list(request):
                 'is_active': group_is_active
             })
 
-    # Añadir sección VARIOS para lo que no encajó
-    otros_cats = [c for c in categorias if c.id not in mapped_cat_ids and c.nombre.lower() not in ['inicio', 'cat1']]
-    if otros_cats:
-        is_otros_active = any(c.id in selected_cat_ints for c in otros_cats)
+    # Sección VARIOS: para todo lo que no entró en el mapeo principal
+    varios_subgroups = {}
+    varios_is_active = False
+    for c in categorias:
+        if c.id not in mapped_cat_ids and c.nombre.lower() not in ['inicio', 'cat1']:
+            varios_subgroups[c.nombre] = [c]
+            if c.id in selected_cat_ints:
+                varios_is_active = True
+    
+    if varios_subgroups:
         categorias_grouped_list.append({
             'name': 'VARIOS',
-            'subgroups': {'Otros Complementos': otros_cats},
-            'is_active': is_otros_active
+            'subgroups': varios_subgroups,
+            'is_active': varios_is_active
         })
     
-    # Filtrar por categorías (múltiples)
-    if categoria_ids:
-        productos = productos.filter(categoria_id__in=categoria_ids)
+    # El filtrado de categorías ya se realizó arriba. Eliminamos la duplicación.
     
     return render(request, 'producto.html', {
         'productos': productos,
@@ -175,6 +213,10 @@ def producto_list(request):
         'selected_color': color_id,
         'selected_talle': talle_id,
         'selected_marca': marca_id,
+        'selected_min_price': min_price,
+        'selected_max_price': max_price,
+        'precio_min_db': precio_min_db,
+        'precio_max_db': precio_max_db,
         'colores_con_stock': list(colores_con_stock),
         'talles_con_stock': list(talles_con_stock),
     })

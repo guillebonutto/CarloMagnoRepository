@@ -56,9 +56,57 @@
     .productos-table th {
         padding: 0 !important;
     }
-    .productos-table th a, .productos-table th span {
+    .productos-table th span {
         padding: 12px 15px;
         display: block;
+    }
+
+    /* Switch Styles */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 46px;
+        height: 24px;
+    }
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: #28a745;
+    }
+    input:checked + .slider:before {
+        transform: translateX(22px);
+    }
+    .status-label {
+        font-size: 0.7rem;
+        font-weight: bold;
+        display: block;
+        margin-top: 2px;
+        color: #666;
     }
 </style>
 {% endblock %}
@@ -128,6 +176,7 @@
                            Precio
                         </a>
                     </th>
+                    <th class="text-center"><span>Estado</span></th>
 					<th>
                         <a href="?sort=fecha&direction={% if current_sort == 'fecha' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}" 
                            class="sortable {% if current_sort == 'fecha' %}{{ current_direction }}{% endif %}">
@@ -155,6 +204,15 @@
 					<td class="align-middle"><span class="badge bg-light text-dark">{{ producto.categoria.nombre }}</span></td>
 					<td class="align-middle">{{ producto.marca.nombre|default:"Sin marca" }}</td>
 					<td class="align-middle"><strong>${{ producto.precio }}</strong></td>
+                    <td class="align-middle text-center">
+                        <label class="switch">
+                            <input type="checkbox" class="status-toggle" data-id="{{ producto.id }}" {% if producto.esta_activo %}checked{% endif %}>
+                            <span class="slider"></span>
+                        </label>
+                        <span class="status-label" id="status-{{ producto.id }}">
+                            {% if producto.esta_activo %}Activo{% else %}Inactivo{% endif %}
+                        </span>
+                    </td>
 					<td class="align-middle text-muted">{{ producto.created_at|date:"d/m/Y" }}</td>
 					<td class="align-middle text-center">
 						<div class="btn-group">
@@ -183,4 +241,45 @@
 
 {% block extra_js %}
 <script src="{% static 'js/panel.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggles = document.querySelectorAll('.status-toggle');
+    
+    toggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const productId = this.dataset.id;
+            const label = document.getElementById(`status-${productId}`);
+            const isChecked = this.checked;
+            
+            // Mostrar estado cargando si querés, o simplemente confiar
+            label.textContent = isChecked ? 'Actualizando...' : 'Actualizando...';
+            
+            fetch(`/panel/productos/${productId}/toggle-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    label.textContent = data.is_active ? 'Activo' : 'Inactivo';
+                    label.style.color = data.is_active ? '#28a745' : '#dc3545';
+                } else {
+                    alert('Error al actualizar el estado');
+                    this.checked = !isChecked; // Revertir
+                    label.textContent = !isChecked ? 'Activo' : 'Inactivo';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error de conexión');
+                this.checked = !isChecked; // Revertir
+                label.textContent = !isChecked ? 'Activo' : 'Inactivo';
+            });
+        });
+    });
+});
+</script>
 {% endblock %}

@@ -134,6 +134,34 @@ small {
 	margin-top: 5px;
 }
 
+/* Estilos para el checkbox de estado activo */
+.checkbox-group {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    margin: 25px 0;
+}
+
+.checkbox-container {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    margin-bottom: 0 !important;
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.checkbox-label {
+    font-weight: 600;
+    color: #333;
+}
+
 .logo-preview {
 	margin-top: 10px;
 	text-align: center;

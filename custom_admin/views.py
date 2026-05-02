@@ -3,6 +3,8 @@ from django.contrib.auth import login as django_login, authenticate
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from django.forms import ModelForm
 from django import forms
 from productos.models import Producto, Categoria, Color, Marca, Talle, Cliente, Direccion, ProductoStock, Pedido, PedidoItem, Cupon
@@ -262,6 +264,21 @@ def eliminar_producto(request, pk):
     return render(request, 'custom_admin/confirm_eliminar.html', {
         'object': producto,
         'type': 'producto'
+    })
+
+@login_required(login_url='login')
+@require_POST
+def toggle_producto_status(request, pk):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'No autorizado'}, status=403)
+    
+    producto = get_object_or_404(Producto, pk=pk)
+    producto.esta_activo = not producto.esta_activo
+    producto.save()
+    
+    return JsonResponse({
+        'status': 'success',
+        'is_active': producto.esta_activo
     })
 
 # Gestión de categorías

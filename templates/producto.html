@@ -640,8 +640,10 @@
                 if (newDesk && deskSidebar) deskSidebar.innerHTML = newDesk.innerHTML;
                 if (newMob  && mobSidebar)  mobSidebar.innerHTML  = newMob.innerHTML;
 
-                // Reinicializar solo el carrusel visual (no los listeners)
+                // Reinicializar listeners y estilos
                 initCarouselStyles();
+                initPriceSlider();
+                initCategorySearch();
 
                 productGrid.style.opacity = '1';
                 productGrid.style.pointerEvents = 'auto';
@@ -651,6 +653,31 @@
                 window.location.href = url;
             })
             .finally(() => { isFetching = false; });
+    };
+
+    // ---- Manejo del Slider de Precio ----
+    const initPriceSlider = () => {
+        document.querySelectorAll('.price-slider').forEach(slider => {
+            const prefix = slider.dataset.prefix;
+            const currentVal = document.getElementById(prefix + 'current_val');
+            
+            // 1. Actualización visual instantánea
+            slider.addEventListener('input', function() {
+                if (currentVal) currentVal.textContent = this.value;
+            });
+            
+            // 2. Ejecución del filtro (al soltar el slider)
+            slider.addEventListener('change', function() {
+                const val = this.value;
+                const url = new URL(window.location.href);
+                url.searchParams.set('max_price', val);
+                
+                // Asegurarse de que el min_price esté presente si es necesario
+                // (Por ahora asumimos el min_db)
+                
+                fetchProductsAndReplace(url.toString());
+            });
+        });
     };
 
     // ---- Event Delegation global ----
@@ -784,6 +811,7 @@
         initCategorySearch();
         initStickySearch();
         initCarouselStyles();
+        initPriceSlider();
     });
 </script>
 {% endblock %}

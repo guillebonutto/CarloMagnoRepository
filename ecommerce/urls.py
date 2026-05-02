@@ -48,6 +48,7 @@ urlpatterns = [
     path('panel/productos/agregar/', admin_views.agregar_producto, name='agregar_producto'),
     path('panel/productos/<int:pk>/editar/', admin_views.editar_producto, name='editar_producto'),
     path('panel/productos/<int:pk>/eliminar/', admin_views.eliminar_producto, name='eliminar_producto'),
+    path('panel/productos/<int:pk>/toggle-status/', admin_views.toggle_producto_status, name='toggle_producto_status'),
     
     # Categorías
     path('panel/categorias/', admin_views.categorias, name='categorias'),
