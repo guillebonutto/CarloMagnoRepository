@@ -9,7 +9,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-LOGIN_URL = 'custom_login'
+LOGIN_URL = 'login_cliente'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -143,6 +143,7 @@ else:
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = _email_user
     EMAIL_HOST_PASSWORD = _email_pass
+    DEFAULT_FROM_EMAIL = _email_user
 
 # Token de reset de contraseña expira en 1 hora
 PASSWORD_RESET_TIMEOUT = 3600
