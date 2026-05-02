@@ -706,9 +706,11 @@ def importar_datos_maestros(request):
     
     try:
         from migrate_prestashop import migrate_data
+        from vincular_fotos import vincular_imagenes
         migrate_data()
+        vincular_imagenes()
         from django.http import HttpResponse
-        return HttpResponse("✅ Datos importados correctamente. Ya podés volver al home.")
+        return HttpResponse("✅ Datos e imágenes vinculados correctamente. Ya podés volver al home.")
     except Exception as e:
         from django.http import HttpResponse
         return HttpResponse(f"❌ Error al importar: {str(e)}")
