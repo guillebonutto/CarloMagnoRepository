@@ -173,7 +173,7 @@
                 <div class="carousel-item-color color-swatch" 
                      data-name="{{ color.nombre }}" 
                      data-id="{{ color.id }}"
-                     style="background-color: {{ color.hex_code }};"></div>
+                     data-color="{{ color.hex_code }}"></div>
                 {% endfor %}
                 <div class="carousel-spacer"></div>
             </div>
@@ -259,8 +259,11 @@
     const carousel = document.getElementById('colorCarousel');
     const items = document.querySelectorAll('.carousel-item-color');
     const nameTxt = document.getElementById('selectedColorName');
-    let selColor = {% if colores_disponibles %}"{{ colores_disponibles.0.id }}"{% else %}null{% endif %};
-    let selTalle = {% if talles_disponibles %}"{{ talles_disponibles.0.id }}"{% else %}null{% endif %};
+
+    // Apply colors from data-color attribute to avoid IDE errors
+    items.forEach(item => { if(item.dataset.color) item.style.backgroundColor = item.dataset.color; });
+    let selColor = "{{ colores_disponibles.0.id|default:'' }}";
+    let selTalle = "{{ talles_disponibles.0.id|default:'' }}";
 
     const updateCarousel = () => {
         if(!carousel) return;
