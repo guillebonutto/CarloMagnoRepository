@@ -698,3 +698,17 @@ def stock(request):
 def health_check(request):
     from django.http import HttpResponse
     return HttpResponse("OK", content_type="text/plain")
+
+def importar_datos_maestros(request):
+    if not request.user.is_staff:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("No autorizado")
+    
+    try:
+        from migrate_prestashop import migrate_data
+        migrate_data()
+        from django.http import HttpResponse
+        return HttpResponse("✅ Datos importados correctamente. Ya podés volver al home.")
+    except Exception as e:
+        from django.http import HttpResponse
+        return HttpResponse(f"❌ Error al importar: {str(e)}")

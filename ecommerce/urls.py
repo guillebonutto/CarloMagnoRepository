@@ -138,6 +138,7 @@ urlpatterns = [
     # Stock
     path('panel/stock/', admin_views.stock, name='stock'),
     path('health/', admin_views.health_check, name='health_check'),
+    path('importar-datos-maestros/', admin_views.importar_datos_maestros, name='importar_datos'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
