@@ -110,7 +110,7 @@ SUPABASE_BUCKET = os.environ.get('SUPABASE_BUCKET', 'productos')
 
 if SUPABASE_URL and SUPABASE_KEY:
     STORAGES["default"] = {
-        "BACKEND": "django_supabase_storage.storage.SupabaseStorage",
+        "BACKEND": "django_supabase_storage.SupabaseStorage",
     }
     SUPABASE_PUBLIC_URL = True 
 
