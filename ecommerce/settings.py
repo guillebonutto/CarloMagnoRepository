@@ -102,8 +102,8 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 20971520   # 20 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520   # 20 MB
 
 # ========== CONFIGURACIÓN DE EMAIL ==========
-_email_user = os.environ.get('EMAIL_HOST_USER', '')
-_email_pass = os.environ.get('EMAIL_HOST_PASSWORD', '')
+_email_user = os.environ.get('EMAIL_HOST_USER', 'carlomagnocordoba@gmail.com')
+_email_pass = os.environ.get('EMAIL_HOST_PASSWORD', 'yjco aysa fdhu fskd')
 
 if DEBUG and not _email_user:
     # En desarrollo: muestra el email en la consola del servidor (no envía nada real)
@@ -116,7 +116,6 @@ else:
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = _email_user
     EMAIL_HOST_PASSWORD = _email_pass
-    DEFAULT_FROM_EMAIL = _email_user
 
 # Token de reset de contraseña expira en 1 hora
 PASSWORD_RESET_TIMEOUT = 3600
