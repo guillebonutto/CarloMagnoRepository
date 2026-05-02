@@ -8,91 +8,59 @@
 	<title>Carlo Magno</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="{% static 'css/style.css' %}" />
 	{% block extra_css %}{% endblock %}
 </head>
 
 <body>
 	<!-- TOP BAR -->
-	<div class="top-bar text-white text-center py-2 fw-bold"
-		style="background-color: #8b0000; font-size: 0.85rem; letter-spacing: 1px;">
-		<i class="fas fa-bolt"></i> OFERTA RELÁMPAGO: 50% OFF - TERMINA EN 02:45:12 <i class="fas fa-bolt"></i>
+	<div class="top-bar-premium py-2">
+		<div class="container d-flex justify-content-center align-items-center gap-3">
+			<span class="top-bar-text"><i class="fas fa-bolt"></i> OFERTA DE TIEMPO LIMITADO:</span>
+			<div class="countdown-mini">
+				<div class="cd-box">02</div> : <div class="cd-box">45</div> : <div class="cd-box">12</div>
+			</div>
+			<i class="fas fa-chevron-right ms-2" style="font-size: 0.7rem; opacity: 0.7;"></i>
+		</div>
 	</div>
 
-	<nav class="navbar navbar-expand-lg sticky-top main-navbar"
-		style="background-color: #ffffff; padding: 15px 0; border-bottom: 1px solid #f0f0f0;">
-		<div class="container-fluid px-lg-5 d-flex flex-wrap align-items-center justify-content-between">
-			<!-- Logo a la izquierda -->
-			<a class="navbar-brand d-flex align-items-center order-1" href="{% url 'inicio' %}" style="margin-right: 30px;">
-				<img src="{% static 'images/logo.png' %}" alt="Carlo Magno Logo"
-					style="height: 45px; filter: brightness(0) invert(15%) sepia(80%) saturate(6000%) hue-rotate(350deg);" />
+	<nav class="navbar main-navbar sticky-top bg-white border-bottom py-2">
+		<div class="container-fluid px-3 d-flex align-items-center justify-content-between">
+			<!-- Hamburger Menu (Mobile Only) -->
+			<button class="navbar-toggler border-0 p-0 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
+				<i class="fas fa-bars fs-4 text-dark"></i>
+			</button>
+
+			<!-- Logo -->
+			<a class="navbar-brand mx-auto ms-lg-0 me-lg-4" href="{% url 'inicio' %}">
+				<img src="{% static 'images/logo.png' %}" alt="Carlo Magno" style="height: 32px;" class="logo-img" />
 			</a>
 
-			<!-- BARRA DE BÚSQUEDA CENTRAL -->
-			<div class="header-search-wrapper order-3 order-lg-2 mt-3 mt-lg-0 mx-lg-4 d-flex align-items-center"
-				id="mainHeaderSearch" style="flex: 1; max-width: 600px;">
+			<!-- Desktop Search (Hidden on Mobile) -->
+			<div class="header-search-wrapper d-none d-lg-flex" style="flex: 1; max-width: 500px;">
 				<form action="{% url 'productos' %}" method="GET" class="w-100">
-					<div class="input-group" style="background-color: #f5f5f5; border-radius: 8px;">
-						<input type="text" name="q" class="form-control border-0 bg-transparent py-2 px-3"
-							placeholder="Buscar en la colección..." style="box-shadow: none; font-size: 0.9rem;">
-						<button class="btn border-0 bg-transparent px-3" type="submit" style="color: #666;">
-							<i class="fas fa-search"></i>
-						</button>
+					<div class="input-group search-group">
+						<input type="text" name="q" class="form-control" placeholder="¿Qué estás buscando?">
+						<button class="btn" type="submit"><i class="fas fa-search"></i></button>
 					</div>
 				</form>
 			</div>
 
-			<!-- BOTONES DERECHA -->
-			<div class="nav-icons-wrapper d-flex align-items-center order-2 order-lg-3 gap-3">
+			<!-- Mobile Icons -->
+			<div class="d-flex align-items-center gap-3">
+				<a href="#" class="text-dark d-lg-none"><i class="fas fa-search fs-5"></i></a>
 				{% if user.is_authenticated %}
-				<div class="dropdown">
-					<a class="nav-link text-dark d-flex align-items-center gap-2" href="#" id="userDropdown"
-						data-bs-toggle="dropdown">
-						<i class="far fa-user fs-5"></i>
-					</a>
-					<ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3" style="border-radius: 10px;">
-						<li><a class="dropdown-item py-2" href="{% url 'perfil_cliente' %}"><i
-									class="fas fa-box-open me-2"></i> Mis Pedidos</a></li>
-						<li><a class="dropdown-item py-2" href="{% url 'perfil_cliente' %}"><i
-									class="fas fa-heart me-2"></i> Mis Favoritos</a></li>
-						<li>
-							<hr class="dropdown-divider">
-						</li>
-						<li><a class="dropdown-item py-2 text-danger" href="{% url 'logout_cliente' %}"><i
-									class="fas fa-sign-out-alt me-2"></i> Salir</a></li>
-					</ul>
-				</div>
+				<a href="{% url 'perfil_cliente' %}" class="text-dark"><i class="far fa-user fs-5"></i></a>
 				{% else %}
-				<a href="{% url 'login_cliente' %}" class="nav-link text-dark">
-					<i class="far fa-user fs-5"></i>
-				</a>
+				<a href="{% url 'login_cliente' %}" class="text-dark"><i class="far fa-user fs-5"></i></a>
 				{% endif %}
-
-				<!-- Carrito flotante -->
-				<div class="cart-wrapper position-relative" id="cartIconContainer">
-					<a href="#" class="nav-link text-dark position-relative" id="cartTrigger">
+				
+				<div class="position-relative">
+					<a href="#" class="text-dark" id="cartTrigger">
 						<i class="fas fa-shopping-cart fs-5"></i>
-						<span
-							class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger text-white border border-white"
-							id="cartBadge" style="font-size: 0.6rem; padding: 0.35em 0.5em; top: -5px !important;">
-							{{ carrito_cantidad|default:0 }}
-						</span>
+						<span class="cart-badge-count">{{ carrito_cantidad|default:0 }}</span>
 					</a>
-
-					<!-- Cart Dropdown (estilo mini-cart) -->
-					<div class="mini-cart-dropdown shadow-lg border-0 d-none" id="miniCart">
-						<div class="p-3 text-center border-bottom">
-							<h6 class="m-0 fw-bold">TU CARRITO</h6>
-						</div>
-						<div class="cart-items-scroll p-2" id="miniCartItems"
-							style="max-height: 300px; overflow-y: auto;">
-							<!-- Dinámico -->
-						</div>
-						<div class="p-3 bg-light rounded-bottom">
-							<a href="{% url 'checkout' %}" class="btn w-100 fw-bold py-2 text-white"
-								style="border-radius: 5px; letter-spacing: 1px; background-color: #8b0000;">FINALIZAR COMPRA</a>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -110,79 +78,165 @@
 	</div>
 
 	<style>
-		/* Estilos Base Marketplace */
+		:root {
+			--primary-red: #8b0000;
+			--dark-red: #5a0000;
+			--accent-orange: #d35400;
+			--light-gray: #f8f9fa;
+			--border-color: #eee;
+			--text-dark: #111;
+			--text-muted: #666;
+		}
+
 		body {
 			font-family: 'Inter', sans-serif;
-			background-color: #f8f9fa;
+			background-color: #ffffff;
+			color: var(--text-dark);
+			padding-bottom: 70px; /* Space for mobile nav */
 		}
 
+		h1, h2, h3, .navbar-brand {
+			font-family: 'Outfit', sans-serif;
+		}
+
+		/* Top Bar Premium */
+		.top-bar-premium {
+			background: var(--primary-red);
+			color: white;
+			font-size: 0.75rem;
+			font-weight: 700;
+			letter-spacing: 0.5px;
+		}
+
+		.countdown-mini {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+
+		.cd-box {
+			background: white;
+			color: black;
+			padding: 2px 4px;
+			border-radius: 4px;
+			font-family: monospace;
+			font-weight: 900;
+		}
+
+		/* Header & Search */
 		.main-navbar {
-			z-index: 1030;
+			transition: all 0.3s;
 		}
 
-		/* Búsqueda Estilo Shein */
-		.header-search-wrapper .form-control:focus {
-			box-shadow: none;
-			background-color: #fff;
-		}
-
-		.header-search-wrapper .input-group {
-			box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+		.search-group {
+			background: #f5f5f5;
 			border-radius: 50px;
 			overflow: hidden;
+			border: 1px solid transparent;
 		}
 
-		/* Mini Cart Dropdown */
-		.mini-cart-dropdown {
+		.search-group .form-control {
+			background: transparent;
+			border: none;
+			box-shadow: none;
+			padding: 8px 20px;
+			font-size: 0.9rem;
+		}
+
+		.search-group .btn {
+			background: transparent;
+			border: none;
+			color: var(--text-muted);
+		}
+
+		.cart-badge-count {
 			position: absolute;
-			top: 100%;
-			right: 0;
-			width: 320px;
+			top: -8px;
+			right: -8px;
+			background: var(--primary-red);
+			color: white;
+			font-size: 0.65rem;
+			font-weight: 800;
+			width: 18px;
+			height: 18px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 50%;
+			border: 2px solid white;
+		}
+
+		/* Bottom Navigation */
+		.mobile-bottom-nav {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			width: 100%;
 			background: white;
-			z-index: 1000;
-			margin-top: 15px;
-			border-radius: 12px;
-			overflow: hidden;
+			display: flex;
+			justify-content: space-around;
+			padding: 10px 0;
+			box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+			z-index: 1050;
+			border-top: 1px solid var(--border-color);
 		}
 
-		.cart-items-scroll::-webkit-scrollbar {
-			width: 4px;
+		.nav-item-mobile {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-decoration: none;
+			color: var(--text-muted);
+			font-size: 0.65rem;
+			font-weight: 700;
+			text-transform: uppercase;
+			gap: 4px;
 		}
 
-		.cart-items-scroll::-webkit-scrollbar-thumb {
-			background: #ddd;
-			border-radius: 10px;
+		.nav-item-mobile.active {
+			color: var(--primary-red);
 		}
 
-		/* Nav Icons */
-		.nav-link {
-			transition: transform 0.2s;
-		}
-
-		.nav-link:hover {
-			transform: scale(1.1);
-		}
-
-		/* Responsivo */
-		@media (max-width: 991px) {
-			.navbar-brand img {
-				height: 35px;
-			}
-
-			#mainHeaderSearch {
-				width: 100% !important;
-				flex-basis: 100%;
-			}
+		.nav-item-mobile i {
+			font-size: 1.2rem;
 		}
 
 		@media (min-width: 992px) {
-			#mainHeaderSearch {
-				width: auto !important;
+			.mobile-bottom-nav {
+				display: none;
+			}
+			body {
+				padding-bottom: 0;
 			}
 		}
 	</style>
 
 	{% block content %}{% endblock %}
+
+	<!-- Mobile Offcanvas Menu -->
+	<div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+		<div class="offcanvas-header border-bottom">
+			<h5 class="offcanvas-title fw-bold" id="mobileMenuLabel">MENÚ</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+		</div>
+		<div class="offcanvas-body p-0">
+			<div class="list-group list-group-flush">
+				<a href="{% url 'inicio' %}" class="list-group-item list-group-item-action py-3 fw-bold"><i class="fas fa-home me-3"></i> INICIO</a>
+				<a href="{% url 'productos' %}" class="list-group-item list-group-item-action py-3 fw-bold"><i class="fas fa-store me-3"></i> TIENDA</a>
+				<a href="{% url 'productos' %}?categoria=79" class="list-group-item list-group-item-action py-3"><i class="fas fa-user-tie me-3"></i> TRAJES</a>
+				<a href="{% url 'productos' %}?categoria=73" class="list-group-item list-group-item-action py-3"><i class="fas fa-tshirt me-3"></i> CAMISAS</a>
+				<a href="{% url 'productos' %}?categoria=75" class="list-group-item list-group-item-action py-3"><i class="fas fa-shoe-prints me-3"></i> ZAPATOS</a>
+				<a href="{% url 'productos' %}?categoria=76" class="list-group-item list-group-item-action py-3"><i class="fas fa-clock me-3"></i> ACCESORIOS</a>
+				<hr class="m-0">
+				{% if user.is_authenticated %}
+				<a href="{% url 'perfil_cliente' %}" class="list-group-item list-group-item-action py-3"><i class="far fa-user me-3"></i> MI CUENTA</a>
+				<a href="{% url 'logout_cliente' %}" class="list-group-item list-group-item-action py-3 text-danger"><i class="fas fa-sign-out-alt me-3"></i> CERRAR SESIÓN</a>
+				{% else %}
+				<a href="{% url 'login_cliente' %}" class="list-group-item list-group-item-action py-3"><i class="far fa-user me-3"></i> INICIAR SESIÓN</a>
+				{% endif %}
+			</div>
+		</div>
+	</div>
 
 	<!-- FOOTER PRINCIPAL -->
 	<footer class="main-footer pt-5 pb-3" style="background-color: #fafafa; border-top: 1px solid #eee;">
@@ -262,6 +316,7 @@
 		};
 
 	</script>
+	{% endblock %}
 
 	<script src="{% static 'js/carrito.js' %}"></script>
 
@@ -354,7 +409,30 @@
 			});
 		})();
 	</script>
-	{% endblock %}
+	<!-- MOBILE BOTTOM NAV -->
+	<div class="mobile-bottom-nav d-lg-none">
+		<a href="{% url 'inicio' %}" class="nav-item-mobile active">
+			<i class="fas fa-home"></i>
+			<span>HOME</span>
+		</a>
+		<a href="{% url 'productos' %}" class="nav-item-mobile">
+			<i class="fas fa-store"></i>
+			<span>SHOP</span>
+		</a>
+		<a href="{% url 'productos' %}" class="nav-item-mobile">
+			<i class="fas fa-bolt"></i>
+			<span>FLASH SALE</span>
+		</a>
+		<a href="{% url 'productos' %}?categoria=79" class="nav-item-mobile">
+			<i class="fas fa-user-tie"></i>
+			<span>SUITS</span>
+		</a>
+		<a href="#" class="nav-item-mobile position-relative">
+			<i class="fas fa-shopping-bag"></i>
+			<span>CART</span>
+			<span class="cart-badge-count" style="top: -5px; right: 0;">{{ carrito_cantidad|default:0 }}</span>
+		</a>
+	</div>
 
 	<!-- WhatsApp Floating Button -->
 	<a href="https://wa.me/5493516681071" class="whatsapp-float" target="_blank" rel="noopener noreferrer">
@@ -366,8 +444,8 @@
 			position: fixed;
 			width: 60px;
 			height: 60px;
-			bottom: 40px;
-			right: 40px;
+			bottom: 85px; /* Elevated to avoid bottom nav */
+			right: 20px;
 			background-color: #25d366;
 			color: #FFF;
 			border-radius: 50%;
