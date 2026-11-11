@@ -90,6 +90,13 @@ class Marca(models.Model):
 
 
 class Producto(models.Model):
+    codigo = models.CharField(
+        max_length=50,
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name='Código de artículo'
+    )
     nombre = models.CharField(max_length=200, verbose_name='Nombre')
     descripcion = models.TextField(verbose_name='Descripción')
     precio = models.DecimalField(

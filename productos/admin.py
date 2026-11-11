@@ -95,9 +95,9 @@ class ProductoStockInline(admin.TabularInline):  # ← Nombre corregido
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):  # ← Nombre corregido
-    list_display = ['nombre', 'marca', 'categoria', 'precio', 'image_thumbnail', 'colores_display', 'created_at']
-    list_filter = ['categoria', 'marca', 'colores', 'created_at']
-    search_fields = ['nombre', 'descripcion', 'marca__nombre']
+    list_display = ['codigo', 'nombre', 'marca', 'categoria', 'precio', 'esta_activo', 'image_thumbnail', 'colores_display', 'created_at']
+    list_filter = ['esta_activo', 'categoria', 'marca', 'colores', 'created_at']
+    search_fields = ['codigo', 'nombre', 'descripcion', 'marca__nombre']
     inlines = [ProductoStockInline]
     readonly_fields = ['image_preview', 'created_at', 'updated_at']
     filter_horizontal = ['colores']
@@ -105,7 +105,7 @@ class ProductoAdmin(admin.ModelAdmin):  # ← Nombre corregido
     
     fieldsets = (
         ('Información básica', {
-            'fields': ('nombre', 'descripcion', 'categoria', 'marca', 'precio'),
+            'fields': ('codigo', 'nombre', 'descripcion', 'categoria', 'marca', 'precio', 'esta_activo'),
             'description': 'Información principal del producto'  # ← Corregido (debe ser 'description')
         }),
         ('Atributos', {
