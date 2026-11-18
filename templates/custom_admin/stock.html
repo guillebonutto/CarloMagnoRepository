@@ -12,58 +12,113 @@
 		<a href="/admin/productos/productostock/" class="btn btn-primary">Ver en Admin</a>
 	</div>
 
-	{% if stock_items %}
-	<div class="stock-table">
-		<table>
-			<thead>
-				<tr>
-					<th>Producto</th>
-					<th>Color</th>
-					<th>Talle</th>
-					<th>Stock</th>
-					<th>Estado</th>
-					<th>Acciones</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for item in stock_items %}
-				<tr>
-					<td><strong>{{ item.producto.nombre }}</strong></td>
-					<td>
-						<span class="color-badge">
-							<span
-								class="color-dot"
-								data-color-hex="{{ item.color.hex_code }}"
-							></span>
-							{{ item.color.nombre }}
-						</span>
-					</td>
-					<td>
-						<span class="size-badge">{{ item.talle.abbreviation }}</span>
-					</td>
-					<td><strong>{{ item.stock }}</strong> unidades</td>
-					<td>
-						{% if item.stock == 0 %}
-						<span class="stock-status stock-out">❌ Sin stock</span>
-						{% elif item.stock < 5 %}
-						<span class="stock-status stock-low">⚠️ Stock bajo</span>
-						{% else %}
-						<span class="stock-status stock-available">✅ Disponible</span>
-						{% endif %}
-					</td>
-					<td>
-						<a href="productos/productostock/{{ item.id }}/change/" class="btn-edit"
-							>✏️ Editar</a
-						>
-					</td>
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+	<form class="stock-controls" method="get" action="{% url 'stock' %}">
+		<div class="stock-search">
+			<label for="stock-search">Buscar</label>
+			<input
+				id="stock-search"
+				type="search"
+				name="buscar"
+				value="{{ search_query }}"
+				placeholder="Producto, código, color o talle"
+			>
+		</div>
+		<div class="stock-sort">
+			<label for="stock-sort">Ordenar por</label>
+			<select id="stock-sort" name="orden">
+				<option value="nombre_asc" {% if sort_by == 'nombre_asc' %}selected{% endif %}>Producto: A → Z</option>
+				<option value="nombre_desc" {% if sort_by == 'nombre_desc' %}selected{% endif %}>Producto: Z → A</option>
+				<option value="color_asc" {% if sort_by == 'color_asc' %}selected{% endif %}>Color: A → Z</option>
+				<option value="talle_asc" {% if sort_by == 'talle_asc' %}selected{% endif %}>Talle</option>
+				<option value="stock_desc" {% if sort_by == 'stock_desc' %}selected{% endif %}>Mayor stock</option>
+				<option value="stock_asc" {% if sort_by == 'stock_asc' %}selected{% endif %}>Menor stock</option>
+			</select>
+		</div>
+		<button class="btn btn-primary" type="submit">Aplicar</button>
+		{% if search_query or sort_by != 'nombre_asc' %}
+		<a class="stock-clear" href="{% url 'stock' %}">Limpiar</a>
+		{% endif %}
+	</form>
+
+	<div class="stock-results-summary">
+		<strong>{{ total_stock_items }}</strong>
+		<span>variantes de stock</span>
+	</div>
+
+	{% if letter_groups %}
+	<nav class="stock-alphabet" aria-label="Ir a la letra">
+		{% for letter in alphabet %}
+			{% if letter in available_letters %}
+			<a href="#stock-letter-{{ letter }}">{{ letter }}</a>
+			{% else %}
+			<span>{{ letter }}</span>
+			{% endif %}
+		{% endfor %}
+		{% if '#' in available_letters %}<a href="#stock-letter-special">#</a>{% endif %}
+	</nav>
+
+	<div class="stock-letter-groups">
+		{% for group in letter_groups %}
+		<section class="stock-letter-group" id="{% if group.letter == '#' %}stock-letter-special{% else %}stock-letter-{{ group.letter }}{% endif %}">
+			<div class="stock-letter-heading">
+				<h2>{{ group.letter }}</h2>
+				<span>{{ group.items|length }} variante{{ group.items|length|pluralize }}</span>
+			</div>
+			<div class="stock-table">
+				<table>
+					<thead>
+						<tr>
+							<th>Producto</th>
+							<th>Color</th>
+							<th>Talle</th>
+							<th>Stock</th>
+							<th>Estado</th>
+							<th>Acciones</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for item in group.items %}
+						<tr>
+							<td>
+								<strong>{{ item.producto.nombre }}</strong>
+								{% if item.producto.codigo %}<small class="stock-product-code">Código {{ item.producto.codigo }}</small>{% endif %}
+							</td>
+							<td>
+								<span class="color-badge">
+									<span class="color-dot" data-color-hex="{{ item.color.hex_code }}"></span>
+									{{ item.color.nombre }}
+								</span>
+							</td>
+							<td><span class="size-badge">{{ item.talle.abbreviation }}</span></td>
+							<td><strong>{{ item.stock }}</strong> unidades</td>
+							<td>
+								{% if item.stock == 0 %}
+								<span class="stock-status stock-out">❌ Sin stock</span>
+								{% elif item.stock < 5 %}
+								<span class="stock-status stock-low">⚠️ Stock bajo</span>
+								{% else %}
+								<span class="stock-status stock-available">✅ Disponible</span>
+								{% endif %}
+							</td>
+							<td>
+								<a href="{% url 'editar_stock' item.id %}" class="btn-edit">✏️ Editar</a>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</section>
+		{% endfor %}
 	</div>
 	{% else %}
 	<div class="empty-state">
+		{% if search_query %}
+		<h2>No se encontraron variantes</h2>
+		<p>No hay resultados para “{{ search_query }}”. Probá con otro producto, código, color o talle.</p>
+		{% else %}
 		<h2>No hay stock registrado</h2>
+		{% endif %}
 	</div>
 	{% endif %}
 </div>

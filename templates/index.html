@@ -2,316 +2,968 @@
 {% load static %}
 
 {% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
 <style>
-    /* DESKTOP STYLES (Keep original) */
-    .index-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 20px;
-        overflow-x: hidden;
-    }
-    .quick-categories { display: flex; overflow-x: auto; gap: 30px; padding: 30px 0; justify-content: center; }
-    .cat-square-item { flex: 0 0 auto; text-align: center; width: 85px; text-decoration: none; color: #111; }
-    .cat-image-wrapper { width: 85px; height: 85px; border-radius: 12px; background: #f8f9fa; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #eaeaea; }
-    .promo-banner { border-radius: 12px; background: linear-gradient(to right, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 100%), url('{% static "images/banner_bg.png" %}'); background-size: cover; height: 450px; margin-bottom: 50px; display: flex; align-items: center; padding: 0 60px; color: white; position: relative; }
-    .product-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
-
-    /* PREMIUM MOBILE REDESIGN (Match Mockup EXACTLY) */
-    @media (max-width: 991px) {
-        .desktop-only { display: none !important; }
-        
-        body { background-color: #ffffff; }
-        .index-container { padding: 0; }
-
-        .hero-premium-mobile {
-            position: relative;
-            height: 65vh;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.1) 100%),
-                        url('https://images.unsplash.com/photo-1594932224828-b4b059b6f68e?q=80&w=800&auto=format&fit=crop') center/cover no-repeat;
-            display: flex;
-            align-items: flex-end;
-            padding: 40px 20px;
-            color: white;
-            margin-bottom: 35px;
-        }
-        .hero-content { width: 100%; }
-        .hero-subtitle { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; opacity: 0.9; }
-        .hero-title { font-size: 2rem; font-weight: 900; line-height: 1.1; font-style: italic; margin-bottom: 25px; letter-spacing: -0.5px; }
-        .hero-actions { display: flex; align-items: center; gap: 25px; }
-        .hero-btn { background: white; color: black; padding: 12px 28px; border-radius: 4px; font-weight: 900; text-transform: uppercase; text-decoration: none; font-size: 0.75rem; letter-spacing: 0.5px; }
-        .hero-timer-info { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; opacity: 0.8; line-height: 1.2; }
-        .hero-timer-val { font-size: 0.85rem; font-weight: 900; display: block; margin-top: 2px; color: #fff; }
-
-        .section-header-mobile { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 18px; }
-        .section-header-mobile h5 { font-size: 0.95rem; font-weight: 900; text-transform: uppercase; margin: 0; letter-spacing: 0.5px; }
-        .section-header-mobile a { font-size: 0.6rem; color: #999; text-decoration: none; font-weight: 800; text-transform: uppercase; }
-
-        .collections-scroll { display: flex; overflow-x: auto; gap: 15px; padding: 0 20px 35px; scrollbar-width: none; }
-        .collections-scroll::-webkit-scrollbar { display: none; }
-        .col-item { flex: 0 0 78px; text-align: center; text-decoration: none; color: #111; }
-        .col-icon { width: 78px; height: 78px; background: #f4f4f4; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; border: 1px solid #eee; }
-        .col-icon i { font-size: 1.4rem; color: #333; }
-        .col-item span { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; display: block; letter-spacing: 0.5px; }
-
-        .flash-banner-premium {
-            background: #d35400;
-            margin: 0 20px 40px;
-            border-radius: 8px;
-            padding: 18px;
-            display: flex;
-            align-items: center;
-            color: white;
-            gap: 15px;
-            box-shadow: 0 4px 15px rgba(211, 84, 0, 0.2);
-        }
-        .flash-icon-box { background: rgba(255,255,255,0.25); width: 45px; height: 45px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-        .flash-icon-box i { font-size: 1.3rem; }
-        .flash-text h4 { font-size: 0.95rem; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
-        .flash-text p { font-size: 0.7rem; margin: 0; opacity: 0.95; font-weight: 500; }
-        .claim-now-btn { margin-left: auto; background: white; color: #111; padding: 10px 18px; font-size: 0.65rem; font-weight: 900; border-radius: 4px; text-decoration: none; text-transform: uppercase; }
-
-        .trending-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px 40px; }
-        .premium-card { background: white; display: flex; flex-direction: column; }
-        .card-visual { position: relative; padding-top: 135%; overflow: hidden; background: #f8f8f8; border-radius: 4px; }
-        .card-visual img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        .card-badge { position: absolute; top: 10px; left: 10px; background: #8b0000; color: white; padding: 4px 10px; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; border-radius: 2px; z-index: 2; }
-        .wishlist-heart { position: absolute; bottom: 10px; right: 10px; width: 32px; height: 32px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 2; }
-        .wishlist-heart i { font-size: 0.9rem; color: #333; }
-        
-        .card-body-premium { padding: 15px 0; }
-        .card-brand { font-size: 0.55rem; color: #999; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px; }
-        .card-name-premium { font-size: 0.85rem; font-weight: 900; color: #111; margin-bottom: 6px; line-height: 1.2; height: 2rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .card-stars { font-size: 0.65rem; color: #d4af37; margin-bottom: 8px; }
-        .card-stars span { color: #aaa; margin-left: 5px; font-weight: 600; }
-        .card-price-row-premium { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .card-price-premium { font-size: 1rem; font-weight: 900; color: #8b0000; }
-        .card-old-price-premium { font-size: 0.75rem; color: #bbb; text-decoration: line-through; font-weight: 600; }
-        .card-urgency-small { font-size: 0.6rem; font-weight: 900; color: #8b0000; text-transform: uppercase; margin-bottom: 12px; display: block; letter-spacing: 0.5px; }
-        .add-to-cart-premium { background: #400000; color: white; border: none; width: 100%; padding: 12px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; border-radius: 4px; letter-spacing: 1px; }
-
-        .bespoke-section {
-            background: linear-gradient(to right, #000 45%, rgba(0,0,0,0.3) 100%),
-                        url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=800&auto=format&fit=crop') center/cover;
-            margin: 0 0 45px;
-            padding: 50px 20px;
-            color: white;
-        }
-        .bespoke-content h3 { font-size: 1.4rem; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; }
-        .bespoke-content p { font-size: 0.8rem; opacity: 0.9; margin-bottom: 25px; max-width: 230px; line-height: 1.5; font-weight: 500; }
-        .learn-more-btn { border: 1.5px solid white; color: white; background: transparent; padding: 10px 25px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; text-decoration: none; border-radius: 2px; }
-
-        .quick-add-premium { border: 1px solid #eee; background: white; color: #111; width: 100%; padding: 12px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    body:has(#cm-home) {
+        padding: 0;
+        background: #fcf9f8;
     }
 
-    @media (min-width: 992px) { .mobile-only { display: none !important; } }
+    body:has(#cm-home) > .top-bar-premium,
+    body:has(#cm-home) > .main-navbar,
+    body:has(#cm-home) > .secondary-nav,
+    body:has(#cm-home) > .mobile-bottom-nav,
+    body:has(#cm-home) > .main-footer,
+    body:has(#cm-home) > .whatsapp-float {
+        display: none !important;
+    }
+
+    #cm-home {
+        --wine: #7b1123;
+        --paper: #fcf9f8;
+        --ink: #211d1c;
+        --muted: #716966;
+        --serif: 'Instrument Serif', Georgia, serif;
+        --sans: 'Satoshi', 'Inter', sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    #cm-home *,
+    #cm-home *::before,
+    #cm-home *::after {
+        box-sizing: border-box;
+    }
+
+    #cm-home a {
+        color: inherit;
+    }
+
+    #cm-home .story-header {
+        position: fixed;
+        z-index: 20;
+        top: 0;
+        right: 0;
+        left: 0;
+        display: flex;
+        height: 78px;
+        align-items: center;
+        justify-content: space-between;
+        padding-inline: clamp(20px, 5vw, 76px);
+        border-bottom: 1px solid rgba(33, 29, 28, .12);
+        background: rgba(252, 249, 248, .96);
+        backdrop-filter: blur(12px);
+    }
+
+    #cm-home .story-brand {
+        display: inline-flex;
+        width: 150px;
+        flex: 0 0 auto;
+    }
+
+    #cm-home .story-brand img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    #cm-home .story-skip,
+    #cm-home .story-control,
+    #cm-home .story-continue,
+    #cm-home .story-action {
+        display: inline-flex;
+        min-height: 46px;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        padding: 0 19px;
+        border: 1px solid currentColor;
+        background: transparent;
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: .14em;
+        line-height: 1.4;
+        text-decoration: none;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background-color .22s ease, color .22s ease, border-color .22s ease;
+    }
+
+    #cm-home .story-skip:hover,
+    #cm-home .story-skip:focus-visible,
+    #cm-home .story-control:hover,
+    #cm-home .story-control:focus-visible,
+    #cm-home .story-continue:hover,
+    #cm-home .story-continue:focus-visible,
+    #cm-home .story-action:hover,
+    #cm-home .story-action:focus-visible {
+        border-color: var(--wine);
+        background: var(--wine);
+        color: var(--paper);
+    }
+
+    #cm-home .story-skip:focus-visible,
+    #cm-home .story-control:focus-visible,
+    #cm-home .story-continue:focus-visible,
+    #cm-home .story-action:focus-visible,
+    #cm-home .story-progress button:focus-visible {
+        outline: 2px solid #735c00;
+        outline-offset: 4px;
+    }
+
+    #cm-home .story-stage {
+        position: relative;
+        display: grid;
+        min-height: 660px;
+        min-height: max(660px, 100svh);
+        align-items: center;
+        overflow: hidden;
+        isolation: isolate;
+        scroll-margin-top: 0;
+    }
+
+    #cm-home .story-media,
+    #cm-home .story-media::after {
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+    }
+
+    #cm-home .story-media {
+        overflow: hidden;
+        background: #453b37;
+    }
+
+    #cm-home .story-media img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    #cm-home .story-media::after {
+        background: linear-gradient(90deg, rgba(22, 16, 15, .55), rgba(22, 16, 15, .06) 80%),
+                    linear-gradient(0deg, rgba(22, 16, 15, .45), transparent 62%);
+        content: "";
+    }
+
+    #cm-home .story-content {
+        width: min(100% - 112px, 1440px);
+        margin: 98px auto 116px;
+        color: var(--paper);
+    }
+
+    #cm-home .story-chapter {
+        display: block;
+        margin-bottom: 24px;
+        color: #f0d9d4;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: .19em;
+        line-height: 1.5;
+        text-transform: uppercase;
+    }
+
+    #cm-home .story-title {
+        max-width: 930px;
+        margin: 0;
+        font-family: var(--serif);
+        font-size: clamp(78px, 12vw, 170px);
+        font-weight: 400;
+        letter-spacing: -.035em;
+        line-height: .78;
+    }
+
+    #cm-home .story-title em {
+        color: #f0d9d4;
+        font-weight: 400;
+    }
+
+    #cm-home .story-copy {
+        max-width: 390px;
+        margin: 24px 0 0;
+        color: rgba(252, 249, 248, .86);
+        font-size: 15px;
+        line-height: 1.75;
+    }
+
+    #cm-home .story-prompt {
+        display: inline-flex;
+        align-items: center;
+        gap: 17px;
+        margin-top: 32px;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: var(--paper);
+        font-family: var(--sans);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    #cm-home .story-prompt span:last-child {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid rgba(252, 249, 248, .72);
+        border-radius: 50%;
+        font-size: 18px;
+        transition: background-color .2s ease, color .2s ease, transform .2s ease;
+    }
+
+    #cm-home .story-prompt:hover span:last-child,
+    #cm-home .story-prompt:focus-visible span:last-child {
+        transform: translateX(4px);
+        background: var(--paper);
+        color: var(--wine);
+    }
+
+    #cm-home .story-prompt:focus-visible {
+        outline: 2px solid var(--paper);
+        outline-offset: 5px;
+    }
+
+    #cm-home .story-asset-note {
+        position: absolute;
+        right: clamp(24px, 5vw, 76px);
+        bottom: 30px;
+        max-width: 310px;
+        color: rgba(252, 249, 248, .86);
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: .11em;
+        line-height: 1.65;
+        text-align: right;
+        text-transform: uppercase;
+    }
+
+    #cm-home .story-asset-note strong {
+        display: block;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    #cm-home .story-stage--opening .story-media img {
+        object-position: center 14%;
+    }
+
+    #cm-home .story-stage--detail {
+        background: #332b28;
+    }
+
+    #cm-home .story-stage--detail .story-media img {
+        object-position: center 45%;
+    }
+
+    #cm-home .story-stage--detail .story-media::after {
+        background: linear-gradient(90deg, rgba(22, 16, 15, .06) 0%, rgba(22, 16, 15, .2) 45%, rgba(22, 16, 15, .73) 100%),
+                    linear-gradient(0deg, rgba(22, 16, 15, .42), transparent 54%);
+    }
+
+    #cm-home .story-stage--detail .story-content {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    #cm-home .story-stage--detail .story-copy-block {
+        width: min(49%, 590px);
+    }
+
+    #cm-home .story-stage--detail .story-title {
+        font-size: clamp(72px, 9.5vw, 132px);
+    }
+
+    #cm-home .story-stage--person .story-media img {
+        object-position: center 29%;
+    }
+
+    #cm-home .story-stage--person .story-media::after {
+        background: linear-gradient(90deg, rgba(22, 16, 15, .66), rgba(22, 16, 15, .06) 74%),
+                    linear-gradient(0deg, rgba(22, 16, 15, .38), transparent 60%);
+    }
+
+    #cm-home .story-stage--person .story-title,
+    #cm-home .story-stage--visit .story-title {
+        max-width: 760px;
+        font-size: clamp(72px, 10.5vw, 148px);
+    }
+
+    #cm-home .story-stage--visit {
+        background: #423a35;
+    }
+
+    #cm-home .story-stage--visit .story-media img {
+        object-position: 55% 36%;
+    }
+
+    #cm-home .story-stage--visit .story-media::after {
+        background: linear-gradient(90deg, rgba(22, 16, 15, .72), rgba(22, 16, 15, .08) 80%),
+                    linear-gradient(0deg, rgba(22, 16, 15, .4), transparent 55%);
+    }
+
+    #cm-home .story-stage--visit .story-copy-block {
+        max-width: 600px;
+    }
+
+    #cm-home .story-stage--visit .story-copy {
+        max-width: 360px;
+    }
+
+    #cm-home .story-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+    }
+
+    #cm-home .story-action {
+        border-color: rgba(252, 249, 248, .78);
+        color: var(--paper);
+    }
+
+    #cm-home .story-action--primary {
+        border-color: var(--paper);
+        background: var(--paper);
+        color: var(--ink);
+    }
+
+    #cm-home .story-action--primary:hover,
+    #cm-home .story-action--primary:focus-visible {
+        border-color: var(--wine);
+        background: var(--wine);
+        color: var(--paper);
+    }
+
+    #cm-home .story-stage--final {
+        min-height: 620px;
+        min-height: max(620px, 100svh);
+        background: var(--paper);
+        color: var(--ink);
+        text-align: center;
+    }
+
+    #cm-home .story-stage--final .story-media {
+        background: var(--paper);
+    }
+
+    #cm-home .story-stage--final .story-media::after {
+        background: radial-gradient(ellipse at 50% 48%, rgba(123, 17, 35, .065), transparent 58%);
+    }
+
+    #cm-home .story-final-content {
+        width: min(100% - 40px, 980px);
+        margin: 116px auto 120px;
+    }
+
+    #cm-home .story-final-content .story-chapter {
+        color: var(--wine);
+    }
+
+    #cm-home .story-final-logo {
+        width: min(250px, 45vw);
+        margin: 0 auto 34px;
+    }
+
+    #cm-home .story-final-logo img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    #cm-home .story-stage--final .story-title {
+        max-width: 930px;
+        margin-inline: auto;
+        color: var(--ink);
+        font-size: clamp(68px, 10vw, 138px);
+    }
+
+    #cm-home .story-stage--final .story-title em {
+        color: var(--wine);
+    }
+
+    #cm-home .story-stage--final .story-copy {
+        margin-inline: auto;
+        color: var(--muted);
+    }
+
+    #cm-home .story-stage--final .story-action {
+        border-color: var(--ink);
+        color: var(--ink);
+    }
+
+    #cm-home .story-stage--final .story-action--primary {
+        border-color: var(--wine);
+        background: var(--wine);
+        color: var(--paper);
+    }
+
+    #cm-home .story-stage--final .story-action:hover,
+    #cm-home .story-stage--final .story-action:focus-visible {
+        border-color: var(--wine);
+        background: var(--wine);
+        color: var(--paper);
+    }
+
+    #cm-home .story-stage--final .story-asset-note {
+        color: var(--muted);
+    }
+
+    #cm-home .story-stage--final .story-asset-note strong {
+        color: var(--wine);
+    }
+
+    #cm-home .story-progress {
+        position: fixed;
+        z-index: 21;
+        right: clamp(18px, 3.6vw, 56px);
+        bottom: 22px;
+        left: clamp(18px, 3.6vw, 56px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        pointer-events: none;
+    }
+
+    #cm-home .story-progress-status,
+    #cm-home .story-progress button {
+        color: var(--paper);
+        font-family: var(--sans);
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: .14em;
+        line-height: 1.4;
+        text-transform: uppercase;
+    }
+
+    #cm-home .story-progress-status {
+        min-width: 108px;
+        text-shadow: 0 1px 5px rgba(0, 0, 0, .45);
+    }
+
+    #cm-home .story-progress-status strong {
+        margin-right: 8px;
+        font-size: 12px;
+    }
+
+    #cm-home .story-progress ol {
+        display: flex;
+        width: min(46vw, 450px);
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        pointer-events: auto;
+    }
+
+    #cm-home .story-progress li {
+        flex: 1;
+    }
+
+    #cm-home .story-progress button {
+        position: relative;
+        display: block;
+        width: 100%;
+        min-height: 32px;
+        border: 0;
+        padding: 12px 0;
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    #cm-home .story-progress button::before,
+    #cm-home .story-progress button::after {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+    }
+
+    #cm-home .story-progress button::before {
+        right: 0;
+        background: rgba(252, 249, 248, .48);
+    }
+
+    #cm-home .story-progress button::after {
+        width: var(--progress, 0%);
+        background: var(--paper);
+        transition: width .3s ease;
+    }
+
+    #cm-home .story-progress button[aria-current="step"]::after {
+        width: 100%;
+    }
+
+    #cm-home .story-progress button span {
+        position: absolute;
+        top: 9px;
+        left: 0;
+        opacity: .8;
+        white-space: nowrap;
+    }
+
+    #cm-home .story-progress-nav {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        pointer-events: auto;
+    }
+
+    #cm-home .story-control {
+        width: 38px;
+        min-height: 38px;
+        padding: 0;
+        border-color: rgba(252, 249, 248, .6);
+        color: var(--paper);
+        font-size: 15px;
+        letter-spacing: 0;
+    }
+
+    #cm-home .story-progress.is-light .story-progress-status,
+    #cm-home .story-progress.is-light .story-progress button {
+        color: var(--ink);
+        text-shadow: none;
+    }
+
+    #cm-home .story-progress.is-light .story-progress button::before {
+        background: rgba(33, 29, 28, .23);
+    }
+
+    #cm-home .story-progress.is-light .story-progress button::after {
+        background: var(--wine);
+    }
+
+    #cm-home .story-progress.is-light .story-control {
+        border-color: rgba(33, 29, 28, .35);
+        color: var(--ink);
+    }
+
+    #cm-home .story-progress.is-light .story-control:hover,
+    #cm-home .story-progress.is-light .story-control:focus-visible {
+        border-color: var(--wine);
+        color: var(--paper);
+    }
+
+    #cm-home .story-live {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
+
+    @media (max-width: 760px) {
+        #cm-home .story-header {
+            height: 66px;
+            padding-inline: 18px;
+        }
+
+        #cm-home .story-brand {
+            width: 124px;
+        }
+
+        #cm-home .story-skip {
+            min-height: 40px;
+            gap: 9px;
+            padding-inline: 12px;
+            font-size: 9px;
+            letter-spacing: .1em;
+        }
+
+        #cm-home .story-stage {
+            min-height: 620px;
+            min-height: max(620px, 100svh);
+        }
+
+        #cm-home .story-content {
+            width: calc(100% - 40px);
+            margin: 90px auto 116px;
+        }
+
+        #cm-home .story-title {
+            font-size: clamp(72px, 17vw, 114px);
+        }
+
+        #cm-home .story-copy {
+            max-width: 330px;
+            font-size: 14px;
+        }
+
+        #cm-home .story-stage--opening .story-media img {
+            object-position: 56% center;
+        }
+
+        #cm-home .story-stage--opening .story-media::after {
+            background: linear-gradient(90deg, rgba(22, 16, 15, .33), rgba(22, 16, 15, .05)),
+                        linear-gradient(0deg, rgba(22, 16, 15, .68), transparent 76%);
+        }
+
+        #cm-home .story-stage--detail .story-media img {
+            object-position: 43% center;
+        }
+
+        #cm-home .story-stage--detail .story-media::after {
+            background: linear-gradient(0deg, rgba(22, 16, 15, .74), rgba(22, 16, 15, .05) 76%);
+        }
+
+        #cm-home .story-stage--detail .story-content {
+            align-items: end;
+        }
+
+        #cm-home .story-stage--detail .story-copy-block {
+            width: 100%;
+            margin-top: auto;
+        }
+
+        #cm-home .story-stage--detail .story-title,
+        #cm-home .story-stage--person .story-title,
+        #cm-home .story-stage--visit .story-title {
+            font-size: clamp(68px, 15vw, 104px);
+        }
+
+        #cm-home .story-stage--person .story-media img {
+            object-position: 55% center;
+        }
+
+        #cm-home .story-stage--person .story-media::after,
+        #cm-home .story-stage--visit .story-media::after {
+            background: linear-gradient(0deg, rgba(22, 16, 15, .75), rgba(22, 16, 15, .08) 82%);
+        }
+
+        #cm-home .story-stage--visit .story-media img {
+            object-position: 58% center;
+        }
+
+        #cm-home .story-stage--final {
+            min-height: 620px;
+            min-height: max(620px, 100svh);
+        }
+
+        #cm-home .story-final-content {
+            width: calc(100% - 36px);
+            margin-block: 92px 122px;
+        }
+
+        #cm-home .story-final-logo {
+            width: min(210px, 55vw);
+        }
+
+        #cm-home .story-stage--final .story-title {
+            font-size: clamp(64px, 14vw, 98px);
+        }
+
+        #cm-home .story-asset-note {
+            right: 19px;
+            bottom: 87px;
+            max-width: 250px;
+            font-size: 8px;
+        }
+
+        #cm-home .story-progress {
+            right: 15px;
+            bottom: max(12px, env(safe-area-inset-bottom));
+            left: 15px;
+            gap: 10px;
+        }
+
+        #cm-home .story-progress-status {
+            display: none;
+        }
+
+        #cm-home .story-progress ol {
+            width: auto;
+            flex: 1;
+            gap: 5px;
+        }
+
+        #cm-home .story-progress button {
+            min-height: 34px;
+            font-size: 0;
+        }
+
+        #cm-home .story-progress button span {
+            top: 8px;
+        }
+
+        #cm-home .story-progress-nav {
+            gap: 5px;
+        }
+
+        #cm-home .story-control {
+            width: 34px;
+            min-height: 34px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #cm-home *,
+        #cm-home *::before,
+        #cm-home *::after {
+            scroll-behavior: auto !important;
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="index-container">
-
-    <!-- MOBILE ONLY: HERO -->
-    <div class="mobile-only hero-premium-mobile">
-        <div class="hero-content">
-            <p class="hero-subtitle">PRE-LANZAMIENTO EXCLUSIVO</p>
-            <h1 class="hero-title">TEMPORADA 2026</h1>
-            <div class="hero-actions">
-                <a href="{% url 'productos' %}" class="hero-btn">COMPRAR AHORA</a>
-                <div class="hero-timer-info">
-                    TERMINA EN:
-                    <span class="hero-timer-val flash-timer">03d : 12h : 44m</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MOBILE ONLY: COLECCIONES -->
-    <div class="mobile-only">
-        <div class="section-header-mobile">
-            <h5>COLECCIONES</h5>
-            <a href="{% url 'productos' %}">VER TODO</a>
-        </div>
-        <div class="collections-scroll">
-            <a href="{% url 'productos' %}?categoria=79" class="col-item">
-                <div class="col-icon"><i class="fas fa-user-tie"></i></div>
-                <span>TRAJES</span>
-            </a>
-            <a href="{% url 'productos' %}?categoria=73" class="col-item">
-                <div class="col-icon"><i class="fas fa-tshirt"></i></div>
-                <span>CAMISAS</span>
-            </a>
-            <a href="{% url 'productos' %}?categoria=75" class="col-item">
-                <div class="col-icon"><i class="fas fa-shoe-prints"></i></div>
-                <span>ZAPATOS</span>
-            </a>
-            <a href="{% url 'productos' %}?categoria=76" class="col-item">
-                <div class="col-icon"><i class="fas fa-clock"></i></div>
-                <span>ACCESORIOS</span>
-            </a>
-            <a href="{% url 'productos' %}" class="col-item">
-                <div class="col-icon"><i class="fas fa-briefcase"></i></div>
-                <span>CASUAL</span>
-            </a>
-        </div>
-    </div>
-
-    <!-- MOBILE ONLY: FLASH SALE -->
-    <div class="mobile-only flash-banner-premium">
-        <div class="flash-icon-box"><i class="fas fa-bolt"></i></div>
-        <div class="flash-text">
-            <h4>OFERTA RELÁMPAGO</h4>
-            <p>Hasta 70% OFF en Trajes Seleccionados</p>
-        </div>
-        <a href="{% url 'productos' %}" class="claim-now-btn">APROVECHAR</a>
-    </div>
-
-    <!-- DESKTOP ONLY CATEGORIES -->
-    <div class="desktop-only quick-categories mb-5">
-        <a href="{% url 'productos' %}?categoria=79&categoria=96&categoria=78" class="cat-square-item">
-            <div class="cat-image-wrapper"><i class="fas fa-user-tie"></i></div>
-            <span>TRAJES</span>
+<main id="cm-home" aria-label="Historia Carlo Magno">
+    <header class="story-header">
+        <a class="story-brand" href="{% url 'inicio' %}" aria-label="Carlo Magno, inicio">
+            <img src="{% static 'images/logo.png' %}" alt="Carlo Magno">
         </a>
-        <a href="{% url 'productos' %}?categoria=73" class="cat-square-item">
-            <div class="cat-image-wrapper"><i class="fas fa-tshirt"></i></div>
-            <span>CAMISAS</span>
-        </a>
-        <a href="{% url 'productos' %}?categoria=76" class="cat-square-item">
-            <div class="cat-image-wrapper"><i class="fas fa-glasses"></i></div>
-            <span>ACCESORIOS</span>
-        </a>
-        <a href="{% url 'productos' %}" class="cat-square-item">
-            <div class="cat-image-wrapper" style="background: #8b0000; border-color: #8b0000;"><i class="far fa-star text-white"></i></div>
-            <span style="color: #8b0000;">NOVEDADES</span>
-        </a>
-    </div>
+        <a class="story-skip" href="{% url 'productos' %}">Saltar la historia <span aria-hidden="true">↗</span></a>
+    </header>
 
-    <!-- TRENDING DEALS (MOBILE GRID) -->
-    <div class="mobile-only">
-        <div class="section-header-mobile">
-            <h5>MÁS BUSCADOS</h5>
-            <span style="background: #f1c40f; font-size: 0.6rem; padding: 4px 10px; font-weight: 900; border-radius: 3px;"><i class="far fa-clock me-1"></i> Termina en 06h</span>
-        </div>
-        <div class="trending-grid">
-            {% for prod in novedades|slice:":2" %}
-            <div class="premium-card">
-                <div class="card-visual">
-                    {% if forloop.first %}
-                    <span class="card-badge">LIQUIDACIÓN</span>
-                    {% else %}
-                    <span class="card-badge" style="background: #e67e22;">SUPER OFERTA</span>
-                    {% endif %}
-                    <a href="{% url 'producto_detail' prod.id %}">
-                        {% if prod.imagen %}
-                        <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}">
-                        {% else %}
-                        <img src="{% static 'images/placeholder.jpg' %}" alt="No image">
-                        {% endif %}
-                    </a>
-                    <div class="wishlist-heart"><i class="far fa-heart"></i></div>
-                </div>
-                <div class="card-body-premium">
-                    <p class="card-brand">CARLO MAGNO SIGNATURE</p>
-                    <p class="card-name-premium">{{ prod.nombre }}</p>
-                    <div class="card-stars">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                        <span>(124)</span>
-                    </div>
-                    <div class="card-price-row-premium">
-                        <span class="card-price-premium">${{ prod.precio }}</span>
-                        {% if prod.precio_original %}
-                        <span class="card-old-price-premium">${{ prod.precio_original }}</span>
-                        {% endif %}
-                    </div>
-                    <p class="card-urgency-small">{% if forloop.first %}STOCK LIMITADO: 3 RESTANTES{% else %}MÁS VENDIDO 🔥{% endif %}</p>
-                    <a href="{% url 'producto_detail' prod.id %}" class="add-to-cart-premium text-center text-decoration-none d-block">AÑADIR AL CARRITO</a>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+    <div class="story-live" aria-live="polite" aria-atomic="true" data-story-live></div>
 
-    <!-- BESPOKE EXPERIENCE -->
-    <div class="mobile-only bespoke-section">
-        <div class="bespoke-content">
-            <h3>EXPERIENCIA A MEDIDA</h3>
-            <p>Reserva tu cita de sastrería para el 2026 ahora mismo.</p>
-            <a href="{% url 'productos' %}" class="learn-more-btn">SABER MÁS</a>
+    <section class="story-stage story-stage--opening" id="capitulo-01" data-chapter data-title="La elección" aria-labelledby="chapter-01-title">
+        <div class="story-media">
+            <img src="{% static 'images/hero-banner.jpg' %}" alt="" fetchpriority="high">
         </div>
-    </div>
+        <div class="story-content">
+            <span class="story-chapter">Capítulo 01 &nbsp;·&nbsp; La apertura</span>
+            <h1 class="story-title" id="chapter-01-title">Todo empieza<br>con <em>una elección.</em></h1>
+            <p class="story-copy">Una historia sobre aquello que elegís llevar y todo lo que dice de vos.</p>
+            <button class="story-prompt" type="button" data-story-next>
+                <span>¿Querés conocer la historia? — Continuar</span><span aria-hidden="true">↓</span>
+            </button>
+        </div>
+        <p class="story-asset-note"><strong>Imagen editorial fija de referencia</strong>Video propio de apertura pendiente</p>
+    </section>
 
-    <!-- MUST HAVES -->
-    <div class="mobile-only">
-        <div class="section-header-mobile">
-            <h5>IMPRESCINDIBLES</h5>
-            <a href="{% url 'productos' %}">VER TODO</a>
+    <section class="story-stage story-stage--detail" id="capitulo-02" data-chapter data-title="El detalle" aria-labelledby="chapter-02-title">
+        <div class="story-media">
+            <img src="{% get_media_prefix %}productos/IMG_20260427_162520299.jpg" alt="" loading="lazy">
         </div>
-        <div class="trending-grid">
-            {% for prod in novedades|slice:"2:4" %}
-            <div class="premium-card">
-                <div class="card-visual">
-                    {% if forloop.first %}
-                    <span class="card-badge" style="background: #e67e22;">-60% OFF</span>
-                    {% else %}
-                    <span class="card-badge" style="background: #111;">ÚLTIMOS</span>
-                    {% endif %}
-                    <a href="{% url 'producto_detail' prod.id %}">
-                        {% if prod.imagen %}
-                        <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}">
-                        {% else %}
-                        <img src="{% static 'images/placeholder.jpg' %}" alt="No image">
-                        {% endif %}
-                    </a>
-                </div>
-                <div class="card-body-premium">
-                    <p class="card-name-premium">{{ prod.nombre }}</p>
-                    <div class="card-price-row-premium">
-                        <span class="card-price-premium">${{ prod.precio }}</span>
-                        {% if prod.precio_original %}
-                        <span class="card-old-price-premium">${{ prod.precio_original }}</span>
-                        {% endif %}
-                    </div>
-                    <a href="{% url 'producto_detail' prod.id %}" class="add-to-cart-premium text-center text-decoration-none d-block">AÑADIR AL CARRITO</a>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- DESKTOP ONLY: ORIGINAL GRID -->
-    <div class="desktop-only product-grid">
-        {% for prod in novedades %}
-        <div class="market-card">
-            <div class="card-img-container">
-                <a href="{% url 'producto_detail' prod.id %}">
-                    {% if prod.imagen %}
-                    <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}">
-                    {% else %}
-                    <img src="{% static 'images/placeholder.jpg' %}" alt="No image">
-                    {% endif %}
-                </a>
-            </div>
-            <div class="card-info">
-                <p class="card-title">{{ prod.nombre }}</p>
-                <p class="card-price">${{ prod.precio }}</p>
+        <div class="story-content">
+            <div class="story-copy-block">
+                <span class="story-chapter">Capítulo 02 &nbsp;·&nbsp; El detalle</span>
+                <h2 class="story-title" id="chapter-02-title">Lo que elegís<br>también habla<br>de <em>vos.</em></h2>
+                <p class="story-copy">Hay cosas que se descubren de cerca. Una textura, un botón, una forma de hacer.</p>
+                <button class="story-prompt" type="button" data-story-next>
+                    <span>Seguir descubriendo</span><span aria-hidden="true">↓</span>
+                </button>
             </div>
         </div>
-        {% endfor %}
-    </div>
+        <p class="story-asset-note"><strong>Fotografía fija de detalle</strong>Video macro de tela y terminaciones pendiente</p>
+    </section>
 
-</div>
+    {% with suit=novedades.2 %}
+    <section class="story-stage story-stage--person" id="capitulo-03" data-chapter data-title="La persona" aria-labelledby="chapter-03-title">
+        <div class="story-media">
+            {% if suit and suit.imagen %}
+            <img src="{{ suit.imagen.url }}" alt="" loading="lazy">
+            {% else %}
+            <img src="{% static 'images/hero-banner.jpg' %}" alt="" loading="lazy">
+            {% endif %}
+        </div>
+        <div class="story-content">
+            <span class="story-chapter">Capítulo 03 &nbsp;·&nbsp; La persona</span>
+            <h2 class="story-title" id="chapter-03-title">La elegancia<br>empieza en<br><em>vos.</em></h2>
+            <p class="story-copy">La prenda cobra sentido cuando encuentra a quien la lleva.</p>
+            <div class="story-actions">
+                {% if suit %}
+                <a class="story-action story-action--primary" href="{% url 'productos' %}">Descubrí la colección <span aria-hidden="true">↗</span></a>
+                {% else %}
+                <a class="story-action story-action--primary" href="{% url 'productos' %}">Descubrí la colección <span aria-hidden="true">↗</span></a>
+                {% endif %}
+                <button class="story-action" type="button" data-story-next>Continuar la historia <span aria-hidden="true">↓</span></button>
+            </div>
+        </div>
+        <p class="story-asset-note"><strong>Fotografía fija del catálogo</strong>Video propio de la prenda en movimiento pendiente</p>
+    </section>
+    {% endwith %}
 
+    <section class="story-stage story-stage--visit" id="capitulo-04" data-chapter data-title="El encuentro" aria-labelledby="chapter-04-title">
+        <div class="story-media">
+            <img src="{% get_media_prefix %}productos/manual_152.jpg" alt="" loading="lazy">
+        </div>
+        <div class="story-content">
+            <div class="story-copy-block">
+                <span class="story-chapter">Capítulo 04 &nbsp;·&nbsp; El encuentro</span>
+                <h2 class="story-title" id="chapter-04-title">Hay elecciones<br>que merecen<br>vivirse <em>en persona.</em></h2>
+                <p class="story-copy">Carlo Magno, en Córdoba. Consultanos por WhatsApp para conocer la dirección y cómo llegar.</p>
+                <div class="story-actions">
+                    <a class="story-action story-action--primary" href="https://wa.me/5493516681071?text=Hola%2C%20quisiera%20conocer%20la%20direcci%C3%B3n%20y%20c%C3%B3mo%20llegar%20a%20Carlo%20Magno." target="_blank" rel="noopener noreferrer">Consultar cómo llegar <span aria-hidden="true">↗</span></a>
+                    <button class="story-action" type="button" data-story-next>Continuar la historia <span aria-hidden="true">↓</span></button>
+                </div>
+            </div>
+        </div>
+        <p class="story-asset-note"><strong>Fotografía fija del espacio</strong>Video propio del establecimiento pendiente</p>
+    </section>
+
+    <section class="story-stage story-stage--final" id="capitulo-05" data-chapter data-title="El cierre" aria-labelledby="chapter-05-title">
+        <div class="story-media" aria-hidden="true"></div>
+        <div class="story-final-content">
+            <span class="story-chapter">Capítulo 05 &nbsp;·&nbsp; Carlo Magno</span>
+            <div class="story-final-logo">
+                <img src="{% static 'images/logo.png' %}" alt="Carlo Magno">
+            </div>
+            <h2 class="story-title" id="chapter-05-title">La elegancia está<br>en <em>los detalles.</em></h2>
+            <p class="story-copy">La historia sigue en cada elección.</p>
+            <div class="story-actions" style="justify-content: center;">
+                <a class="story-action story-action--primary" href="{% url 'productos' %}">Explorar colección <span aria-hidden="true">↗</span></a>
+                <a class="story-action" href="https://wa.me/5493516681071?text=Hola%2C%20quisiera%20visitar%20Carlo%20Magno.%20%C2%BFMe%20comparten%20la%20direcci%C3%B3n%3F" target="_blank" rel="noopener noreferrer">Visitar Carlo Magno <span aria-hidden="true">↗</span></a>
+            </div>
+        </div>
+    </section>
+
+    <nav class="story-progress is-dark" aria-label="Progreso de la historia" data-story-progress>
+        <div class="story-progress-status" data-story-status><strong>01 / 05</strong> La elección</div>
+        <ol>
+            <li><button type="button" data-story-go="0" aria-label="Ir al capítulo 1: La elección" aria-current="step"><span>01</span></button></li>
+            <li><button type="button" data-story-go="1" aria-label="Ir al capítulo 2: El detalle"><span>02</span></button></li>
+            <li><button type="button" data-story-go="2" aria-label="Ir al capítulo 3: La persona"><span>03</span></button></li>
+            <li><button type="button" data-story-go="3" aria-label="Ir al capítulo 4: El encuentro"><span>04</span></button></li>
+            <li><button type="button" data-story-go="4" aria-label="Ir al capítulo 5: El cierre"><span>05</span></button></li>
+        </ol>
+        <div class="story-progress-nav">
+            <button class="story-control" type="button" data-story-prev aria-label="Capítulo anterior">↑</button>
+            <button class="story-control" type="button" data-story-next aria-label="Capítulo siguiente">↓</button>
+        </div>
+    </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
 <script>
-    // Countdown logic for the premium timer
-    let time = 302568; 
-    setInterval(() => {
-        time--;
-        let d = Math.floor(time / 86400);
-        let h = Math.floor((time % 86400) / 3600);
-        let m = Math.floor((time % 3600) / 60);
-        const timerEl = document.querySelector('.hero-timer-val');
-        if (timerEl) {
-            timerEl.textContent = `${String(d).padStart(2,'0')}d : ${String(h).padStart(2,'0')}h : ${String(m).padStart(2,'0')}m`;
+    document.addEventListener('DOMContentLoaded', function () {
+        const chapters = Array.from(document.querySelectorAll('[data-chapter]'));
+        const progress = document.querySelector('[data-story-progress]');
+        const chapterButtons = Array.from(document.querySelectorAll('[data-story-go]'));
+        const status = document.querySelector('[data-story-status]');
+        const liveRegion = document.querySelector('[data-story-live]');
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let currentChapter = 0;
+
+        function goToChapter(index) {
+            const target = chapters[index];
+            if (!target) return;
+            target.scrollIntoView({
+                behavior: reducedMotion.matches ? 'auto' : 'smooth',
+                block: 'start'
+            });
         }
-    }, 60000);
+
+        function setCurrentChapter(index) {
+            if (index < 0 || index >= chapters.length || index === currentChapter) return;
+            currentChapter = index;
+            const name = chapters[index].dataset.title;
+
+            chapterButtons.forEach(function (button, buttonIndex) {
+                if (buttonIndex === index) {
+                    button.setAttribute('aria-current', 'step');
+                } else {
+                    button.removeAttribute('aria-current');
+                }
+            });
+
+            status.innerHTML = '<strong>' + String(index + 1).padStart(2, '0') +
+                ' / 05</strong> ' + name;
+            liveRegion.textContent = 'Capítulo ' + (index + 1) + ' de 5: ' + name;
+            progress.classList.toggle('is-light', index === chapters.length - 1);
+        }
+
+        document.querySelectorAll('[data-story-go]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                goToChapter(Number(button.dataset.storyGo));
+            });
+        });
+
+        document.querySelectorAll('[data-story-next]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                goToChapter(Math.min(currentChapter + 1, chapters.length - 1));
+            });
+        });
+
+        document.querySelector('[data-story-prev]').addEventListener('click', function () {
+            goToChapter(Math.max(currentChapter - 1, 0));
+        });
+
+        if (window.gsap && window.ScrollTrigger) {
+            gsap.registerPlugin(ScrollTrigger);
+            chapters.forEach(function (chapter, index) {
+                ScrollTrigger.create({
+                    trigger: chapter,
+                    start: 'top 55%',
+                    end: 'bottom 55%',
+                    onEnter: function () { setCurrentChapter(index); },
+                    onEnterBack: function () { setCurrentChapter(index); }
+                });
+            });
+
+            if (!reducedMotion.matches) {
+                gsap.from('#capitulo-01 .story-content > *', {
+                    y: 22,
+                    opacity: 0,
+                    duration: .8,
+                    stagger: .12,
+                    ease: 'power2.out',
+                    delay: .12
+                });
+
+                chapters.slice(1).forEach(function (chapter) {
+                    gsap.from(chapter.querySelectorAll('.story-chapter, .story-title, .story-copy, .story-prompt, .story-actions, .story-final-logo'), {
+                        y: 22,
+                        opacity: 0,
+                        duration: .72,
+                        stagger: .09,
+                        ease: 'power2.out',
+                        scrollTrigger: {
+                            trigger: chapter,
+                            start: 'top 52%',
+                            once: true
+                        }
+                    });
+                });
+
+                gsap.utils.toArray('.story-media img').forEach(function (image) {
+                    const chapter = image.closest('[data-chapter]');
+                    if (!chapter || chapter.id === 'capitulo-05') return;
+                    gsap.to(image, {
+                        yPercent: 4,
+                        ease: 'none',
+                        scrollTrigger: {
+                            trigger: chapter,
+                            start: 'top bottom',
+                            end: 'bottom top',
+                            scrub: true
+                        }
+                    });
+                });
+            }
+        } else if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        setCurrentChapter(chapters.indexOf(entry.target));
+                    }
+                });
+            }, { threshold: .55 });
+
+            chapters.forEach(function (chapter) {
+                observer.observe(chapter);
+            });
+        }
+    });
 </script>
 {% endblock %}

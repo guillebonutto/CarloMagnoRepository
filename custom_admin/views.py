@@ -1,16 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login as django_login, authenticate
 from django.contrib.auth import logout as django_logout
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.forms import PasswordChangeForm
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.forms import ModelForm
 from django import forms
 from productos.models import Producto, Categoria, Color, Marca, Talle, Cliente, Direccion, ProductoStock, Pedido, PedidoItem, Cupon
 from productos.forms import ProductoForm
-from django.db.models import Sum, Count, Avg
+from django.db import transaction
+from django.db.models import F, Q, Sum, Count, Avg
 from django.db.models.functions import ExtractMonth
+import unicodedata
 
 # Formularios
 # class ProductForm(ModelForm):
@@ -81,6 +85,29 @@ class StockForm(ModelForm):
         model = ProductoStock
         fields = ['producto', 'color', 'talle', 'stock']
 
+
+class StockQuantityForm(forms.Form):
+    stock = forms.IntegerField(
+        min_value=0,
+        label='Cantidad de stock',
+        widget=forms.NumberInput(attrs={'min': 0, 'step': 1}),
+    )
+
+
+class StockBarcodeForm(forms.Form):
+    codigo = forms.CharField(
+        max_length=50,
+        strip=True,
+        label='Código del artículo',
+        widget=forms.TextInput(attrs={
+            'autofocus': True,
+            'autocomplete': 'off',
+            'placeholder': 'Escaneá el código del artículo',
+            'data-stock-barcode': '',
+        }),
+    )
+
+
 # Vista de login
 def iniciar_sesion(request):
     if request.user.is_authenticated:
@@ -105,6 +132,25 @@ def cerrar_sesion(request):
     django_logout(request)
     messages.success(request, 'Has cerrado sesión correctamente')
     return redirect('login')
+
+@login_required(login_url='login')
+def cambiar_contrasena(request):
+    if not request.user.is_staff:
+        return redirect('inicio')
+
+    form = PasswordChangeForm(
+        user=request.user,
+        data=request.POST if request.method == 'POST' else None,
+    )
+    for field in form.fields.values():
+        field.widget.attrs['class'] = 'form-control'
+    if request.method == 'POST' and form.is_valid():
+        user = form.save()
+        update_session_auth_hash(request, user)
+        messages.success(request, 'Tu contraseña se actualizó correctamente.')
+        return redirect('cambiar_contrasena')
+
+    return render(request, 'custom_admin/cambiar_contrasena.html', {'form': form})
 
 # Dashboard
 @login_required(login_url='login')
@@ -166,13 +212,16 @@ def productos(request):
     
     # Aplicar filtros
     if cat_filter and cat_filter.isdigit():
-        try:
-            from django.db.models import Q
-            # Filtramos por la categoría seleccionada O por cualquier subcategoría que la tenga como padre
-            subcategorias_ids = Categoria.objects.filter(parent_id=cat_filter).values_list('id', flat=True)
-            productos_qs = productos_qs.filter(Q(categoria_id=cat_filter) | Q(categoria_id__in=subcategorias_ids))
-        except Exception:
-            pass
+        categoria_ids = {int(cat_filter)}
+        pendientes = list(categoria_ids)
+        while pendientes:
+            subcategorias = set(
+                Categoria.objects.filter(parent_id__in=pendientes)
+                .values_list('id', flat=True)
+            ) - categoria_ids
+            categoria_ids.update(subcategorias)
+            pendientes = list(subcategorias)
+        productos_qs = productos_qs.filter(categoria_id__in=categoria_ids)
     if marca_filter and marca_filter.isdigit():
         productos_qs = productos_qs.filter(marca_id=marca_filter)
     
@@ -281,14 +330,105 @@ def toggle_producto_status(request, pk):
         'is_active': producto.esta_activo
     })
 
+def _get_category_tree():
+    categories = list(
+        Categoria.objects.annotate(productos_directos=Count('productos'))
+        .order_by('nombre')
+    )
+    children_by_parent = {}
+    for category in categories:
+        category.children = []
+        category.productos_totales = category.productos_directos
+        if category.parent_id is not None:
+            children_by_parent.setdefault(category.parent_id, []).append(category)
+
+    def count_subtree(category, ancestors=frozenset()):
+        if category.pk in ancestors:
+            raise ValueError('Se encontró un ciclo en la jerarquía de categorías.')
+        descendants = ancestors | {category.pk}
+        category.children = children_by_parent.get(category.pk, [])
+        category.productos_totales = category.productos_directos + sum(
+            count_subtree(child, descendants)
+            for child in category.children
+        )
+        return category.productos_totales
+
+    root_categories = [
+        category for category in categories if category.parent_id is None
+    ]
+    for category in root_categories:
+        count_subtree(category)
+
+    return root_categories
+
+
 # Gestión de categorías
 @login_required(login_url='login')
 def categorias(request):
     if not request.user.is_staff:
         return redirect('home')
-    
-    categories = Categoria.objects.all()
-    return render(request, 'custom_admin/categorias.html', {'categories': categories})
+
+    return render(
+        request,
+        'custom_admin/categorias.html',
+        {'categories': _get_category_tree()},
+    )
+
+
+@login_required(login_url='login')
+def detalle_categoria(request, pk):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    categoria = get_object_or_404(Categoria, pk=pk, parent__isnull=True)
+    categoria = next(
+        category
+        for category in _get_category_tree()
+        if category.pk == categoria.pk
+    )
+    categoria_ids = {categoria.pk}
+    pendientes = list(categoria.children)
+    while pendientes:
+        subcategoria = pendientes.pop()
+        if subcategoria.pk in categoria_ids:
+            continue
+        categoria_ids.add(subcategoria.pk)
+        pendientes.extend(subcategoria.children)
+
+    productos_categoria = list(
+        Producto.objects.filter(categoria_id__in=categoria_ids)
+        .select_related('categoria', 'marca')
+        .order_by('nombre')
+    )
+    productos_por_categoria = {}
+    for producto in productos_categoria:
+        productos_por_categoria.setdefault(producto.categoria_id, []).append(producto)
+
+    product_groups = []
+
+    def agrupar_productos(category, ancestors=()):
+        category_path = (*ancestors, category.nombre)
+        productos_directos = productos_por_categoria.get(category.pk, [])
+        if productos_directos:
+            product_groups.append({
+                'nombre': ' / '.join(category_path),
+                'productos': productos_directos,
+            })
+        for child in category.children:
+            agrupar_productos(child, category_path)
+
+    agrupar_productos(categoria)
+
+    return render(
+        request,
+        'custom_admin/categoria_detalle.html',
+        {
+            'categoria': categoria,
+            'productos': productos_categoria,
+            'product_groups': product_groups,
+        },
+    )
+
 
 @login_required(login_url='login')
 def agregar_categoria(request):
@@ -691,9 +831,145 @@ def eliminar_direccion(request, pk):
 def stock(request):
     if not request.user.is_staff:
         return redirect('home')
-    
-    stock_items = ProductoStock.objects.select_related('producto', 'color', 'talle').all()
-    return render(request, 'custom_admin/stock.html', {'stock_items': stock_items})
+
+    sort_options = {
+        'nombre_asc': (
+            'producto__nombre', 'color__nombre', 'talle__order',
+            'talle__abbreviation',
+        ),
+        'nombre_desc': (
+            '-producto__nombre', 'color__nombre', 'talle__order',
+            'talle__abbreviation',
+        ),
+        'color_asc': (
+            'color__nombre', 'producto__nombre', 'talle__order',
+            'talle__abbreviation',
+        ),
+        'talle_asc': (
+            'talle__order', 'talle__abbreviation', 'producto__nombre',
+            'color__nombre',
+        ),
+        'stock_desc': (
+            '-stock', 'producto__nombre', 'color__nombre',
+            'talle__order', 'talle__abbreviation',
+        ),
+        'stock_asc': (
+            'stock', 'producto__nombre', 'color__nombre',
+            'talle__order', 'talle__abbreviation',
+        ),
+    }
+    sort_by = request.GET.get('orden', 'nombre_asc')
+    if sort_by not in sort_options:
+        sort_by = 'nombre_asc'
+    search_query = request.GET.get('buscar', '').strip()
+
+    stock_items = ProductoStock.objects.select_related(
+        'producto', 'color', 'talle',
+    )
+    if search_query:
+        stock_items = stock_items.filter(
+            Q(producto__nombre__icontains=search_query)
+            | Q(producto__codigo__icontains=search_query)
+            | Q(color__nombre__icontains=search_query)
+            | Q(talle__nombre__icontains=search_query)
+            | Q(talle__abbreviation__icontains=search_query)
+        )
+    stock_items = stock_items.order_by(*sort_options[sort_by])
+
+    grouped_items = {}
+    for item in stock_items:
+        normalized_name = unicodedata.normalize(
+            'NFKD', item.producto.nombre,
+        )
+        first_character = ''.join(
+            character
+            for character in normalized_name
+            if not unicodedata.combining(character)
+        )[:1].upper()
+        letter = first_character if first_character in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' else '#'
+        grouped_items.setdefault(letter, []).append(item)
+
+    letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    letter_groups = [
+        {'letter': letter, 'items': grouped_items[letter]}
+        for letter in letters
+        if letter in grouped_items
+    ]
+    if '#' in grouped_items:
+        letter_groups.append({'letter': '#', 'items': grouped_items['#']})
+
+    return render(
+        request,
+        'custom_admin/stock.html',
+        {
+            'letter_groups': letter_groups,
+            'alphabet': letters,
+            'available_letters': set(grouped_items),
+            'search_query': search_query,
+            'sort_by': sort_by,
+            'total_stock_items': sum(len(group['items']) for group in letter_groups),
+        },
+    )
+
+
+@login_required(login_url='login')
+def editar_stock(request, pk):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    item = get_object_or_404(
+        ProductoStock.objects.select_related('producto', 'color', 'talle'),
+        pk=pk,
+    )
+    quantity_form = StockQuantityForm(initial={'stock': item.stock})
+    barcode_form = StockBarcodeForm()
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'guardar':
+            quantity_form = StockQuantityForm(request.POST)
+            if quantity_form.is_valid():
+                item.stock = quantity_form.cleaned_data['stock']
+                item.save(update_fields=['stock'])
+                messages.success(
+                    request,
+                    f'Stock de {item.producto.nombre} actualizado a {item.stock} unidades.',
+                )
+                return redirect('editar_stock', pk=item.pk)
+        elif action == 'escanear':
+            barcode_form = StockBarcodeForm(request.POST)
+            if barcode_form.is_valid():
+                codigo = barcode_form.cleaned_data['codigo']
+                if not item.producto.codigo or codigo != item.producto.codigo:
+                    messages.error(
+                        request,
+                        'El código leído no corresponde a este artículo. No se modificó el stock.',
+                    )
+                else:
+                    with transaction.atomic():
+                        ProductoStock.objects.filter(pk=item.pk).update(
+                            stock=F('stock') + 1,
+                        )
+                    item.refresh_from_db()
+                    quantity_form = StockQuantityForm(initial={'stock': item.stock})
+                    messages.success(
+                        request,
+                        f'{item.producto.nombre}: stock actualizado a {item.stock} unidades.',
+                    )
+                return redirect('editar_stock', pk=item.pk)
+        else:
+            messages.error(request, 'No se reconoció la acción solicitada.')
+
+    return render(
+        request,
+        'custom_admin/stock_editar.html',
+        {
+            'item': item,
+            'quantity_form': quantity_form,
+            'barcode_form': barcode_form,
+        },
+    )
+
 
 def health_check(request):
     from django.http import HttpResponse

@@ -1,5 +1,12 @@
 from django.contrib import admin
+from django.contrib import messages
+from django.core.exceptions import PermissionDenied
+from django.db import router, transaction
+from django.db.models import F
+from django.shortcuts import redirect, render
+from django.urls import path, reverse
 from django.utils.html import format_html
+from .forms import IngresoStockPorLectorForm
 from .models import Categoria, Color, Talle, Marca, Producto, ProductoStock, Cliente, GrupoCliente, Direccion, Carrito, CarritoItem, Pedido, PedidoItem, Cupon
 
 @admin.register(Categoria)
@@ -163,12 +170,76 @@ class ProductoAdmin(admin.ModelAdmin):  # ← Nombre corregido
 
 @admin.register(ProductoStock)
 class ProductoStockAdmin(admin.ModelAdmin):  # ← Nombre corregido
+    change_list_template = 'admin/productos/productostock/change_list.html'
     list_display = ['producto', 'color_badge', 'talle_badge', 'stock', 'stock_status']
     list_filter = ['color', 'talle', 'producto__categoria', 'producto__marca']
     search_fields = ['producto__nombre']
     list_editable = ['stock']
     ordering = ['producto', 'color__order', 'talle__order']
     autocomplete_fields = ['producto', 'color', 'talle']
+
+    def get_urls(self):
+        custom_urls = [
+            path(
+                'recepcion/',
+                self.admin_site.admin_view(self.recepcion_stock_view),
+                name='productos_productostock_recepcion',
+            ),
+        ]
+        return custom_urls + super().get_urls()
+
+    def recepcion_stock_view(self, request):
+        if not self.has_change_permission(request):
+            raise PermissionDenied
+
+        if request.method == 'POST':
+            form = IngresoStockPorLectorForm(request.POST)
+            if form.is_valid():
+                color = form.cleaned_data['color']
+                talle = form.cleaned_data['talle']
+                request.session['recepcion_stock_color'] = color.pk
+                request.session['recepcion_stock_talle'] = talle.pk
+                codigo = form.cleaned_data['codigo']
+                db = router.db_for_write(ProductoStock)
+                producto = Producto.objects.using(db).filter(codigo=codigo).first()
+
+                if producto is None:
+                    messages.error(request, f'No se encontró un artículo con el código {codigo}. No se modificó el stock.')
+                else:
+                    with transaction.atomic(using=db):
+                        stock, creado = ProductoStock.objects.using(db).get_or_create(
+                            producto=producto,
+                            color=color,
+                            talle=talle,
+                            defaults={'stock': 1},
+                        )
+                        if not creado:
+                            ProductoStock.objects.using(db).filter(pk=stock.pk).update(
+                                stock=F('stock') + 1
+                            )
+                            stock.refresh_from_db(using=db)
+                        producto.colores.add(color)
+
+                    messages.success(
+                        request,
+                        f'{producto.nombre}: stock de {color.nombre}, talle {talle.abbreviation} '
+                        f'actualizado a {stock.stock}.',
+                    )
+
+                return redirect(reverse('admin:productos_productostock_recepcion'))
+        else:
+            form = IngresoStockPorLectorForm(initial={
+                'color': request.session.get('recepcion_stock_color'),
+                'talle': request.session.get('recepcion_stock_talle'),
+            })
+
+        context = {
+            **self.admin_site.each_context(request),
+            'form': form,
+            'opts': self.model._meta,
+            'title': 'Recepción de stock por lector',
+        }
+        return render(request, 'admin/productos/productostock/recepcion.html', context)
 
     def color_badge(self, obj):
         """Mostrar color con badge"""

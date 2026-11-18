@@ -1,0 +1,87 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Editar stock | {{ item.producto.nombre }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/stock.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<div>
+			<a href="{% url 'stock' %}" class="stock-back-link">← Volver a Gestión de Stock</a>
+			<h1>Editar stock</h1>
+		</div>
+	</div>
+
+	<section class="stock-edit-product">
+		<div class="stock-edit-product-icon">📦</div>
+		<div class="stock-edit-product-info">
+			<span class="stock-edit-eyebrow">Artículo</span>
+			<h2>{{ item.producto.nombre }}</h2>
+			<div class="stock-edit-badges">
+				{% if item.producto.codigo %}<span>Código {{ item.producto.codigo }}</span>{% endif %}
+				<span class="color-badge">
+					<span class="color-dot" data-color-hex="{{ item.color.hex_code }}"></span>
+					{{ item.color.nombre }}
+				</span>
+				<span class="size-badge">{{ item.talle.abbreviation }} · {{ item.talle.nombre }}</span>
+			</div>
+		</div>
+		<div class="stock-current-value">
+			<strong>{{ item.stock }}</strong>
+			<span>unidades actuales</span>
+		</div>
+	</section>
+
+	<section class="stock-edit-panel stock-edit-unified">
+		<div class="stock-edit-panel-heading">
+			<span class="stock-edit-panel-icon" aria-hidden="true">📦</span>
+			<div>
+				<h2>Stock de esta variante</h2>
+				<p>Podés corregir la cantidad o escanear el artículo para sumar una unidad automáticamente.</p>
+			</div>
+		</div>
+		<form method="post" class="stock-edit-form" data-stock-edit-form>
+			{% csrf_token %}
+			<input type="hidden" name="action" value="guardar" data-stock-action>
+			<div class="stock-edit-fields">
+				<div class="stock-edit-field stock-quantity-field">
+					<label for="{{ quantity_form.stock.id_for_label }}">{{ quantity_form.stock.label }}</label>
+					{{ quantity_form.stock }}
+					{{ quantity_form.stock.errors }}
+				</div>
+				<div class="stock-edit-field stock-barcode-field">
+					<label for="{{ barcode_form.codigo.id_for_label }}">{{ barcode_form.codigo.label }}</label>
+					{{ barcode_form.codigo }}
+					{{ barcode_form.codigo.errors }}
+					<small>La lectora procesa cada lectura válida y suma una unidad automáticamente.</small>
+				</div>
+			</div>
+			<div class="stock-edit-submit-row">
+				<button class="btn btn-primary" type="submit">Guardar stock</button>
+				<a class="stock-edit-cancel" href="{% url 'stock' %}">Volver sin guardar</a>
+			</div>
+		</form>
+	</section>
+</div>
+<script>
+	document.querySelectorAll('[data-color-hex]').forEach((element) => {
+		element.style.backgroundColor = element.dataset.colorHex;
+	});
+
+	const stockEditForm = document.querySelector('[data-stock-edit-form]');
+	const stockBarcodeInput = document.querySelector('[data-stock-barcode]');
+	const stockActionInput = document.querySelector('[data-stock-action]');
+
+	if (stockEditForm && stockBarcodeInput && stockActionInput) {
+		stockBarcodeInput.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				stockActionInput.value = 'escanear';
+				stockEditForm.requestSubmit();
+			}
+		});
+	}
+</script>
+{% endblock %}

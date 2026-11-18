@@ -17,16 +17,16 @@
 		{% for categoria in categories %}
 		<div class="category-card">
 			<h3>📁 {{ categoria.nombre }}</h3>
-            {% if categoria.parent %}
-                <p class="text-muted mb-1"><small>Subcategoría de: {{ categoria.parent.nombre }}</small></p>
-            {% endif %}
 			<p>{{ categoria.descripcion|default:"Sin descripción" }}</p>
 
 			<div class="category-stats">
-				<span class="stat">📦 {{ categoria.productos.count }} productos</span>
+				<span class="stat">
+					📦 {{ categoria.productos_totales }} producto{{ categoria.productos_totales|pluralize }}
+				</span>
 			</div>
 
 			<div class="actions">
+				<a href="{% url 'detalle_categoria' categoria.id %}" class="btn btn-primary">Ver categoría</a>
 				<a href="{% url 'editar_categoria' categoria.id %}" class="btn-edit">✏️ Editar</a>
 				<a href="{% url 'eliminar_categoria' categoria.id %}" class="btn-delete">🗑️ Eliminar</a>
 			</div>

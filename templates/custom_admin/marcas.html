@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block content %}
-<div class="main-content">
 	<div class="header">
 		<h1>Gestión de Marcas</h1>
 		<a href="{% url 'agregar_marca' %}" class="btn btn-primary">+ Nueva Marca</a>
@@ -47,7 +46,6 @@
 		<h2>No hay marcas registradas</h2>
 	</div>
 	{% endif %}
-</div>
 {% load static %}
 <script src="{% static 'js/panel.js' %}"></script>
 {% endblock %}

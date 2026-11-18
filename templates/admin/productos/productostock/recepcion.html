@@ -1,0 +1,34 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <div id="content-main">
+    <p>Elegí el color y talle que vas a cargar. Cada código leído suma una unidad a esa combinación.</p>
+    <p>La lectora finaliza cada lectura automáticamente y suma una unidad. Los artículos no se activan automáticamente.</p>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="form-row">
+        {{ form.color.errors }}
+        {{ form.color.label_tag }}
+        {{ form.color }}
+      </div>
+      <div class="form-row">
+        {{ form.talle.errors }}
+        {{ form.talle.label_tag }}
+        {{ form.talle }}
+      </div>
+      <div class="form-row">
+        {{ form.codigo.errors }}
+        {{ form.codigo.label_tag }}
+        {{ form.codigo }}
+      </div>
+
+      <div class="submit-row">
+        <input type="submit" value="Sumar 1 unidad" class="default">
+        <a href="{% url 'admin:productos_productostock_changelist' %}">Volver al stock</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -17,11 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import redirect
+from django.urls import reverse_lazy
 from django.conf import settings
 from django.conf.urls.static import static
 from productos.views import producto_list, home, producto_detail
 from contact.views import contact
 from custom_admin import views as admin_views
+from custom_admin.forms import StaffPasswordResetForm
 from productos import cart_views
 from productos import cliente_auth
 from productos import vton_views
@@ -42,6 +44,41 @@ urlpatterns = [
     path('panel/', admin_views.dashboard, name='dashboard'),
     path('panel/login/', admin_views.iniciar_sesion, name='login'),
     path('panel/logout/', admin_views.cerrar_sesion, name='logout'),
+    path('panel/cambiar-contrasena/', admin_views.cambiar_contrasena, name='cambiar_contrasena'),
+    path(
+        'panel/recuperar-contrasena/',
+        auth_views.PasswordResetView.as_view(
+            form_class=StaffPasswordResetForm,
+            template_name='custom_admin/password_reset.html',
+            email_template_name='custom_admin/password_reset_email.txt',
+            html_email_template_name='custom_admin/password_reset_email.html',
+            subject_template_name='custom_admin/password_reset_subject.txt',
+            success_url=reverse_lazy('panel_password_reset_done'),
+        ),
+        name='panel_password_reset',
+    ),
+    path(
+        'panel/recuperar-contrasena/enviado/',
+        auth_views.PasswordResetDoneView.as_view(
+            template_name='custom_admin/password_reset_done.html',
+        ),
+        name='panel_password_reset_done',
+    ),
+    path(
+        'panel/recuperar-contrasena/<uidb64>/<token>/',
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name='custom_admin/password_reset_confirm.html',
+            success_url=reverse_lazy('panel_password_reset_complete'),
+        ),
+        name='panel_password_reset_confirm',
+    ),
+    path(
+        'panel/recuperar-contrasena/completa/',
+        auth_views.PasswordResetCompleteView.as_view(
+            template_name='custom_admin/password_reset_complete.html',
+        ),
+        name='panel_password_reset_complete',
+    ),
     
     # Productos
     path('panel/productos/', admin_views.productos, name='admin_productos'),
@@ -52,6 +89,7 @@ urlpatterns = [
     
     # Categorías
     path('panel/categorias/', admin_views.categorias, name='categorias'),
+    path('panel/categorias/<int:pk>/', admin_views.detalle_categoria, name='detalle_categoria'),
     path('panel/categorias/agregar/', admin_views.agregar_categoria, name='agregar_categoria'),
     path('panel/categorias/<int:pk>/editar/', admin_views.editar_categoria, name='editar_categoria'),
     path('panel/categorias/<int:pk>/eliminar/', admin_views.eliminar_categoria, name='eliminar_categoria'),
@@ -137,6 +175,7 @@ urlpatterns = [
 
     # Stock
     path('panel/stock/', admin_views.stock, name='stock'),
+    path('panel/stock/<int:pk>/editar/', admin_views.editar_stock, name='editar_stock'),
     path('health/', admin_views.health_check, name='health_check'),
     path('importar-datos-maestros/', admin_views.importar_datos_maestros, name='importar_datos'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

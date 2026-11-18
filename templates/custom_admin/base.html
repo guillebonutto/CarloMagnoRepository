@@ -73,6 +73,11 @@
             <div class="nav-item">
                 <a href="/admin/" target="_blank"><i class="fas fa-cogs me-2"></i> Avanzado (Django)</a>
             </div>
+            <div class="nav-item">
+                <a href="{% url 'cambiar_contrasena' %}" class="{% if request.resolver_match.url_name == 'cambiar_contrasena' %}active{% endif %}">
+                    <i class="fas fa-key me-2"></i> Cambiar contraseña
+                </a>
+            </div>
             
             <div class="nav-item mt-4">
                 <a href="{% url 'logout' %}" class="text-danger"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>

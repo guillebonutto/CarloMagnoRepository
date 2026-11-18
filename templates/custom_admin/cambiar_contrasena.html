@@ -1,0 +1,34 @@
+{% extends 'custom_admin/base.html' %}
+
+{% block title %}Cambiar contraseña - Panel de Administración{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-sm" style="max-width: 640px;">
+        <div class="card-body">
+            <h1 class="h3 mb-3">Cambiar contraseña</h1>
+            <p class="text-muted">Ingresá tu contraseña actual y elegí una nueva.</p>
+
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text|safe }}</div>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <button type="submit" class="btn btn-danger">Actualizar contraseña</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
