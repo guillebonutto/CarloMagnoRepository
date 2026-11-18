@@ -5,6 +5,8 @@ from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from productos.models import Marca, Producto
+
 
 @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
 class PanelPasswordTests(TestCase):
@@ -83,3 +85,48 @@ class PanelPasswordTests(TestCase):
         self.assertRedirects(response, reverse('panel_password_reset_complete'))
         self.admin.refresh_from_db()
         self.assertTrue(self.admin.check_password('Reset-Complex-Password-739!'))
+
+
+class PanelProductEditTests(TestCase):
+    def setUp(self):
+        self.admin = get_user_model().objects.create_user(
+            username='product-admin',
+            password='Test-Password-739!',
+            is_staff=True,
+        )
+        self.original_brand = Marca.objects.create(nombre='Marca anterior')
+        self.updated_brand = Marca.objects.create(nombre='Marca nueva')
+        self.product = Producto.objects.create(
+            codigo='TEST-PANEL-001',
+            nombre='Producto de prueba',
+            descripcion='Descripción original',
+            precio='100.00',
+            marca=self.original_brand,
+        )
+        self.client.force_login(self.admin)
+
+    def test_edit_form_preserves_barcode_and_saves_brand(self):
+        response = self.client.get(
+            reverse('editar_producto', args=[self.product.pk]),
+        )
+
+        self.assertContains(response, 'name="codigo"')
+
+        response = self.client.post(
+            reverse('editar_producto', args=[self.product.pk]),
+            {
+                'codigo': self.product.codigo,
+                'nombre': self.product.nombre,
+                'descripcion': self.product.descripcion,
+                'precio': str(self.product.precio),
+                'categoria': '',
+                'marca': str(self.updated_brand.pk),
+                'talle': '',
+                'esta_activo': 'on',
+            },
+        )
+
+        self.assertRedirects(response, reverse('admin_productos'))
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.codigo, 'TEST-PANEL-001')
+        self.assertEqual(self.product.marca, self.updated_brand)

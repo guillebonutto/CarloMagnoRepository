@@ -41,6 +41,11 @@
 			</div>
 
 			<div class="form-group">
+				<label for="{{ form.codigo.id_for_label }}">Código de barras / artículo</label>
+				{{ form.codigo }} {{ form.codigo.errors }}
+			</div>
+
+			<div class="form-group">
 				<label for="{{ form.descripcion.id_for_label }}">Descripción *</label>
 				{{ form.descripcion }} {{ form.descripcion.errors }}
 			</div>
@@ -56,7 +61,7 @@
 			</div>
 
 			<div class="form-group">
-				<label for="{{ form.marcas.id_for_label }}">Marca</label>
+				<label for="{{ form.marca.id_for_label }}">Marca</label>
 				{{ form.marca }} {{ form.marca.errors }}
 			</div>
 
