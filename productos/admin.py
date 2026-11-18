@@ -109,6 +109,10 @@ class ProductoAdmin(admin.ModelAdmin):  # ← Nombre corregido
     readonly_fields = ['image_preview', 'created_at', 'updated_at']
     filter_horizontal = ['colores']
     autocomplete_fields = ['marca', 'categoria']
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        form.instance.sync_stock_variants()
     
     fieldsets = (
         ('Información básica', {

@@ -206,11 +206,17 @@ def productos(request):
     direction = request.GET.get('direction', 'asc')
     cat_filter = request.GET.get('categoria')
     marca_filter = request.GET.get('marca')
+    search_query = request.GET.get('buscar', '').strip()
     
     # Queryset base
     productos_qs = Producto.objects.select_related('categoria', 'marca').all()
     
     # Aplicar filtros
+    if search_query:
+        productos_qs = productos_qs.filter(
+            Q(codigo__icontains=search_query)
+            | Q(nombre__icontains=search_query)
+        )
     if cat_filter and cat_filter.isdigit():
         categoria_ids = {int(cat_filter)}
         pendientes = list(categoria_ids)
@@ -248,6 +254,7 @@ def productos(request):
         'current_direction': direction,
         'current_cat': cat_filter,
         'current_marca': marca_filter,
+        'search_query': search_query,
     }
     
     return render(request, 'custom_admin/productos.html', context)
@@ -260,7 +267,8 @@ def agregar_producto(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            product = form.save()
+            product.sync_stock_variants()
             messages.success(request, '✅ Producto creado exitosamente')
             return redirect('admin_productos')
         else:
@@ -284,7 +292,8 @@ def editar_producto(request, pk):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            form.save()
+            product = form.save()
+            product.sync_stock_variants()
             messages.success(request, '✅ Producto actualizado exitosamente')
             return redirect('admin_productos')
         else:

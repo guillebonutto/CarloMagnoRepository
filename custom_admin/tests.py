@@ -5,7 +5,7 @@ from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from productos.models import Marca, Producto
+from productos.models import Color, Marca, Producto, ProductoStock, Talle
 
 
 @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
@@ -130,3 +130,47 @@ class PanelProductEditTests(TestCase):
         self.product.refresh_from_db()
         self.assertEqual(self.product.codigo, 'TEST-PANEL-001')
         self.assertEqual(self.product.marca, self.updated_brand)
+
+    def test_product_list_search_finds_product_by_code_without_stock(self):
+        product = Producto.objects.get(codigo='001067')
+        response = self.client.get(
+            reverse('admin_productos'),
+            {'buscar': '001067'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, product.nombre)
+        self.assertEqual(list(response.context['productos']), [product])
+        self.assertFalse(product.stock_items.exists())
+
+    def test_saving_product_creates_missing_color_size_stock_variants_at_zero(self):
+        first_color = Color.objects.create(nombre='Rojo', hex_code='#FF0000')
+        second_color = Color.objects.create(nombre='Azul', hex_code='#0000FF')
+        size = Talle.objects.create(
+            nombre='Mediano',
+            abbreviation='M',
+        )
+        response = self.client.post(
+            reverse('editar_producto', args=[self.product.pk]),
+            {
+                'codigo': self.product.codigo,
+                'nombre': self.product.nombre,
+                'descripcion': self.product.descripcion,
+                'precio': str(self.product.precio),
+                'categoria': '',
+                'marca': str(self.original_brand.pk),
+                'talle': str(size.pk),
+                'colores': [str(first_color.pk), str(second_color.pk)],
+                'esta_activo': 'on',
+            },
+        )
+
+        self.assertRedirects(response, reverse('admin_productos'))
+        variants = ProductoStock.objects.filter(producto=self.product)
+        self.assertEqual(variants.count(), 2)
+        self.assertSetEqual(
+            set(variants.values_list('color_id', flat=True)),
+            {first_color.pk, second_color.pk},
+        )
+        self.assertSetEqual(set(variants.values_list('talle_id', flat=True)), {size.pk})
+        self.assertSetEqual(set(variants.values_list('stock', flat=True)), {0})

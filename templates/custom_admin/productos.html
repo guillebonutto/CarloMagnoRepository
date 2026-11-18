@@ -124,6 +124,14 @@
             <!-- Mantener el orden al filtrar -->
             <input type="hidden" name="sort" value="{{ current_sort }}">
             <input type="hidden" name="direction" value="{{ current_direction }}">
+
+            <input
+                type="search"
+                name="buscar"
+                value="{{ search_query }}"
+                placeholder="Buscar por código o nombre"
+                aria-label="Buscar productos por código o nombre"
+            >
             
             <select name="categoria">
                 <option value="">Todas las Categorías</option>
@@ -140,7 +148,7 @@
             </select>
             
             <button type="submit"><i class="fas fa-filter me-1"></i> Filtrar</button>
-            {% if current_cat or current_marca %}
+            {% if current_cat or current_marca or search_query %}
             <a href="{% url 'admin_productos' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center" style="padding: 8px 12px;">Limpiar</a>
             {% endif %}
         </form>
@@ -153,32 +161,32 @@
 				<tr>
 					<th style="width: 80px;"><span>Imagen</span></th>
 					<th>
-                        <a href="?sort=nombre&direction={% if current_sort == 'nombre' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}" 
+                        <a href="?sort=nombre&direction={% if current_sort == 'nombre' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}{% if search_query %}&buscar={{ search_query|urlencode }}{% endif %}"
                            class="sortable {% if current_sort == 'nombre' %}{{ current_direction }}{% endif %}">
                            Nombre
                         </a>
                     </th>
 					<th>
-                        <a href="?sort=categoria&direction={% if current_sort == 'categoria' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}" 
+                        <a href="?sort=categoria&direction={% if current_sort == 'categoria' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}{% if search_query %}&buscar={{ search_query|urlencode }}{% endif %}"
                            class="sortable {% if current_sort == 'categoria' %}{{ current_direction }}{% endif %}">
                            Categoría
                         </a>
                     </th>
 					<th>
-                        <a href="?sort=marca&direction={% if current_sort == 'marca' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}" 
+                        <a href="?sort=marca&direction={% if current_sort == 'marca' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}{% if search_query %}&buscar={{ search_query|urlencode }}{% endif %}"
                            class="sortable {% if current_sort == 'marca' %}{{ current_direction }}{% endif %}">
                            Marca
                         </a>
                     </th>
 					<th>
-                        <a href="?sort=precio&direction={% if current_sort == 'precio' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}" 
+                        <a href="?sort=precio&direction={% if current_sort == 'precio' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}{% if search_query %}&buscar={{ search_query|urlencode }}{% endif %}"
                            class="sortable {% if current_sort == 'precio' %}{{ current_direction }}{% endif %}">
                            Precio
                         </a>
                     </th>
                     <th class="text-center"><span>Estado</span></th>
 					<th>
-                        <a href="?sort=fecha&direction={% if current_sort == 'fecha' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}" 
+                        <a href="?sort=fecha&direction={% if current_sort == 'fecha' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}{% if search_query %}&buscar={{ search_query|urlencode }}{% endif %}"
                            class="sortable {% if current_sort == 'fecha' %}{{ current_direction }}{% endif %}">
                            Fecha
                         </a>

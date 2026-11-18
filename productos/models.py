@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.validators import MinValueValidator
 from PIL import Image, ImageOps
 from django_countries.fields import CountryField
@@ -152,6 +152,20 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    def sync_stock_variants(self):
+        if not self.pk or not self.talle_id:
+            return
+
+        database = self._state.db or 'default'
+        with transaction.atomic(using=database):
+            for color in self.colores.using(database).all():
+                ProductoStock.objects.using(database).get_or_create(
+                    producto=self,
+                    color=color,
+                    talle_id=self.talle_id,
+                    defaults={'stock': 0},
+                )
     
     def save(self, *args, **kwargs):
         """Redimensionar imagen y auto-categorizar si es necesario"""
