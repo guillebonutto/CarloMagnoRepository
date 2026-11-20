@@ -1,15 +1,29 @@
 {% extends 'custom_admin/base.html' %}
 {% load static %}
-{% block title %}Depósito - Recibir Stock | Carlo Magno{% endblock %}
+{% block title %}Recibir stock con lector | Carlo Magno{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/stock.css' %}" />
+<style>
+    @media (max-width: 992px) {
+        .mobile-navbar {
+            display: none !important;
+        }
+        .main-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="main-content stock-terminal-page">
+<div class="stock-terminal-page">
 	<form method="post" id="stock-receive-form" data-stock-receive-form action="{% url 'recibir_stock' %}">
 		{% csrf_token %}
-		
+
 		<div class="stock-terminal-container">
 			<!-- Terminal Header -->
 			<div class="stock-terminal-header">
@@ -43,11 +57,15 @@
 				<div class="barcode-scan-box">
 					<span class="barcode-scan-icon" aria-hidden="true">
 						<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-							<path d="M3 4h2v16H3V4zm3 0h1v16H6V4zm2 0h2v16H8V4zm3 0h1v16h-1V4zm2 0h2v16h-2V4zm3 0h2v16h-2V4zm3 0h1v16h-1V4zm2 0h1v16h-1V4z"/>
+							<path
+								d="M3 4h2v16H3V4zm3 0h1v16H6V4zm2 0h2v16H8V4zm3 0h1v16h-1V4zm2 0h2v16h-2V4zm3 0h2v16h-2V4zm3 0h1v16h-1V4zm2 0h1v16h-1V4z" />
 						</svg>
 					</span>
-					<input type="text" name="codigo" id="{{ form.codigo.id_for_label }}" class="barcode-scan-input" placeholder="Escaneá código o SKU..." autocomplete="off" autofocus value="{{ form.codigo.value|default:'' }}">
-					<button type="button" class="btn-scanner-camera" id="btn-open-camera-scanner" title="Escanear con cámara del celular">
+					<input type="text" name="codigo" id="{{ form.codigo.id_for_label }}" class="barcode-scan-input"
+						placeholder="Escaneá código o SKU..." autocomplete="off" autofocus
+						value="{{ form.codigo.value|default:'' }}">
+					<button type="button" class="btn-scanner-camera" id="btn-open-camera-scanner"
+						title="Escanear con cámara del celular">
 						📷 Cámara
 					</button>
 				</div>
@@ -86,11 +104,9 @@
 						<!-- Chips rendered by JS from native select -->
 					</div>
 					<!-- Hidden native select for form submit -->
-					<select name="talle" id="{{ form.talle.id_for_label }}" style="display: none;">
-						{% for choice in form.talle.field.choices %}
-							<option value="{{ choice.0 }}" {% if form.talle.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>
-						{% endfor %}
-					</select>
+					<div style="display: none;">
+						{{ form.talle }}
+					</div>
 				</div>
 
 				<!-- Color + Estilo Row -->
@@ -100,22 +116,14 @@
 							<span class="field-micro-label">Color</span>
 							<button type="button" class="link-quick-add" id="btn-quick-add-color">+ Color</button>
 						</div>
-						<select name="color" id="{{ form.color.id_for_label }}" class="custom-select-styled">
-							{% for choice in form.color.field.choices %}
-								<option value="{{ choice.0 }}" {% if form.color.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>
-							{% endfor %}
-						</select>
+						{{ form.color }}
 					</div>
 					<div>
 						<div class="section-label-with-action">
 							<span class="field-micro-label">Estilo / Corte</span>
 							<button type="button" class="link-quick-add" id="btn-quick-add-estilo">+ Estilo</button>
 						</div>
-						<select name="estilo" id="{{ form.estilo.id_for_label }}" class="custom-select-styled">
-							{% for choice in form.estilo.field.choices %}
-								<option value="{{ choice.0 }}" {% if form.estilo.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>
-							{% endfor %}
-						</select>
+						{{ form.estilo }}
 					</div>
 				</div>
 
@@ -125,11 +133,7 @@
 						<span class="field-micro-label">Tipo de Tela / Composición</span>
 						<button type="button" class="link-quick-add" id="btn-quick-add-tipo">+ Tela</button>
 					</div>
-					<select name="tipo" id="{{ form.tipo.id_for_label }}" class="custom-select-styled">
-						{% for choice in form.tipo.field.choices %}
-							<option value="{{ choice.0 }}" {% if form.tipo.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>
-						{% endfor %}
-					</select>
+					{{ form.tipo }}
 				</div>
 			</div>
 
@@ -137,11 +141,13 @@
 			<div class="terminal-card">
 				<div class="terminal-card-title-row">
 					<h3 class="terminal-card-title">CANTIDAD A SUMAR</h3>
-					<span style="font-size: 0.82rem; color: #475569;">Stock resultante: <strong id="stock-result-num" style="color: #0f172a; font-weight: 800;">0</strong> u.</span>
+					<span style="font-size: 0.82rem; color: #475569;">Stock resultante: <strong id="stock-result-num"
+							style="color: #0f172a; font-weight: 800;">0</strong> u.</span>
 				</div>
 				<div class="quantity-control-row">
 					<button type="button" class="btn-qty-large" id="btn-qty-minus">-</button>
-					<input type="number" name="cantidad" id="{{ form.cantidad.id_for_label }}" class="quantity-big-input" value="1" min="1" step="1">
+					<input type="number" name="cantidad" id="{{ form.cantidad.id_for_label }}"
+						class="quantity-big-input" value="1" min="1" step="1">
 					<button type="button" class="btn-qty-large plus" id="btn-qty-plus">+</button>
 				</div>
 				<div class="quick-qty-shortcuts">
@@ -159,7 +165,8 @@
 			<div class="terminal-card" id="recent-scans-card" style="display: none;">
 				<div class="recent-scans-header">
 					<h3 class="recent-scans-title"><span class="dot-recent"></span> ÚLTIMAS LECTURAS INGRESADAS</h3>
-					<span class="recent-scans-link" id="recent-scans-count-link">Ver lote completo (<span id="recent-scans-count">0</span>)</span>
+					<span class="recent-scans-link" id="recent-scans-count-link">Ver lote completo (<span
+							id="recent-scans-count">0</span>)</span>
 				</div>
 				<div class="recent-scans-list" id="recent-scans-list">
 					<!-- Generado dinámicamente -->
@@ -244,7 +251,8 @@
 			<div class="quick-modal-body">
 				<div class="quick-modal-field">
 					<label for="quick-estilo-nombre">Nombre del Estilo *</label>
-					<input type="text" id="quick-estilo-nombre" name="nombre" placeholder="Ej: Oversize, Clásico, Slim Fit" required>
+					<input type="text" id="quick-estilo-nombre" name="nombre"
+						placeholder="Ej: Oversize, Clásico, Slim Fit" required>
 				</div>
 			</div>
 			<div class="quick-modal-footer">
@@ -266,7 +274,8 @@
 			<div class="quick-modal-body">
 				<div class="quick-modal-field">
 					<label for="quick-tipo-nombre">Nombre del Tipo de Tela *</label>
-					<input type="text" id="quick-tipo-nombre" name="nombre" placeholder="Ej: Algodón Pima, Lino, Gabardina" required>
+					<input type="text" id="quick-tipo-nombre" name="nombre"
+						placeholder="Ej: Algodón Pima, Lino, Gabardina" required>
 				</div>
 			</div>
 			<div class="quick-modal-footer">
@@ -287,23 +296,28 @@
 		<form id="form-quick-producto">
 			<div class="quick-modal-body">
 				<p style="font-size: 0.88rem; color: #64748b; margin-bottom: 6px;">
-					El código escaneado no existe aún en el catálogo. Podés registrar el producto ahora mismo para cargarle stock de inmediato.
+					El código escaneado no existe aún en el catálogo. Podés registrar el producto ahora mismo para
+					cargarle stock de inmediato.
 				</p>
 				<div class="quick-modal-field">
 					<label for="quick-prod-codigo">Código de Barras *</label>
-					<input type="text" id="quick-prod-codigo" name="codigo" readonly style="background: #f1f5f9; font-weight: 700; color: #1e293b;">
+					<input type="text" id="quick-prod-codigo" name="codigo" readonly
+						style="background: #f1f5f9; font-weight: 700; color: #1e293b;">
 				</div>
 				<div class="quick-modal-field">
 					<label for="quick-prod-nombre">Nombre del Producto / Prenda *</label>
-					<input type="text" id="quick-prod-nombre" name="nombre" placeholder="Ej: Remera Lisa Carlo Magno" required>
+					<input type="text" id="quick-prod-nombre" name="nombre" placeholder="Ej: Remera Lisa Carlo Magno"
+						required>
 				</div>
 				<div class="quick-modal-field">
 					<label for="quick-prod-precio">Precio de Venta ($)</label>
-					<input type="number" step="0.01" min="0" id="quick-prod-precio" name="precio" placeholder="0.00" value="0.00">
+					<input type="number" step="0.01" min="0" id="quick-prod-precio" name="precio" placeholder="0.00"
+						value="0.00">
 				</div>
 			</div>
 			<div class="quick-modal-footer">
-				<button type="button" class="btn btn-secondary" data-close-modal="modal-quick-producto">Cancelar</button>
+				<button type="button" class="btn btn-secondary"
+					data-close-modal="modal-quick-producto">Cancelar</button>
 				<button type="submit" class="btn btn-primary" id="btn-save-quick-prod">Crear y Cargar Stock</button>
 			</div>
 		</form>
