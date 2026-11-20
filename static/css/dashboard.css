@@ -128,3 +128,541 @@
         font-size: 2.2rem;
     }
 }
+
+/* ==========================================================================
+   PRESTASHOP 9.0 DASHBOARD STYLES (Carlo Magno)
+   ========================================================================== */
+
+.ps-dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.ps-dashboard-title-area h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.ps-breadcrumb {
+    font-size: 0.8rem;
+    color: #8c9ba5;
+    margin-bottom: 2px;
+}
+
+.ps-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ps-demo-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #2c3e50;
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.ps-demo-switch.active {
+    background: #000000;
+}
+
+.ps-demo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #25b9d7;
+    box-shadow: 0 0 6px #25b9d7;
+}
+
+/* Period Filter Bar */
+.ps-period-bar {
+    background: #ffffff;
+    border: 1px solid #e1e6eb;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ps-period-btn-group {
+    display: flex;
+    align-items: center;
+    background: #f1f4f7;
+    padding: 3px;
+    border-radius: 6px;
+    gap: 2px;
+}
+
+.ps-period-btn {
+    border: none;
+    background: transparent;
+    padding: 5px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #495057;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.ps-period-btn:hover {
+    color: #2c3e50;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.ps-period-btn.active {
+    background: #2c3e50;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.ps-daterange-picker {
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 3-Column Layout */
+.ps-dashboard-grid {
+    display: grid;
+    grid-template-columns: 290px 1fr 290px;
+    gap: 20px;
+    margin-bottom: 24px;
+    align-items: start;
+}
+
+@media (max-width: 1280px) {
+    .ps-dashboard-grid {
+        grid-template-columns: 280px 1fr;
+    }
+    .ps-right-column {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 992px) {
+    .ps-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .ps-right-column {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* PrestaShop White Cards */
+.ps-card {
+    background: #ffffff;
+    border: 1px solid #e1e6eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.ps-card-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f4f7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.ps-card-header .ps-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.ps-card-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #8c9ba5;
+    font-size: 0.85rem;
+}
+
+.ps-card-tools i {
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.ps-card-tools i:hover {
+    color: #2c3e50;
+}
+
+.ps-card-body {
+    padding: 16px;
+}
+
+/* Tip / Promo Banner */
+.ps-tip-banner {
+    background: #d4f0f7;
+    border: 1px solid #b8e6f1;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.ps-tip-banner h4 {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #17697b;
+    margin-bottom: 8px;
+}
+
+.ps-tip-banner ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 14px 0;
+    font-size: 0.82rem;
+    color: #2c3e50;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ps-tip-banner ul li i {
+    color: #17697b;
+    margin-right: 6px;
+}
+
+.ps-btn-tip {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: transparent;
+    border: 1px solid #17697b;
+    color: #17697b;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.ps-btn-tip:hover {
+    background: #17697b;
+    color: #ffffff;
+}
+
+/* Activity Overview Inner Items */
+.ps-active-carts-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f1f4f7;
+    margin-bottom: 12px;
+}
+
+.ps-active-carts-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.2;
+}
+
+.ps-active-carts-sub {
+    font-size: 0.72rem;
+    color: #8c9ba5;
+    display: block;
+}
+
+.ps-active-carts-num {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #2c3e50;
+}
+
+.ps-activity-section {
+    margin-bottom: 12px;
+}
+
+.ps-activity-section-title {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 5px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ps-activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ps-activity-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.84rem;
+    color: #475569;
+    padding: 3px 4px;
+}
+
+.ps-activity-row span.val {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 0.9rem;
+}
+
+.ps-notif-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    text-align: center;
+    padding: 6px 0;
+}
+
+.ps-notif-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 6px;
+}
+
+.ps-notif-label {
+    font-size: 0.74rem;
+    color: #64748b;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.ps-notif-val {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+/* Forecast Header & Pills */
+.ps-forecast-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.ps-tab-pill {
+    background: #f1f4f7;
+    border: none;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+.ps-tab-pill .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.ps-tab-pill.active {
+    background: #2c3e50;
+    color: #ffffff;
+}
+
+/* Dashboard KPIs 6-Columns Row */
+.ps-kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 1100px) {
+    .ps-kpis-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .ps-kpis-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.ps-kpi-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 84px;
+    transition: all 0.15s ease;
+}
+
+.ps-kpi-card.highlight {
+    background: #25b9d7;
+    border-color: #25b9d7;
+    color: #ffffff;
+}
+
+.ps-kpi-card.highlight .ps-kpi-title,
+.ps-kpi-card.highlight .ps-kpi-value {
+    color: #ffffff !important;
+}
+
+.ps-kpi-title {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: capitalize;
+    margin-bottom: 4px;
+}
+
+.ps-kpi-value {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ps-kpi-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin: 0 auto;
+}
+
+.ps-kpi-badge.up {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.ps-kpi-badge.down {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.ps-kpi-card.highlight .ps-kpi-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+/* News & Learn Section (Right Column) */
+.ps-news-item {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f4f7;
+    margin-bottom: 12px;
+}
+
+.ps-news-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.ps-news-date {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.ps-news-title {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.3;
+    margin-bottom: 4px;
+}
+
+.ps-news-desc {
+    font-size: 0.76rem;
+    color: #64748b;
+    line-height: 1.35;
+}
+
+.ps-quick-action-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #1e293b;
+    text-decoration: none;
+    font-size: 0.84rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    transition: all 0.15s ease;
+}
+
+.ps-quick-action-link:hover {
+    background: #f1f5f9;
+    border-color: #7f1d1d;
+    color: #7f1d1d;
+}
+
+.ps-quick-action-link i {
+    color: #7f1d1d;
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+}

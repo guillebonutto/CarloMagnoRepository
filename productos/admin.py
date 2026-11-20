@@ -7,7 +7,7 @@ from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
 from .forms import IngresoStockPorLectorForm, ProductoForm
-from .models import Categoria, Color, Estilo, Tipo, Talle, Marca, Producto, ProductoStock, Cliente, GrupoCliente, Direccion, Carrito, CarritoItem, Pedido, PedidoItem, Cupon
+from .models import Categoria, Color, Estilo, Tipo, Talle, Marca, Producto, ProductoStock, Cliente, GrupoCliente, Direccion, Carrito, CarritoItem, Pedido, PedidoItem, Cupon, MetaMensual, RegistroVisita
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
@@ -439,3 +439,17 @@ class PedidoAdmin(admin.ModelAdmin):
     def get_estacion_display(self, obj):
         return obj.get_estacion()
     get_estacion_display.short_description = 'Estación'
+
+
+@admin.register(MetaMensual)
+class MetaMensualAdmin(admin.ModelAdmin):
+    list_display = ['año', 'mes', 'meta_ventas', 'meta_pedidos', 'meta_visitas', 'meta_ticket_promedio']
+    list_editable = ['meta_ventas', 'meta_pedidos', 'meta_visitas', 'meta_ticket_promedio']
+    list_filter = ['año']
+
+
+@admin.register(RegistroVisita)
+class RegistroVisitaAdmin(admin.ModelAdmin):
+    list_display = ['fecha', 'visitas', 'carritos_creados']
+    list_editable = ['visitas', 'carritos_creados']
+    list_filter = ['fecha']

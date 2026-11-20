@@ -570,3 +570,36 @@ class PedidoItem(models.Model):
 
     def get_subtotal(self):
         return self.precio_unitario * self.cantidad
+
+
+class MetaMensual(models.Model):
+    año = models.PositiveIntegerField(default=2026, verbose_name='Año')
+    mes = models.PositiveIntegerField(verbose_name='Mes (1-12)')
+    meta_ventas = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Meta de Ventas ($)')
+    meta_pedidos = models.PositiveIntegerField(default=0, verbose_name='Meta de Pedidos')
+    meta_visitas = models.PositiveIntegerField(default=0, verbose_name='Meta de Visitas')
+    meta_ticket_promedio = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Meta Ticket Promedio ($)')
+
+    class Meta:
+        unique_together = ('año', 'mes')
+        verbose_name = 'Meta Mensual'
+        verbose_name_plural = 'Metas Mensuales'
+        ordering = ['año', 'mes']
+
+    def __str__(self):
+        return f"Metas {self.mes}/{self.año}"
+
+
+class RegistroVisita(models.Model):
+    fecha = models.DateField(db_index=True, verbose_name='Fecha')
+    visitas = models.PositiveIntegerField(default=0, verbose_name='Cantidad de Visitas')
+    carritos_creados = models.PositiveIntegerField(default=0, verbose_name='Carritos Creados')
+
+    class Meta:
+        verbose_name = 'Registro de Visita'
+        verbose_name_plural = 'Registros de Visitas'
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f"{self.fecha}: {self.visitas} visitas"
+

@@ -9,12 +9,16 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.forms import ModelForm
 from django import forms
-from productos.models import Producto, Categoria, Color, Estilo, Tipo, Marca, Talle, Cliente, Direccion, ProductoStock, Pedido, PedidoItem, Cupon
+from productos.models import Producto, Categoria, Color, Estilo, Tipo, Marca, Talle, Cliente, Direccion, ProductoStock, Pedido, PedidoItem, Cupon, Carrito, CarritoItem, MetaMensual, RegistroVisita
 from productos.forms import ProductoForm, IngresoStockPorLectorForm
 from django.db import router, transaction
 from django.db.models import F, Q, Sum, Count, Avg
 from django.db.models.functions import ExtractMonth
+from django.utils import timezone
+from datetime import timedelta
 import unicodedata
+import json
+import math
 
 # Formularios
 # class ProductForm(ModelForm):
@@ -162,48 +166,231 @@ def cambiar_contrasena(request):
 
     return render(request, 'custom_admin/cambiar_contrasena.html', {'form': form})
 
-# Dashboard
+# Dashboard estilo PrestaShop
 @login_required(login_url='login')
 def dashboard(request):
     if not request.user.is_staff:
         return redirect('inicio')
     
-    # Métricas de Ventas Reales
-    ventas_totales = Pedido.objects.filter(estado_pago='pagado').aggregate(Sum('total'))['total__sum'] or 0
-    cantidad_pedidos = Pedido.objects.filter(estado_pago='pagado').count()
-    ticket_promedio = Pedido.objects.filter(estado_pago='pagado').aggregate(Avg('total'))['total__avg'] or 0
+    # Manejar Demo Mode (activable vía GET ?demo=1 o por defecto si aún no hay pedidos cargados)
+    demo_param = request.GET.get('demo')
+    total_pedidos_reales = Pedido.objects.count()
+    demo_mode = (demo_param == '1') or (demo_param is None and total_pedidos_reales == 0)
+    if demo_param == '0':
+        demo_mode = False
+
+    # Filtro de Período
+    periodo = request.GET.get('periodo', 'year')
+    now = timezone.now()
+    hoy = now.date()
     
-    # Ventas por Estación (Cálculo dinámico basado en los pedidos existentes)
-    estaciones = {
-        'Verano': 0,
-        'Otoño': 0,
-        'Invierno': 0,
-        'Primavera': 0
-    }
+    # Calcular rangos de fechas según período
+    if periodo == 'day':
+        fecha_inicio = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_fin = now
+        fecha_inicio_ant = fecha_inicio - timedelta(days=1)
+        fecha_fin_ant = fecha_fin - timedelta(days=1)
+        label_periodo = "Hoy"
+    elif periodo == 'month':
+        fecha_inicio = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        fecha_fin = now
+        primer_dia_este_mes = fecha_inicio
+        ultimo_dia_mes_ant = primer_dia_este_mes - timedelta(days=1)
+        fecha_inicio_ant = ultimo_dia_mes_ant.replace(day=1)
+        fecha_fin_ant = ultimo_dia_mes_ant
+        label_periodo = "Este Mes"
+    elif periodo == 'day-1':
+        fecha_inicio = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_fin = fecha_inicio.replace(hour=23, minute=59, second=59)
+        fecha_inicio_ant = fecha_inicio - timedelta(days=1)
+        fecha_fin_ant = fecha_fin - timedelta(days=1)
+        label_periodo = "Ayer"
+    elif periodo == 'month-1':
+        primer_dia_este_mes = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        ultimo_dia_mes_ant = primer_dia_este_mes - timedelta(days=1)
+        fecha_inicio = ultimo_dia_mes_ant.replace(day=1)
+        fecha_fin = ultimo_dia_mes_ant
+        fecha_inicio_ant = (fecha_inicio - timedelta(days=1)).replace(day=1)
+        fecha_fin_ant = fecha_inicio - timedelta(days=1)
+        label_periodo = "Mes Anterior"
+    elif periodo == 'year-1':
+        fecha_inicio = now.replace(year=now.year - 1, month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        fecha_fin = now.replace(year=now.year - 1, month=12, day=31, hour=23, minute=59, second=59)
+        fecha_inicio_ant = fecha_inicio.replace(year=now.year - 2)
+        fecha_fin_ant = fecha_fin.replace(year=now.year - 2)
+        label_periodo = f"Año {now.year - 1}"
+    else: # 'year' por defecto
+        fecha_inicio = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        fecha_fin = now
+        fecha_inicio_ant = fecha_inicio.replace(year=now.year - 1)
+        fecha_fin_ant = fecha_fin.replace(year=now.year - 1)
+        label_periodo = f"Año {now.year}"
+        periodo = 'year'
+
+    # 1. Activity Overview (Métricas en tiempo real)
+    hace_30_min = now - timedelta(minutes=30)
+    carritos_activos = Carrito.objects.filter(actualizado__gte=hace_30_min).count()
+    pedidos_pendientes = Pedido.objects.filter(estado_pago='pendiente').count()
+    devoluciones = 0
+    hace_2_horas = now - timedelta(hours=2)
+    carritos_abandonados = Carrito.objects.filter(actualizado__lt=hace_2_horas, items__isnull=False).distinct().count()
+    productos_sin_stock = ProductoStock.objects.filter(stock=0).count()
+    nuevos_clientes = Cliente.objects.filter(fecha_registro__gte=fecha_inicio.date()).count()
+    nuevos_suscriptores = Cliente.objects.filter(boletin=True, fecha_registro__gte=fecha_inicio.date()).count()
+    total_suscriptores = Cliente.objects.filter(boletin=True).count()
+
+    # Si está en demo_mode y no hay carritos/datos, asegurar números para la vista previa
+    if demo_mode:
+        if carritos_activos == 0: carritos_activos = 2
+        if pedidos_pendientes == 0: pedidos_pendientes = 2
+        if devoluciones == 0: devoluciones = 1
+        if carritos_abandonados == 0: carritos_abandonados = 15
+        if productos_sin_stock == 0: productos_sin_stock = 2
+        nuevos_mensajes = 588
+        reviews_count = 6319
+        if nuevos_clientes == 0: nuevos_clientes = 735
+        if nuevos_suscriptores == 0: nuevos_suscriptores = 294
+        if total_suscriptores == 0: total_suscriptores = 1174
+    else:
+        nuevos_mensajes = 0
+        reviews_count = 0
+
+    # 2. Métricas del Dashboard (KPIs)
+    pedidos_periodo = Pedido.objects.filter(estado_pago='pagado', fecha_creacion__gte=fecha_inicio, fecha_creacion__lte=fecha_fin)
+    pedidos_ant = Pedido.objects.filter(estado_pago='pagado', fecha_creacion__gte=fecha_inicio_ant, fecha_creacion__lte=fecha_fin_ant)
+
+    ventas_reales = pedidos_periodo.aggregate(Sum('total'))['total__sum'] or 0
+    ventas_ant = pedidos_ant.aggregate(Sum('total'))['total__sum'] or 0
+    cantidad_pedidos = pedidos_periodo.count()
+    cantidad_pedidos_ant = pedidos_ant.count()
+
+    # Visitas
+    visitas_periodo = RegistroVisita.objects.filter(fecha__gte=fecha_inicio.date(), fecha__lte=fecha_fin.date()).aggregate(Sum('visitas'))['visitas__sum'] or 0
+
+    if demo_mode and ventas_reales == 0:
+        ventas_display = 3500506.00
+        ventas_diff = 2.72
+        pedidos_display = 27878
+        pedidos_diff = 6.32
+        ticket_display = 125.57
+        ticket_diff = -3.39
+        visitas_display = 1703602
+        visitas_diff = 7.69
+        conversion_display = 1.64
+        conversion_diff = -0.02
+        beneficio_display = 1209348.15
+        beneficio_diff = 0.57
+    else:
+        ventas_display = float(ventas_reales)
+        ventas_diff = round(((float(ventas_reales) - float(ventas_ant)) / float(ventas_ant) * 100) if ventas_ant > 0 else 0, 2)
+        pedidos_display = cantidad_pedidos
+        pedidos_diff = round(((cantidad_pedidos - cantidad_pedidos_ant) / cantidad_pedidos_ant * 100) if cantidad_pedidos_ant > 0 else 0, 2)
+        ticket_display = round(ventas_display / pedidos_display, 2) if pedidos_display > 0 else 0
+        ticket_diff = 0.0
+        visitas_display = visitas_periodo if visitas_periodo > 0 else (pedidos_display * 30)
+        visitas_diff = 0.0
+        conversion_display = round((pedidos_display / visitas_display * 100), 2) if visitas_display > 0 else 0.0
+        conversion_diff = 0.0
+        beneficio_display = round(ventas_display * 0.35, 2)
+        beneficio_diff = ventas_diff
+
+    # 3. Datos para el Gráfico Forecast (Mes a Mes)
+    meses_nombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
     
-    pedidos_pagados = Pedido.objects.filter(estado_pago='pagado')
-    for p in pedidos_pagados:
+    # Obtener metas mensuales o usar estimación de previsión
+    metas_dict = {m.mes: m for m in MetaMensual.objects.filter(año=now.year)}
+    if demo_mode and not metas_dict and ventas_reales == 0:
+        forecast_sales_actual = [120000, 150000, 180000, 220000, 260000, 290000, 340000, 390000, 430000, 480000, 520000, 580000]
+        forecast_sales_target = [140000, 170000, 200000, 240000, 280000, 310000, 360000, 410000, 460000, 510000, 550000, 620000]
+        forecast_traffic = [24000, 28000, 31000, 35000, 39000, 42000, 47000, 51000, 56000, 61000, 65000, 72000]
+        forecast_orders = [1200, 1450, 1700, 1950, 2200, 2450, 2800, 3100, 3400, 3750, 4100, 4600]
+    else:
+        forecast_sales_actual = []
+        forecast_sales_target = []
+        forecast_traffic = []
+        forecast_orders = []
+        for m in range(1, 13):
+            v_mes = Pedido.objects.filter(estado_pago='pagado', fecha_creacion__year=now.year, fecha_creacion__month=m).aggregate(Sum('total'))['total__sum'] or 0
+            p_mes = Pedido.objects.filter(estado_pago='pagado', fecha_creacion__year=now.year, fecha_creacion__month=m).count()
+            meta = metas_dict.get(m)
+            target = float(meta.meta_ventas) if meta else (float(v_mes) * 1.2 if v_mes > 0 else 100000.0)
+            forecast_sales_actual.append(float(v_mes))
+            forecast_sales_target.append(target)
+            forecast_orders.append(p_mes)
+            forecast_traffic.append(p_mes * 30)
+
+    # 4. Datos para el Gráfico de Tendencias (Líneas comparativas PrestaShop)
+    if demo_mode and ventas_reales == 0:
+        dias_muestras = 30
+        trend_labels = [f"Día {i}" for i in range(1, dias_muestras + 1)]
+        trend_sales = [round(35000 + 18000 * math.sin(i / 2.5) + (i * 1100), 2) for i in range(1, dias_muestras + 1)]
+        trend_sales_prev = [round(28000 + 14000 * math.sin(i / 2.7) + (i * 850), 2) for i in range(1, dias_muestras + 1)]
+    else:
+        dias_muestras = 30
+        trend_labels = [f"Día {i}" for i in range(1, dias_muestras + 1)]
+        trend_sales = [0] * dias_muestras
+        trend_sales_prev = [0] * dias_muestras
+
+    # Estaciones (para compatibilidad de métricas existentes)
+    estaciones = {'Verano': 0, 'Otoño': 0, 'Invierno': 0, 'Primavera': 0}
+    for p in Pedido.objects.filter(estado_pago='pagado'):
         estacion = p.get_estacion()
         estaciones[estacion] += float(p.total)
 
-    # Impacto de Promociones
-    pedidos_con_cupon = Pedido.objects.filter(estado_pago='pagado', cupon__isnull=False).count()
-    
     context = {
+        'demo_mode': demo_mode,
+        'periodo': periodo,
+        'label_periodo': label_periodo,
+        'fecha_inicio': fecha_inicio.strftime('%Y-%m-%d'),
+        'fecha_fin': fecha_fin.strftime('%Y-%m-%d'),
+        'año_actual': now.year,
+
+        # Activity overview
+        'carritos_activos': carritos_activos,
+        'pedidos_pendientes': pedidos_pendientes,
+        'devoluciones': devoluciones,
+        'carritos_abandonados': carritos_abandonados,
+        'productos_sin_stock': productos_sin_stock,
+        'nuevos_mensajes': nuevos_mensajes,
+        'reviews_count': reviews_count,
+        'nuevos_clientes': nuevos_clientes,
+        'nuevos_suscriptores': nuevos_suscriptores,
+        'total_suscriptores': total_suscriptores,
+
+        # KPIs
+        'ventas_display': ventas_display,
+        'ventas_diff': ventas_diff,
+        'pedidos_display': pedidos_display,
+        'pedidos_diff': pedidos_diff,
+        'ticket_display': ticket_display,
+        'ticket_diff': ticket_diff,
+        'visitas_display': visitas_display,
+        'visitas_diff': visitas_diff,
+        'conversion_display': conversion_display,
+        'conversion_diff': conversion_diff,
+        'beneficio_display': beneficio_display,
+        'beneficio_diff': beneficio_diff,
+
+        # Gráficos (JSON para Chart.js)
+        'meses_nombres_json': json.dumps(meses_nombres),
+        'forecast_sales_actual_json': json.dumps(forecast_sales_actual),
+        'forecast_sales_target_json': json.dumps(forecast_sales_target),
+        'forecast_traffic_json': json.dumps(forecast_traffic),
+        'forecast_orders_json': json.dumps(forecast_orders),
+        'trend_labels_json': json.dumps(trend_labels),
+        'trend_sales_json': json.dumps(trend_sales),
+        'trend_sales_prev_json': json.dumps(trend_sales_prev),
+
+        # Totales generales catálogo
         'total_productos': Producto.objects.count(),
         'total_categories': Categoria.objects.count(),
         'total_marcas': Marca.objects.count(),
         'low_stock': ProductoStock.objects.filter(stock__lt=5).count(),
-        
-        # Nuevas métricas Shein/AliExpress
-        'ventas_totales': ventas_totales,
-        'cantidad_pedidos': cantidad_pedidos,
-        'ticket_promedio': ticket_promedio,
-        'estaciones_data': estaciones,
-        'pedidos_con_cupon': pedidos_con_cupon,
-        'recent_pedidos': Pedido.objects.order_by('-fecha_creacion')[:5],
+        'pedidos_con_cupon': Pedido.objects.filter(estado_pago='pagado', cupon__isnull=False).count(),
+        'recent_pedidos': Pedido.objects.order_by('-fecha_creacion')[:8],
     }
     return render(request, 'custom_admin/dashboard.html', context)
+
 
 # Gestión de productos
 @login_required(login_url='login')
