@@ -958,6 +958,7 @@ def editar_stock(request, pk):
                             stock=F('stock') + 1,
                         )
                     item.refresh_from_db()
+                    item.producto.sync_active_status_with_stock()
                     quantity_form = StockQuantityForm(initial={'stock': item.stock})
                     messages.success(
                         request,

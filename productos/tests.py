@@ -24,7 +24,7 @@ class IngresoStockPorLectorTests(TestCase):
         self.talle = Talle.objects.create(nombre='Mediano', abbreviation='M')
         self.url = reverse('admin:productos_productostock_recepcion')
 
-    def test_scans_increment_selected_variant_without_activating_product(self):
+    def test_scans_increment_selected_variant_and_activate_product(self):
         payload = {
             'codigo': self.producto.codigo,
             'color': self.color.pk,
@@ -43,7 +43,7 @@ class IngresoStockPorLectorTests(TestCase):
         )
         self.assertEqual(stock.stock, 2)
         self.producto.refresh_from_db()
-        self.assertFalse(self.producto.esta_activo)
+        self.assertTrue(self.producto.esta_activo)
         self.assertTrue(
             ProductoStock.objects.filter(
                 producto=self.producto,
@@ -156,6 +156,10 @@ class IngresoStockPorLectorTests(TestCase):
         )
         self.assertContains(response, 'stock-letter-A')
         self.assertContains(response, 'stock-letter-B')
+        self.assertContains(
+            response,
+            reverse('admin:productos_productostock_recepcion'),
+        )
 
     def test_stock_search_matches_code_color_and_talle_and_accepts_sort(self):
         beta = Producto.objects.create(
@@ -224,7 +228,7 @@ class IngresoStockPorLectorTests(TestCase):
             producto=self.producto,
             color=self.color,
             talle=self.talle,
-            stock=4,
+            stock=0,
         )
         edit_url = reverse('editar_stock', args=[stock.pk])
 
@@ -238,6 +242,8 @@ class IngresoStockPorLectorTests(TestCase):
         self.assertEqual(page.content.count(b'<form'), 1)
         self.assertEqual(len(page.context['quantity_form'].fields), 1)
         self.assertNotContains(page, 'presioná Enter')
+        self.producto.refresh_from_db()
+        self.assertFalse(self.producto.esta_activo)
 
         response = self.client.post(edit_url, {
             'action': 'guardar',
@@ -246,6 +252,8 @@ class IngresoStockPorLectorTests(TestCase):
         self.assertRedirects(response, edit_url)
         stock.refresh_from_db()
         self.assertEqual(stock.stock, 9)
+        self.producto.refresh_from_db()
+        self.assertTrue(self.producto.esta_activo)
 
         response = self.client.post(edit_url, {
             'action': 'escanear',
@@ -262,6 +270,44 @@ class IngresoStockPorLectorTests(TestCase):
         stock.refresh_from_db()
         self.assertEqual(stock.stock, 10)
         self.assertContains(response, 'No se modificó el stock')
+
+        response = self.client.post(edit_url, {
+            'action': 'guardar',
+            'stock': 0,
+        })
+        self.assertRedirects(response, edit_url)
+        stock.refresh_from_db()
+        self.assertEqual(stock.stock, 0)
+        self.producto.refresh_from_db()
+        self.assertFalse(self.producto.esta_activo)
+
+    def test_product_stays_active_until_all_variants_are_out_of_stock(self):
+        second_size = Talle.objects.create(
+            nombre='Grande',
+            abbreviation='L',
+        )
+        first_variant = ProductoStock.objects.create(
+            producto=self.producto,
+            color=self.color,
+            talle=self.talle,
+            stock=1,
+        )
+        second_variant = ProductoStock.objects.create(
+            producto=self.producto,
+            color=self.color,
+            talle=second_size,
+            stock=2,
+        )
+
+        first_variant.stock = 0
+        first_variant.save(update_fields=['stock'])
+        self.producto.refresh_from_db()
+        self.assertTrue(self.producto.esta_activo)
+
+        second_variant.stock = 0
+        second_variant.save(update_fields=['stock'])
+        self.producto.refresh_from_db()
+        self.assertFalse(self.producto.esta_activo)
 
     def test_stock_list_edit_action_opens_custom_panel_editor(self):
         stock = ProductoStock.objects.create(

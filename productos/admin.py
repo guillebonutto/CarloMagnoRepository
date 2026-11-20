@@ -227,6 +227,7 @@ class ProductoStockAdmin(admin.ModelAdmin):  # ← Nombre corregido
                                 stock=F('stock') + 1
                             )
                             stock.refresh_from_db(using=db)
+                    producto.sync_active_status_with_stock()
                     messages.success(
                         request,
                         f'{producto.nombre}: stock de {color.nombre}, talle {talle.abbreviation} '

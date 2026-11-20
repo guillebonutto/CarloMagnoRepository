@@ -153,6 +153,16 @@ class Producto(models.Model):
                         talle_id=talle.pk,
                         defaults={'stock': 0},
                     )
+
+    def sync_active_status_with_stock(self):
+        database = self._state.db or 'default'
+        has_stock = self.stock_items.using(database).filter(stock__gt=0).exists()
+        if self.esta_activo != has_stock:
+            self.esta_activo = has_stock
+            self.save(
+                using=database,
+                update_fields=['esta_activo', 'updated_at'],
+            )
     
     def save(self, *args, **kwargs):
         """Redimensionar imagen y auto-categorizar si es necesario"""
@@ -261,6 +271,12 @@ class ProductoStock(models.Model):
         verbose_name_plural = 'Stock de productos'
         unique_together = ['producto', 'color', 'talle']
         ordering = ['producto', 'color__order', 'talle__order']
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        database = self._state.db or 'default'
+        producto = Producto.objects.using(database).get(pk=self.producto_id)
+        producto.sync_active_status_with_stock()
 
     def __str__(self):
         return f"{self.producto.nombre} - {self.color.nombre} - {self.talle.abbreviation}: {self.stock} unidades"
