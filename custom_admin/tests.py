@@ -181,3 +181,37 @@ class PanelProductEditTests(TestCase):
             {size.pk, second_size.pk},
         )
         self.assertSetEqual(set(variants.values_list('stock', flat=True)), {0})
+
+    def test_staff_can_receive_stock_from_custom_panel_and_keep_variant_selection(self):
+        color = Color.objects.create(nombre='Verde', hex_code='#00FF00')
+        size = Talle.objects.create(nombre='Mediano', abbreviation='M')
+        self.product.esta_activo = False
+        self.product.save(update_fields=['esta_activo'])
+        receive_url = reverse('recibir_stock')
+
+        page = self.client.get(receive_url)
+
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'Recibir stock con lector')
+        self.assertContains(page, '/static/css/stock.')
+        self.assertEqual(page.context['form']['codigo'].field.widget.attrs['autofocus'], True)
+
+        response = self.client.post(receive_url, {
+            'codigo': self.product.codigo,
+            'color': color.pk,
+            'talle': size.pk,
+        })
+
+        self.assertRedirects(response, receive_url)
+        stock = ProductoStock.objects.get(
+            producto=self.product,
+            color=color,
+            talle=size,
+        )
+        self.assertEqual(stock.stock, 1)
+        self.product.refresh_from_db()
+        self.assertTrue(self.product.esta_activo)
+
+        page = self.client.get(receive_url)
+        self.assertEqual(str(page.context['form']['color'].value()), str(color.pk))
+        self.assertEqual(str(page.context['form']['talle'].value()), str(size.pk))

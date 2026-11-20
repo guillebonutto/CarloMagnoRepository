@@ -158,7 +158,7 @@ class IngresoStockPorLectorTests(TestCase):
         self.assertContains(response, 'stock-letter-B')
         self.assertContains(
             response,
-            reverse('admin:productos_productostock_recepcion'),
+            reverse('recibir_stock'),
         )
 
     def test_stock_search_matches_code_color_and_talle_and_accepts_sort(self):

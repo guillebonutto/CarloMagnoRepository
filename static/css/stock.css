@@ -365,7 +365,8 @@
     font-weight: 650;
 }
 
-.stock-edit-field input {
+.stock-edit-field input,
+.stock-edit-field select {
     width: 100%;
     min-height: 44px;
     padding: 10px 12px;
@@ -376,7 +377,8 @@
     font: inherit;
 }
 
-.stock-edit-field input:focus {
+.stock-edit-field input:focus,
+.stock-edit-field select:focus {
     border-color: #667eea;
     outline: 3px solid rgba(102, 126, 234, 0.15);
 }
@@ -386,6 +388,26 @@
     padding-left: 18px;
     color: #c62828;
     font-size: 0.83rem;
+}
+
+.stock-receive-panel {
+    max-width: 860px;
+}
+
+.stock-receive-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.stock-receive-code-field {
+    grid-column: 1 / -1;
+}
+
+.stock-receive-code-field small {
+    color: #778195;
+    font-size: 0.8rem;
+    line-height: 1.45;
 }
 
 .stock-edit-submit-row {
@@ -487,6 +509,14 @@
 
     .stock-edit-fields {
         grid-template-columns: 1fr;
+    }
+
+    .stock-receive-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .stock-receive-code-field {
+        grid-column: auto;
     }
 
     .stock-alphabet {

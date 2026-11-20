@@ -1,0 +1,71 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Recibir stock con lector{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/stock.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<div>
+			<a href="{% url 'stock' %}" class="stock-back-link">← Volver a Gestión de Stock</a>
+			<h1>Recibir stock con lector</h1>
+		</div>
+	</div>
+
+	<section class="stock-edit-panel stock-receive-panel">
+		<div class="stock-edit-panel-heading">
+			<span class="stock-edit-panel-icon" aria-hidden="true">📦</span>
+			<div>
+				<h2>Cargar unidades</h2>
+				<p>Elegí color y talle, y escaneá cada artículo. Cada lectura suma una unidad y activa el producto si queda stock disponible.</p>
+			</div>
+		</div>
+
+		<form method="post" class="stock-edit-form stock-receive-form" data-stock-receive-form>
+			{% csrf_token %}
+			{{ form.non_field_errors }}
+
+			<div class="stock-receive-fields">
+				<div class="stock-edit-field">
+					<label for="{{ form.color.id_for_label }}">{{ form.color.label }}</label>
+					{{ form.color }}
+					{{ form.color.errors }}
+				</div>
+				<div class="stock-edit-field">
+					<label for="{{ form.talle.id_for_label }}">{{ form.talle.label }}</label>
+					{{ form.talle }}
+					{{ form.talle.errors }}
+				</div>
+				<div class="stock-edit-field stock-receive-code-field">
+					<label for="{{ form.codigo.id_for_label }}">{{ form.codigo.label }}</label>
+					{{ form.codigo }}
+					{{ form.codigo.errors }}
+					<small>La lectora envía Enter para registrar la unidad. El color y el talle quedan seleccionados para la próxima lectura.</small>
+				</div>
+			</div>
+
+			<div class="stock-edit-submit-row">
+				<button class="btn btn-primary" type="submit">Sumar 1 unidad</button>
+				<a class="stock-edit-cancel" href="{% url 'stock' %}">Volver a Stock</a>
+			</div>
+		</form>
+	</section>
+</div>
+<script>
+	const stockReceiveForm = document.querySelector('[data-stock-receive-form]');
+	const stockReceiveCode = stockReceiveForm
+		? stockReceiveForm.querySelector('input[name="codigo"]')
+		: null;
+
+	if (stockReceiveForm && stockReceiveCode) {
+		stockReceiveCode.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				stockReceiveForm.requestSubmit();
+			}
+		});
+	}
+</script>
+{% endblock %}

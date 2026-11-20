@@ -10,8 +10,8 @@ from django.views.decorators.http import require_POST
 from django.forms import ModelForm
 from django import forms
 from productos.models import Producto, Categoria, Color, Marca, Talle, Cliente, Direccion, ProductoStock, Pedido, PedidoItem, Cupon
-from productos.forms import ProductoForm
-from django.db import transaction
+from productos.forms import ProductoForm, IngresoStockPorLectorForm
+from django.db import router, transaction
 from django.db.models import F, Q, Sum, Count, Avg
 from django.db.models.functions import ExtractMonth
 import unicodedata
@@ -916,6 +916,67 @@ def stock(request):
             'sort_by': sort_by,
             'total_stock_items': sum(len(group['items']) for group in letter_groups),
         },
+    )
+
+
+@login_required(login_url='login')
+def recibir_stock(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = IngresoStockPorLectorForm(request.POST)
+        if form.is_valid():
+            color = form.cleaned_data['color']
+            talle = form.cleaned_data['talle']
+            request.session['recepcion_stock_color'] = color.pk
+            request.session['recepcion_stock_talle'] = talle.pk
+            codigo = form.cleaned_data['codigo']
+            database = router.db_for_write(ProductoStock)
+            producto = Producto.objects.using(database).filter(
+                codigo=codigo,
+            ).first()
+
+            if producto is None:
+                messages.error(
+                    request,
+                    f'No se encontró un artículo con el código {codigo}. '
+                    'No se modificó el stock.',
+                )
+            else:
+                with transaction.atomic(using=database):
+                    stock, creado = ProductoStock.objects.using(
+                        database,
+                    ).get_or_create(
+                        producto=producto,
+                        color=color,
+                        talle=talle,
+                        defaults={'stock': 1},
+                    )
+                    if not creado:
+                        ProductoStock.objects.using(database).filter(
+                            pk=stock.pk,
+                        ).update(stock=F('stock') + 1)
+                        stock.refresh_from_db(using=database)
+                        producto.sync_active_status_with_stock()
+
+                messages.success(
+                    request,
+                    f'{producto.nombre}: stock de {color.nombre}, talle '
+                    f'{talle.abbreviation} actualizado a {stock.stock}.',
+                )
+
+            return redirect('recibir_stock')
+    else:
+        form = IngresoStockPorLectorForm(initial={
+            'color': request.session.get('recepcion_stock_color'),
+            'talle': request.session.get('recepcion_stock_talle'),
+        })
+
+    return render(
+        request,
+        'custom_admin/stock_recepcion.html',
+        {'form': form},
     )
 
 
