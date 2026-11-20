@@ -32,7 +32,7 @@
 				<span class="active-product-code" id="active-product-code">-</span>
 			</div>
 			<div class="product-stock-status-box">
-				<span class="stock-indicator-label">Stock de la variante seleccionada:</span>
+				<span class="stock-indicator-label">Stock variante actual:</span>
 				<div class="stock-counter-badge" id="current-variant-stock">0 u.</div>
 			</div>
 		</div>
@@ -55,6 +55,12 @@
 					</div>
 					{{ form.codigo.errors }}
 					<small>Al escanear un código nuevo, se detectará el artículo automáticamente. Al volver a escanearlo, sumará la cantidad especificada.</small>
+				</div>
+
+				<div class="stock-edit-field stock-price-field">
+					<label for="scanned-product-price">Precio del Producto ($)</label>
+					<input type="text" id="scanned-product-price" class="form-control" placeholder="$ 0.00" readonly style="background: #f8fafc; font-weight: 700; color: #1e293b;">
+					<small>Precio de venta registrado para este artículo.</small>
 				</div>
 
 				<div class="stock-edit-field">
@@ -270,6 +276,7 @@
 	const activeProductName = document.getElementById('active-product-name');
 	const activeProductCode = document.getElementById('active-product-code');
 	const currentVariantStock = document.getElementById('current-variant-stock');
+	const scannedProductPrice = document.getElementById('scanned-product-price');
 	const scanFeedbackMessage = document.getElementById('scan-feedback-message');
 	const btnResetScannedProduct = document.getElementById('btn-reset-scanned-product');
 
@@ -290,6 +297,7 @@
 		if (!currentScannedData) {
 			activeProductCard.style.display = 'none';
 			btnResetScannedProduct.style.display = 'none';
+			if (scannedProductPrice) scannedProductPrice.value = '';
 			return;
 		}
 
@@ -297,6 +305,10 @@
 		btnResetScannedProduct.style.display = 'inline-flex';
 		activeProductName.textContent = currentScannedData.producto.nombre;
 		activeProductCode.textContent = `Código: ${currentScannedData.producto.codigo}`;
+		if (scannedProductPrice) {
+			const precioNum = parseFloat(currentScannedData.producto.precio) || 0;
+			scannedProductPrice.value = `$ ${precioNum.toFixed(2)}`;
+		}
 
 		// Sincronizar estilo y tipo si vienen del producto
 		if (estiloSelect && currentScannedData.producto.estilo_id) {

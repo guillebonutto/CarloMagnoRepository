@@ -23,10 +23,10 @@
 				<p class="color-stats">📦 Usado en {{ color.productos.count }} productos</p>
 
 				<div class="actions">
-					<a href="/admin/productos/color/{{ color.id }}/editar/" class="btn-edit"
+					<a href="{% url 'editar_color' color.id %}" class="btn-edit"
 						>✏️ Editar</a
 					>
-					<a href="/admin/productos/color/{{ color.id }}/delete/" class="btn-delete"
+					<a href="{% url 'eliminar_color' color.id %}" class="btn-delete"
 						>🗑️ Eliminar</a
 					>
 				</div>
