@@ -98,6 +98,37 @@
 
 .category-back-link:hover {
 	color: #4c5fc7;
+}
+
+/* ==========================================================================
+   Responsive styles for Categories
+   ========================================================================== */
+@media (max-width: 768px) {
+    .categories-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .category-card {
+        padding: 16px;
+    }
+
+    .category-detail-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+        gap: 14px;
+    }
+
+    .category-detail-header-actions {
+        justify-content: stretch;
+    }
+
+    .category-detail-header-actions .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
 	text-decoration: underline;
 }
 

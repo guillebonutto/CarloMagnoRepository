@@ -227,3 +227,46 @@ small {
 	border-radius: 10px;
 	border: 2px solid #e0e0e0;
 }
+
+/* ==========================================================================
+   Responsive styles for Products Admin
+   ========================================================================== */
+@media (max-width: 768px) {
+    .form-container {
+        padding: 18px;
+        border-radius: 12px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .form-actions .btn,
+    .form-actions button,
+    .form-actions a {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .filters-bar select,
+    .filters-bar button {
+        width: 100%;
+    }
+
+    .productos-table {
+        border-radius: 12px;
+    }
+
+    .product-img, .product-img-placeholder {
+        width: 42px;
+        height: 52px;
+    }
+}

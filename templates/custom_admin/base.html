@@ -11,9 +11,32 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <aside class="sidebar">
-        <div class="sidebar-logo text-center py-3">
-            <img src="{% static 'images/logo.png' %}" alt="Carlo Magno" style="width: 80%; filter: invert(1);">
+    <!-- Overlay para cerrar la sidebar en móviles -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Barra superior para móviles con botón hamburguesa -->
+    <header class="mobile-navbar">
+        <button type="button" class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Abrir menú">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-navbar-brand">
+            <img src="{% static 'images/logo.png' %}" alt="Carlo Magno">
+        </div>
+        <div class="mobile-navbar-actions">
+            <a href="{% url 'logout' %}" class="mobile-logout-btn" title="Cerrar sesión">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </header>
+
+    <aside class="sidebar" id="admin-sidebar">
+        <div class="sidebar-header-row">
+            <div class="sidebar-logo text-center py-2">
+                <img src="{% static 'images/logo.png' %}" alt="Carlo Magno" style="width: 80%; filter: invert(1);">
+            </div>
+            <button type="button" class="sidebar-close-btn" id="sidebar-close" aria-label="Cerrar menú">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         
         <nav class="mt-2">
@@ -122,6 +145,36 @@
                     }
                 });
             });
+
+            // Control de menú responsive (Mobile Sidebar Drawer)
+            const sidebar = document.getElementById('admin-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            const closeBtn = document.getElementById('sidebar-close');
+
+            function openSidebar() {
+                if (sidebar) sidebar.classList.add('open');
+                if (overlay) overlay.classList.add('active');
+                document.body.classList.add('sidebar-open');
+            }
+
+            function closeSidebar() {
+                if (sidebar) sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('active');
+                document.body.classList.remove('sidebar-open');
+            }
+
+            if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            if (overlay) overlay.addEventListener('click', closeSidebar);
+
+            // Cerrar menú móvil al navegar mediante links de la sidebar
+            if (window.innerWidth <= 992) {
+                const navLinks = sidebar ? sidebar.querySelectorAll('nav a:not(.toggle-btn)') : [];
+                navLinks.forEach(link => {
+                    link.addEventListener('click', closeSidebar);
+                });
+            }
         });
     </script>
     {% block extra_js %}{% endblock %}

@@ -50,6 +50,25 @@
     display: inline-block;
 }
 
+/* ==========================================================================
+   Responsive styles for Colores
+   ========================================================================== */
+@media (max-width: 600px) {
+    .colors-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .color-card {
+        border-radius: 12px;
+    }
+
+    .color-preview {
+        height: 100px;
+    }
+}
+}
+
 .color-stats {
     color: #999;
     font-size: 0.85em;
