@@ -80,6 +80,18 @@ class IngresoStockPorLectorForm(forms.Form):
             'placeholder': 'Escaneá el código del artículo',
         }),
     )
+    cantidad = forms.IntegerField(
+        label='Cantidad a sumar',
+        min_value=1,
+        initial=1,
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'min': '1',
+            'value': '1',
+            'class': 'form-control',
+            'style': 'max-width: 130px;',
+        }),
+    )
     color = forms.ModelChoiceField(
         label='Color',
         queryset=Color.objects.filter(esta_activo=True).order_by('order', 'nombre'),
@@ -87,4 +99,14 @@ class IngresoStockPorLectorForm(forms.Form):
     talle = forms.ModelChoiceField(
         label='Talle',
         queryset=Talle.objects.filter(esta_activo=True).order_by('order', 'nombre'),
+    )
+    estilo = forms.ModelChoiceField(
+        label='Estilo',
+        queryset=Estilo.objects.filter(esta_activo=True).order_by('order', 'nombre'),
+        required=False,
+    )
+    tipo = forms.ModelChoiceField(
+        label='Tipo de tela',
+        queryset=Tipo.objects.filter(esta_activo=True).order_by('order', 'nombre'),
+        required=False,
     )

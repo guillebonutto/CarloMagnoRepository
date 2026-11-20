@@ -18,26 +18,33 @@
 		<div class="stock-edit-panel-heading">
 			<span class="stock-edit-panel-icon" aria-hidden="true">📦</span>
 			<div>
-				<h2>Cargar unidades</h2>
-				<p>Elegí color y talle, y escaneá cada artículo. Cada lectura suma una unidad y activa el producto si queda stock disponible.</p>
+				<h2>Cargar unidades de stock</h2>
+				<p>Escaneá con la lectora o cámara. El producto, color y talle se mantienen en pantalla para seguir sumando unidades o cambiar talle/color sin perder el artículo.</p>
 			</div>
 		</div>
+
+		<!-- Card de Producto Detectado Activo -->
+		<div id="active-product-card" class="active-scanned-product" style="display: none;">
+			<div class="product-badge-icon">🏷️</div>
+			<div class="product-info-col">
+				<span class="eyebrow-text">Artículo en carga</span>
+				<h3 id="active-product-name">-</h3>
+				<span class="active-product-code" id="active-product-code">-</span>
+			</div>
+			<div class="product-stock-status-box">
+				<span class="stock-indicator-label">Stock de la variante seleccionada:</span>
+				<div class="stock-counter-badge" id="current-variant-stock">0 u.</div>
+			</div>
+		</div>
+
+		<!-- Feedback dinámico tipo Toast/Alerta flotante -->
+		<div id="scan-feedback-message" class="scan-feedback" style="display: none;"></div>
 
 		<form method="post" class="stock-edit-form stock-receive-form" data-stock-receive-form>
 			{% csrf_token %}
 			{{ form.non_field_errors }}
 
 			<div class="stock-receive-fields">
-				<div class="stock-edit-field">
-					<label for="{{ form.color.id_for_label }}">{{ form.color.label }}</label>
-					{{ form.color }}
-					{{ form.color.errors }}
-				</div>
-				<div class="stock-edit-field">
-					<label for="{{ form.talle.id_for_label }}">{{ form.talle.label }}</label>
-					{{ form.talle }}
-					{{ form.talle.errors }}
-				</div>
 				<div class="stock-edit-field stock-receive-code-field">
 					<label for="{{ form.codigo.id_for_label }}">{{ form.codigo.label }}</label>
 					<div class="barcode-input-container">
@@ -47,40 +54,533 @@
 						</button>
 					</div>
 					{{ form.codigo.errors }}
-					<small>Podés ingresar el código con lectora física de código de barras, ingresarlo manualmente, o presionar <strong>"Usar cámara"</strong> desde tu celular.</small>
+					<small>Al escanear un código nuevo, se detectará el artículo automáticamente. Al volver a escanearlo, sumará la cantidad especificada.</small>
+				</div>
+
+				<div class="stock-edit-field">
+					<label for="{{ form.color.id_for_label }}">{{ form.color.label }}</label>
+					<div class="field-with-add-btn">
+						{{ form.color }}
+						<button type="button" class="btn-quick-add" id="btn-quick-add-color" title="Crear nuevo color en el momento">
+							+ Color
+						</button>
+					</div>
+					{{ form.color.errors }}
+				</div>
+
+				<div class="stock-edit-field">
+					<label for="{{ form.talle.id_for_label }}">{{ form.talle.label }}</label>
+					<div class="field-with-add-btn">
+						{{ form.talle }}
+						<button type="button" class="btn-quick-add" id="btn-quick-add-talle" title="Crear nuevo talle en el momento">
+							+ Talle
+						</button>
+					</div>
+					{{ form.talle.errors }}
+				</div>
+
+				<div class="stock-edit-field">
+					<label for="{{ form.estilo.id_for_label }}">{{ form.estilo.label }}</label>
+					<div class="field-with-add-btn">
+						{{ form.estilo }}
+						<button type="button" class="btn-quick-add" id="btn-quick-add-estilo" title="Crear nuevo estilo en el momento">
+							+ Estilo
+						</button>
+					</div>
+					{{ form.estilo.errors }}
+				</div>
+
+				<div class="stock-edit-field">
+					<label for="{{ form.tipo.id_for_label }}">{{ form.tipo.label }}</label>
+					<div class="field-with-add-btn">
+						{{ form.tipo }}
+						<button type="button" class="btn-quick-add" id="btn-quick-add-tipo" title="Crear nuevo tipo de tela en el momento">
+							+ Tipo
+						</button>
+					</div>
+					{{ form.tipo.errors }}
+				</div>
+
+				<div class="stock-edit-field stock-qty-field">
+					<label for="{{ form.cantidad.id_for_label }}">{{ form.cantidad.label }}</label>
+					<div class="qty-input-stepper">
+						<button type="button" class="btn-step" id="btn-qty-minus">-</button>
+						{{ form.cantidad }}
+						<button type="button" class="btn-step" id="btn-qty-plus">+</button>
+					</div>
+					<small>Cantidad a sumar por lectura o al presionar "Ingresar Stock".</small>
 				</div>
 			</div>
 
 			<div class="stock-edit-submit-row">
-				<button class="btn btn-primary" type="submit">Sumar 1 unidad</button>
+				<button class="btn btn-primary" type="submit" id="btn-submit-stock">
+					<span>➕</span> Ingresar Stock
+				</button>
+				<button type="button" class="btn btn-secondary" id="btn-reset-scanned-product" style="display: none;">
+					✕ Limpiar selección
+				</button>
 				<a class="stock-edit-cancel" href="{% url 'stock' %}">Volver a Stock</a>
 			</div>
 		</form>
 	</section>
 </div>
+<!-- Modal Rápido para Crear Color -->
+<div class="quick-modal" id="modal-quick-color" style="display: none;">
+	<div class="quick-modal-dialog" role="dialog" aria-modal="true">
+		<div class="quick-modal-header">
+			<h4>🎨 Nuevo Color</h4>
+			<button type="button" class="quick-modal-close" data-close-modal="modal-quick-color">&times;</button>
+		</div>
+		<form id="form-quick-color">
+			<div class="quick-modal-body">
+				<div class="quick-modal-field">
+					<label for="quick-color-nombre">Nombre del Color *</label>
+					<input type="text" id="quick-color-nombre" name="nombre" placeholder="Ej: Azul Marino" required>
+				</div>
+				<div class="quick-modal-field">
+					<label for="quick-color-hex">Color visual</label>
+					<input type="color" id="quick-color-hex" name="hex_code" value="#1e3a8a">
+				</div>
+			</div>
+			<div class="quick-modal-footer">
+				<button type="button" class="btn btn-secondary" data-close-modal="modal-quick-color">Cancelar</button>
+				<button type="submit" class="btn btn-primary" id="btn-save-quick-color">Crear y Seleccionar</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Modal Rápido para Crear Talle -->
+<div class="quick-modal" id="modal-quick-talle" style="display: none;">
+	<div class="quick-modal-dialog" role="dialog" aria-modal="true">
+		<div class="quick-modal-header">
+			<h4>📏 Nuevo Talle</h4>
+			<button type="button" class="quick-modal-close" data-close-modal="modal-quick-talle">&times;</button>
+		</div>
+		<form id="form-quick-talle">
+			<div class="quick-modal-body">
+				<div class="quick-modal-field">
+					<label for="quick-talle-abbr">Abreviatura / Talle *</label>
+					<input type="text" id="quick-talle-abbr" name="abbreviation" placeholder="Ej: XXL o 46" required>
+				</div>
+				<div class="quick-modal-field">
+					<label for="quick-talle-nombre">Nombre Completo (opcional)</label>
+					<input type="text" id="quick-talle-nombre" name="nombre" placeholder="Ej: Extra Extra Large">
+				</div>
+			</div>
+			<div class="quick-modal-footer">
+				<button type="button" class="btn btn-secondary" data-close-modal="modal-quick-talle">Cancelar</button>
+				<button type="submit" class="btn btn-primary" id="btn-save-quick-talle">Crear y Seleccionar</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Modal Rápido para Crear Estilo -->
+<div class="quick-modal" id="modal-quick-estilo" style="display: none;">
+	<div class="quick-modal-dialog" role="dialog" aria-modal="true">
+		<div class="quick-modal-header">
+			<h4>✨ Nuevo Estilo</h4>
+			<button type="button" class="quick-modal-close" data-close-modal="modal-quick-estilo">&times;</button>
+		</div>
+		<form id="form-quick-estilo">
+			<div class="quick-modal-body">
+				<div class="quick-modal-field">
+					<label for="quick-estilo-nombre">Nombre del Estilo *</label>
+					<input type="text" id="quick-estilo-nombre" name="nombre" placeholder="Ej: Oversize, Clásico, Slim Fit" required>
+				</div>
+			</div>
+			<div class="quick-modal-footer">
+				<button type="button" class="btn btn-secondary" data-close-modal="modal-quick-estilo">Cancelar</button>
+				<button type="submit" class="btn btn-primary" id="btn-save-quick-estilo">Crear y Seleccionar</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Modal Rápido para Crear Tipo de Tela -->
+<div class="quick-modal" id="modal-quick-tipo" style="display: none;">
+	<div class="quick-modal-dialog" role="dialog" aria-modal="true">
+		<div class="quick-modal-header">
+			<h4>🧵 Nuevo Tipo de Tela</h4>
+			<button type="button" class="quick-modal-close" data-close-modal="modal-quick-tipo">&times;</button>
+		</div>
+		<form id="form-quick-tipo">
+			<div class="quick-modal-body">
+				<div class="quick-modal-field">
+					<label for="quick-tipo-nombre">Nombre del Tipo de Tela *</label>
+					<input type="text" id="quick-tipo-nombre" name="nombre" placeholder="Ej: Algodón Pima, Lino, Gabardina" required>
+				</div>
+			</div>
+			<div class="quick-modal-footer">
+				<button type="button" class="btn btn-secondary" data-close-modal="modal-quick-tipo">Cancelar</button>
+				<button type="submit" class="btn btn-primary" id="btn-save-quick-tipo">Crear y Seleccionar</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Modal Rápido para Crear Producto No Encontrado -->
+<div class="quick-modal" id="modal-quick-producto" style="display: none;">
+	<div class="quick-modal-dialog" role="dialog" aria-modal="true">
+		<div class="quick-modal-header">
+			<h4>✨ Registrar Nuevo Producto</h4>
+			<button type="button" class="quick-modal-close" data-close-modal="modal-quick-producto">&times;</button>
+		</div>
+		<form id="form-quick-producto">
+			<div class="quick-modal-body">
+				<p style="font-size: 0.88rem; color: #64748b; margin-bottom: 6px;">
+					El código escaneado no existe aún en el catálogo. Podés registrar el producto ahora mismo para cargarle stock de inmediato.
+				</p>
+				<div class="quick-modal-field">
+					<label for="quick-prod-codigo">Código de Barras *</label>
+					<input type="text" id="quick-prod-codigo" name="codigo" readonly style="background: #f1f5f9; font-weight: 700; color: #1e293b;">
+				</div>
+				<div class="quick-modal-field">
+					<label for="quick-prod-nombre">Nombre del Producto / Prenda *</label>
+					<input type="text" id="quick-prod-nombre" name="nombre" placeholder="Ej: Remera Lisa Carlo Magno" required>
+				</div>
+				<div class="quick-modal-field">
+					<label for="quick-prod-precio">Precio de Venta ($)</label>
+					<input type="number" step="0.01" min="0" id="quick-prod-precio" name="precio" placeholder="0.00" value="0.00">
+				</div>
+			</div>
+			<div class="quick-modal-footer">
+				<button type="button" class="btn btn-secondary" data-close-modal="modal-quick-producto">Cancelar</button>
+				<button type="submit" class="btn btn-primary" id="btn-save-quick-prod">Crear y Cargar Stock</button>
+			</div>
+		</form>
+	</div>
+</div>
+
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="{% static 'js/camera_scanner.js' %}"></script>
 <script>
 	const stockReceiveForm = document.querySelector('[data-stock-receive-form]');
-	const stockReceiveCode = stockReceiveForm
-		? stockReceiveForm.querySelector('input[name="codigo"]')
-		: null;
+	const stockReceiveCode = stockReceiveForm ? stockReceiveForm.querySelector('input[name="codigo"]') : null;
+	const stockReceiveQty = stockReceiveForm ? stockReceiveForm.querySelector('input[name="cantidad"]') : null;
+	const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+	const colorSelect = document.getElementById('{{ form.color.id_for_label }}');
+	const talleSelect = document.getElementById('{{ form.talle.id_for_label }}');
+	const estiloSelect = document.getElementById('{{ form.estilo.id_for_label }}');
+	const tipoSelect = document.getElementById('{{ form.tipo.id_for_label }}');
 
-	if (stockReceiveForm && stockReceiveCode) {
-		stockReceiveCode.addEventListener('keydown', (event) => {
-			if (event.key === 'Enter') {
-				event.preventDefault();
-				stockReceiveForm.requestSubmit();
-			}
-		});
+	// Elementos de la Card del Producto Activo y Feedback
+	const activeProductCard = document.getElementById('active-product-card');
+	const activeProductName = document.getElementById('active-product-name');
+	const activeProductCode = document.getElementById('active-product-code');
+	const currentVariantStock = document.getElementById('current-variant-stock');
+	const scanFeedbackMessage = document.getElementById('scan-feedback-message');
+	const btnResetScannedProduct = document.getElementById('btn-reset-scanned-product');
 
-		setupCameraScanner({
-			triggerBtnId: 'btn-open-camera-scanner',
-			inputElement: stockReceiveCode,
-			onDetected: (code) => {
-				stockReceiveForm.requestSubmit();
+	// Estado local en memoria
+	let currentScannedData = null; // { producto: {id, nombre, codigo}, stocks: [...] }
+
+	function showFeedback(text, isSuccess = true) {
+		scanFeedbackMessage.className = `scan-feedback ${isSuccess ? 'success' : 'error'}`;
+		scanFeedbackMessage.textContent = text;
+		scanFeedbackMessage.style.display = 'block';
+
+		setTimeout(() => {
+			scanFeedbackMessage.style.display = 'none';
+		}, 4000);
+	}
+
+	function updateCurrentVariantStockDisplay() {
+		if (!currentScannedData) {
+			activeProductCard.style.display = 'none';
+			btnResetScannedProduct.style.display = 'none';
+			return;
+		}
+
+		activeProductCard.style.display = 'flex';
+		btnResetScannedProduct.style.display = 'inline-flex';
+		activeProductName.textContent = currentScannedData.producto.nombre;
+		activeProductCode.textContent = `Código: ${currentScannedData.producto.codigo}`;
+
+		// Sincronizar estilo y tipo si vienen del producto
+		if (estiloSelect && currentScannedData.producto.estilo_id) {
+			estiloSelect.value = currentScannedData.producto.estilo_id;
+		}
+		if (tipoSelect && currentScannedData.producto.tipo_id) {
+			tipoSelect.value = currentScannedData.producto.tipo_id;
+		}
+
+		const selectedColor = parseInt(colorSelect.value, 10);
+		const selectedTalle = parseInt(talleSelect.value, 10);
+
+		const variant = currentScannedData.stocks.find(
+			s => s.color_id === selectedColor && s.talle_id === selectedTalle
+		);
+
+		const qty = variant ? variant.stock : 0;
+		currentVariantStock.textContent = `${qty} u.`;
+	}
+
+	// Al cambiar color o talle dentro del mismo producto escaneado, refrescar el indicador de stock
+	colorSelect.addEventListener('change', updateCurrentVariantStockDisplay);
+	talleSelect.addEventListener('change', updateCurrentVariantStockDisplay);
+
+	// Stepper para el input de cantidad
+	const btnQtyMinus = document.getElementById('btn-qty-minus');
+	const btnQtyPlus = document.getElementById('btn-qty-plus');
+
+	if (btnQtyMinus && stockReceiveQty) {
+		btnQtyMinus.addEventListener('click', () => {
+			let val = parseInt(stockReceiveQty.value, 10) || 1;
+			if (val > 1) {
+				stockReceiveQty.value = val - 1;
 			}
 		});
 	}
+
+	if (btnQtyPlus && stockReceiveQty) {
+		btnQtyPlus.addEventListener('click', () => {
+			let val = parseInt(stockReceiveQty.value, 10) || 1;
+			stockReceiveQty.value = val + 1;
+		});
+	}
+
+	// Botón limpiar selección
+	btnResetScannedProduct.addEventListener('click', () => {
+		currentScannedData = null;
+		activeProductCard.style.display = 'none';
+		btnResetScannedProduct.style.display = 'none';
+		stockReceiveCode.value = '';
+		stockReceiveQty.value = 1;
+		showFeedback('Se limpió el artículo actual. Podés escanear otro.', true);
+		stockReceiveCode.focus();
+	});
+
+	// Función central para procesar lectura o envío
+	async function processStockEntry(explicitCode = null) {
+		const code = (explicitCode !== null ? explicitCode : stockReceiveCode.value).trim();
+		if (!code) {
+			showFeedback('Ingresá o escaneá un código de barras primero.', false);
+			return;
+		}
+
+		// Si el usuario escanea un código DIFERENTE al que ya tenía cargado en pantalla,
+		// primero cargamos los datos de ese nuevo producto sin sumar stock todavía para que pueda ver/elegir color y talle.
+		const isDifferentProduct = currentScannedData && currentScannedData.producto.codigo !== code;
+
+		if (!currentScannedData || isDifferentProduct) {
+			try {
+				const response = await fetch(`{% url 'recibir_stock' %}?buscar_codigo=${encodeURIComponent(code)}`, {
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest'
+					}
+				});
+				const data = await response.json();
+
+				if (data.success) {
+					currentScannedData = data;
+					stockReceiveCode.value = code;
+					updateCurrentVariantStockDisplay();
+					showFeedback(`Detectado: ${data.producto.nombre}. Elegí color/talle y presioná "Ingresar Stock" o volvé a escanearlo.`, true);
+					stockReceiveCode.select();
+					return;
+				} else {
+					// Abrir modal de creación rápida de producto si no existe
+					promptCreateMissingProduct(code);
+					return;
+				}
+			} catch (err) {
+				console.error(err);
+				showFeedback('Error al consultar el artículo.', false);
+				return;
+			}
+		}
+
+		// Si es el MISMO producto (o si ya estaba confirmado y se presionó Enter o el botón), enviamos la suma de stock
+		const formData = new FormData(stockReceiveForm);
+		formData.set('codigo', code);
+
+		try {
+			const response = await fetch(stockReceiveForm.action || window.location.href, {
+				method: 'POST',
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest',
+					'X-CSRFToken': csrfToken
+				},
+				body: formData
+			});
+
+			const result = await response.json();
+			if (result.success) {
+				showFeedback(result.mensaje, true);
+
+				// Actualizar los stocks en memoria sin borrar el formulario
+				if (currentScannedData) {
+					currentScannedData.stocks = result.stocks;
+					updateCurrentVariantStockDisplay();
+				}
+
+				// Retroalimentación háptica en móvil
+				if (navigator.vibrate) {
+					navigator.vibrate([80, 50, 80]);
+				}
+
+				// Mantener el foco y selección en el input para la siguiente pistola
+				stockReceiveCode.select();
+			} else {
+				showFeedback(result.error || 'Error al procesar el ingreso de stock.', false);
+			}
+		} catch (err) {
+			console.error(err);
+			showFeedback('Error de conexión al ingresar stock.', false);
+		}
+	}
+
+	// Interceptar Enter en el input de código
+	stockReceiveCode.addEventListener('keydown', (event) => {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			processStockEntry();
+		}
+	});
+
+	// Interceptar el envío del formulario completo
+	stockReceiveForm.addEventListener('submit', (e) => {
+		e.preventDefault();
+		processStockEntry();
+	});
+
+	// Integración del lector por cámara
+	setupCameraScanner({
+		triggerBtnId: 'btn-open-camera-scanner',
+		inputElement: stockReceiveCode,
+		onDetected: (code) => {
+			stockReceiveCode.value = code;
+			processStockEntry(code);
+		}
+	});
+
+	// Lógica de Modales Rápidos (Color y Talle)
+	function setupModal(triggerBtnId, modalId, formId, endpoint, targetSelect, focusInputId) {
+		const triggerBtn = document.getElementById(triggerBtnId);
+		const modal = document.getElementById(modalId);
+		const form = document.getElementById(formId);
+		if (!triggerBtn || !modal || !form) return;
+
+		const openModal = () => {
+			modal.style.display = 'flex';
+			const focusInput = document.getElementById(focusInputId);
+			if (focusInput) setTimeout(() => focusInput.focus(), 100);
+		};
+
+		const closeModal = () => {
+			modal.style.display = 'none';
+			form.reset();
+		};
+
+		triggerBtn.addEventListener('click', openModal);
+
+		modal.querySelectorAll('[data-close-modal]').forEach(btn => {
+			btn.addEventListener('click', closeModal);
+		});
+
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal) closeModal();
+		});
+
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const formData = new FormData(form);
+
+			try {
+				const response = await fetch(endpoint, {
+					method: 'POST',
+					headers: {
+						'X-CSRFToken': csrfToken
+					},
+					body: formData
+				});
+
+				const result = await response.json();
+				if (result.success) {
+					let option = targetSelect.querySelector(`option[value="${result.id}"]`);
+					if (!option) {
+						option = new Option(result.nombre, result.id, true, true);
+						targetSelect.add(option);
+					}
+					targetSelect.value = result.id;
+					closeModal();
+					updateCurrentVariantStockDisplay();
+
+					if (stockReceiveCode) stockReceiveCode.focus();
+				} else {
+					alert(result.error || 'Ocurrió un error al guardar.');
+				}
+			} catch (err) {
+				console.error(err);
+				alert('Error de conexión al guardar.');
+			}
+		});
+	}
+
+	setupModal('btn-quick-add-color', 'modal-quick-color', 'form-quick-color', '{% url "api_agregar_color" %}', colorSelect, 'quick-color-nombre');
+	setupModal('btn-quick-add-talle', 'modal-quick-talle', 'form-quick-talle', '{% url "api_agregar_talle" %}', talleSelect, 'quick-talle-abbr');
+	setupModal('btn-quick-add-estilo', 'modal-quick-estilo', 'form-quick-estilo', '{% url "api_agregar_estilo" %}', estiloSelect, 'quick-estilo-nombre');
+	setupModal('btn-quick-add-tipo', 'modal-quick-tipo', 'form-quick-tipo', '{% url "api_agregar_tipo" %}', tipoSelect, 'quick-tipo-nombre');
+
+	// Lógica para registrar Producto inexistente al escanear
+	const modalQuickProd = document.getElementById('modal-quick-producto');
+	const formQuickProd = document.getElementById('form-quick-producto');
+	const quickProdCodigo = document.getElementById('quick-prod-codigo');
+	const quickProdNombre = document.getElementById('quick-prod-nombre');
+
+	function promptCreateMissingProduct(code) {
+		quickProdCodigo.value = code;
+		quickProdNombre.value = '';
+		modalQuickProd.style.display = 'flex';
+		setTimeout(() => quickProdNombre.focus(), 100);
+	}
+
+	modalQuickProd.querySelectorAll('[data-close-modal]').forEach(btn => {
+		btn.addEventListener('click', () => {
+			modalQuickProd.style.display = 'none';
+			formQuickProd.reset();
+			if (stockReceiveCode) stockReceiveCode.focus();
+		});
+	});
+
+	modalQuickProd.addEventListener('click', (e) => {
+		if (e.target === modalQuickProd) {
+			modalQuickProd.style.display = 'none';
+			formQuickProd.reset();
+		}
+	});
+
+	formQuickProd.addEventListener('submit', async (e) => {
+		e.preventDefault();
+		const formData = new FormData(formQuickProd);
+
+		try {
+			const response = await fetch('{% url "api_crear_producto_rapido" %}', {
+				method: 'POST',
+				headers: {
+					'X-CSRFToken': csrfToken
+				},
+				body: formData
+			});
+
+			const result = await response.json();
+			if (result.success) {
+				modalQuickProd.style.display = 'none';
+				formQuickProd.reset();
+				currentScannedData = result;
+				stockReceiveCode.value = result.producto.codigo;
+				updateCurrentVariantStockDisplay();
+				showFeedback(`¡Producto "${result.producto.nombre}" creado exitosamente! Elegí color/talle y presioná "Ingresar Stock".`, true);
+				stockReceiveCode.select();
+			} else {
+				alert(result.error || 'Error al crear el producto.');
+			}
+		} catch (err) {
+			console.error(err);
+			alert('Error de conexión al registrar el producto.');
+		}
+	});
 </script>
 {% endblock %}

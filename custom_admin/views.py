@@ -1073,11 +1073,36 @@ def recibir_stock(request):
     if not request.user.is_staff:
         return redirect('home')
 
+    # Consulta JSON asíncrona para buscar producto por código de barras
+    if request.method == 'GET' and request.headers.get('x-requested-with') == 'XMLHttpRequest' and 'buscar_codigo' in request.GET:
+        codigo = request.GET.get('buscar_codigo', '').strip()
+        producto = Producto.objects.filter(codigo=codigo).first()
+        if not producto:
+            return JsonResponse({'success': False, 'error': f'No se encontró un artículo con el código {codigo}.'})
+        
+        # Obtener los stocks actuales de las variantes de este producto
+        stocks = list(ProductoStock.objects.filter(producto=producto).values('color_id', 'talle_id', 'stock'))
+        return JsonResponse({
+            'success': True,
+            'producto': {
+                'id': producto.id,
+                'nombre': producto.nombre,
+                'codigo': producto.codigo,
+                'precio': float(producto.precio),
+                'estilo_id': producto.estilo_id,
+                'tipo_id': producto.tipo_id,
+            },
+            'stocks': stocks,
+        })
+
     if request.method == 'POST':
         form = IngresoStockPorLectorForm(request.POST)
         if form.is_valid():
             color = form.cleaned_data['color']
             talle = form.cleaned_data['talle']
+            estilo = form.cleaned_data.get('estilo')
+            tipo = form.cleaned_data.get('tipo')
+            cantidad = form.cleaned_data.get('cantidad') or 1
             request.session['recepcion_stock_color'] = color.pk
             request.session['recepcion_stock_talle'] = talle.pk
             codigo = form.cleaned_data['codigo']
@@ -1087,12 +1112,28 @@ def recibir_stock(request):
             ).first()
 
             if producto is None:
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'No se encontró un artículo con el código {codigo}. No se modificó el stock.'
+                    })
                 messages.error(
                     request,
                     f'No se encontró un artículo con el código {codigo}. '
                     'No se modificó el stock.',
                 )
             else:
+                # Si se enviaron estilo o tipo, actualizar el producto
+                campos_a_actualizar = []
+                if estilo is not None and producto.estilo != estilo:
+                    producto.estilo = estilo
+                    campos_a_actualizar.append('estilo')
+                if tipo is not None and producto.tipo != tipo:
+                    producto.tipo = tipo
+                    campos_a_actualizar.append('tipo')
+                if campos_a_actualizar:
+                    producto.save(update_fields=campos_a_actualizar)
+
                 with transaction.atomic(using=database):
                     stock, creado = ProductoStock.objects.using(
                         database,
@@ -1100,26 +1141,49 @@ def recibir_stock(request):
                         producto=producto,
                         color=color,
                         talle=talle,
-                        defaults={'stock': 1},
+                        defaults={'stock': cantidad},
                     )
                     if not creado:
                         ProductoStock.objects.using(database).filter(
                             pk=stock.pk,
-                        ).update(stock=F('stock') + 1)
+                        ).update(stock=F('stock') + cantidad)
                         stock.refresh_from_db(using=database)
-                        producto.sync_active_status_with_stock()
+                    producto.sync_active_status_with_stock()
 
-                messages.success(
-                    request,
+                msg = (
                     f'{producto.nombre}: stock de {color.nombre}, talle '
-                    f'{talle.abbreviation} actualizado a {stock.stock}.',
+                    f'{talle.abbreviation} actualizado a {stock.stock} (+{cantidad}).'
                 )
 
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    stocks = list(ProductoStock.objects.filter(producto=producto).values('color_id', 'talle_id', 'stock'))
+                    return JsonResponse({
+                        'success': True,
+                        'mensaje': msg,
+                        'nuevo_stock': stock.stock,
+                        'producto_id': producto.id,
+                        'producto_nombre': producto.nombre,
+                        'color_id': color.id,
+                        'talle_id': talle.id,
+                        'estilo_id': producto.estilo_id,
+                        'tipo_id': producto.tipo_id,
+                        'stocks': stocks,
+                    })
+
+                messages.success(request, msg)
+
             return redirect('recibir_stock')
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Formulario inválido. Verificá que los datos ingresados sean correctos.'
+                })
     else:
         form = IngresoStockPorLectorForm(initial={
             'color': request.session.get('recepcion_stock_color'),
             'talle': request.session.get('recepcion_stock_talle'),
+            'cantidad': 1,
         })
 
     return render(
@@ -1192,6 +1256,225 @@ def editar_stock(request, pk):
 def health_check(request):
     from django.http import HttpResponse
     return HttpResponse("OK", content_type="text/plain")
+
+
+@login_required(login_url='login')
+def api_agregar_color(request):
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+    nombre = request.POST.get('nombre', '').strip()
+    hex_code = request.POST.get('hex_code', '').strip() or '#000000'
+    order = request.POST.get('order', 0)
+
+    if not nombre:
+        return JsonResponse({'success': False, 'error': 'El nombre del color es obligatorio.'})
+
+    if Color.objects.filter(nombre__iexact=nombre).exists():
+        color_existente = Color.objects.filter(nombre__iexact=nombre).first()
+        return JsonResponse({
+            'success': True,
+            'id': color_existente.id,
+            'nombre': color_existente.nombre,
+            'mensaje': 'El color ya existía y fue seleccionado.',
+        })
+
+    try:
+        order = int(order) if order else 0
+    except (ValueError, TypeError):
+        order = 0
+
+    nuevo_color = Color.objects.create(
+        nombre=nombre,
+        hex_code=hex_code,
+        order=order,
+        esta_activo=True,
+    )
+    return JsonResponse({
+        'success': True,
+        'id': nuevo_color.id,
+        'nombre': nuevo_color.nombre,
+    })
+
+
+@login_required(login_url='login')
+def api_agregar_talle(request):
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+    abbreviation = request.POST.get('abbreviation', '').strip().upper()
+    nombre = request.POST.get('nombre', '').strip() or abbreviation
+    order = request.POST.get('order', 0)
+
+    if not abbreviation:
+        return JsonResponse({'success': False, 'error': 'La abreviatura del talle es obligatoria (ej: M, L, 42).'})
+
+    if Talle.objects.filter(abbreviation__iexact=abbreviation).exists():
+        talle_existente = Talle.objects.filter(abbreviation__iexact=abbreviation).first()
+        return JsonResponse({
+            'success': True,
+            'id': talle_existente.id,
+            'nombre': talle_existente.abbreviation,
+            'mensaje': 'El talle ya existía y fue seleccionado.',
+        })
+
+    try:
+        order = int(order) if order else 0
+    except (ValueError, TypeError):
+        order = 0
+
+    nuevo_talle = Talle.objects.create(
+        abbreviation=abbreviation,
+        nombre=nombre,
+        order=order,
+        esta_activo=True,
+    )
+    return JsonResponse({
+        'success': True,
+        'id': nuevo_talle.id,
+        'nombre': nuevo_talle.abbreviation,
+    })
+
+
+@login_required(login_url='login')
+def api_crear_producto_rapido(request):
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+    codigo = request.POST.get('codigo', '').strip()
+    nombre = request.POST.get('nombre', '').strip()
+    precio = request.POST.get('precio', '0').strip()
+    descripcion = request.POST.get('descripcion', '').strip() or f'Artículo {nombre}'
+
+    if not codigo:
+        return JsonResponse({'success': False, 'error': 'El código de barras es obligatorio.'})
+    if not nombre:
+        return JsonResponse({'success': False, 'error': 'El nombre del artículo es obligatorio.'})
+
+    estilo_id = request.POST.get('estilo')
+    tipo_id = request.POST.get('tipo')
+
+    try:
+        precio_val = float(precio) if precio else 0.0
+    except ValueError:
+        precio_val = 0.0
+
+    if Producto.objects.filter(codigo=codigo).exists():
+        producto = Producto.objects.filter(codigo=codigo).first()
+    else:
+        producto = Producto.objects.create(
+            codigo=codigo,
+            nombre=nombre,
+            precio=precio_val,
+            descripcion=descripcion,
+            estilo_id=estilo_id if estilo_id else None,
+            tipo_id=tipo_id if tipo_id else None,
+            esta_activo=True,
+        )
+
+    stocks = list(ProductoStock.objects.filter(producto=producto).values('color_id', 'talle_id', 'stock'))
+    return JsonResponse({
+        'success': True,
+        'producto': {
+            'id': producto.id,
+            'nombre': producto.nombre,
+            'codigo': producto.codigo,
+            'precio': float(producto.precio),
+            'estilo_id': producto.estilo_id,
+            'tipo_id': producto.tipo_id,
+        },
+        'stocks': stocks,
+    })
+
+
+@login_required(login_url='login')
+def api_agregar_estilo(request):
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+    nombre = request.POST.get('nombre', '').strip()
+    order = request.POST.get('order', 0)
+
+    if not nombre:
+        return JsonResponse({'success': False, 'error': 'El nombre del estilo es obligatorio.'})
+
+    if Estilo.objects.filter(nombre__iexact=nombre).exists():
+        estilo_existente = Estilo.objects.filter(nombre__iexact=nombre).first()
+        return JsonResponse({
+            'success': True,
+            'id': estilo_existente.id,
+            'nombre': estilo_existente.nombre,
+            'mensaje': 'El estilo ya existía y fue seleccionado.',
+        })
+
+    try:
+        order = int(order) if order else 0
+    except (ValueError, TypeError):
+        order = 0
+
+    nuevo_estilo = Estilo.objects.create(
+        nombre=nombre,
+        order=order,
+        esta_activo=True,
+    )
+    return JsonResponse({
+        'success': True,
+        'id': nuevo_estilo.id,
+        'nombre': nuevo_estilo.nombre,
+    })
+
+
+@login_required(login_url='login')
+def api_agregar_tipo(request):
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+    nombre = request.POST.get('nombre', '').strip()
+    order = request.POST.get('order', 0)
+
+    if not nombre:
+        return JsonResponse({'success': False, 'error': 'El tipo de tela es obligatorio.'})
+
+    if Tipo.objects.filter(nombre__iexact=nombre).exists():
+        tipo_existente = Tipo.objects.filter(nombre__iexact=nombre).first()
+        return JsonResponse({
+            'success': True,
+            'id': tipo_existente.id,
+            'nombre': tipo_existente.nombre,
+            'mensaje': 'El tipo de tela ya existía y fue seleccionado.',
+        })
+
+    try:
+        order = int(order) if order else 0
+    except (ValueError, TypeError):
+        order = 0
+
+    nuevo_tipo = Tipo.objects.create(
+        nombre=nombre,
+        order=order,
+        esta_activo=True,
+    )
+    return JsonResponse({
+        'success': True,
+        'id': nuevo_tipo.id,
+        'nombre': nuevo_tipo.nombre,
+    })
+
 
 def importar_datos_maestros(request):
     if not request.user.is_staff:

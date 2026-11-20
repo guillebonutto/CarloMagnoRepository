@@ -220,6 +220,7 @@ class ProductoStockAdmin(admin.ModelAdmin):  # ← Nombre corregido
             if form.is_valid():
                 color = form.cleaned_data['color']
                 talle = form.cleaned_data['talle']
+                cantidad = form.cleaned_data.get('cantidad') or 1
                 request.session['recepcion_stock_color'] = color.pk
                 request.session['recepcion_stock_talle'] = talle.pk
                 codigo = form.cleaned_data['codigo']
@@ -234,11 +235,11 @@ class ProductoStockAdmin(admin.ModelAdmin):  # ← Nombre corregido
                             producto=producto,
                             color=color,
                             talle=talle,
-                            defaults={'stock': 1},
+                            defaults={'stock': cantidad},
                         )
                         if not creado:
                             ProductoStock.objects.using(db).filter(pk=stock.pk).update(
-                                stock=F('stock') + 1
+                                stock=F('stock') + cantidad
                             )
                             stock.refresh_from_db(using=db)
                     producto.sync_active_status_with_stock()
