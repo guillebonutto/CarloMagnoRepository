@@ -194,6 +194,7 @@ urlpatterns = [
     path('panel/stock/api/estilo/agregar/', admin_views.api_agregar_estilo, name='api_agregar_estilo'),
     path('panel/stock/api/tipo/agregar/', admin_views.api_agregar_tipo, name='api_agregar_tipo'),
     path('panel/stock/api/producto/crear-rapido/', admin_views.api_crear_producto_rapido, name='api_crear_producto_rapido'),
+    path('panel/stock/api/deshacer/', admin_views.api_deshacer_stock, name='api_deshacer_stock'),
     path('health/', admin_views.health_check, name='health_check'),
     path('importar-datos-maestros/', admin_views.importar_datos_maestros, name='importar_datos'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,135 +1,186 @@
 {% extends 'custom_admin/base.html' %}
 {% load static %}
-{% block title %}Recibir stock con lector{% endblock %}
+{% block title %}Depósito - Recibir Stock | Carlo Magno{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/stock.css' %}" />
 {% endblock %}
 
 {% block content %}
-<div class="main-content">
-	<div class="header">
-		<div>
-			<a href="{% url 'stock' %}" class="stock-back-link">← Volver a Gestión de Stock</a>
-			<h1>Recibir stock con lector</h1>
-		</div>
-	</div>
+<div class="main-content stock-terminal-page">
+	<form method="post" id="stock-receive-form" data-stock-receive-form action="{% url 'recibir_stock' %}">
+		{% csrf_token %}
+		
+		<div class="stock-terminal-container">
+			<!-- Terminal Header -->
+			<div class="stock-terminal-header">
+				<div class="terminal-header-left">
+					<a href="{% url 'stock' %}" class="btn-terminal-back" title="Volver a Gestión de Stock">‹</a>
+					<div class="terminal-brand-info">
+						<div class="terminal-brand-title-row">
+							<h1 class="terminal-brand-title">CARLO MAGNO</h1>
+							<span class="badge-deposito">DEPÓSITO</span>
+						</div>
+						<span class="terminal-brand-sub">Rivadavia 150, Córdoba</span>
+					</div>
+				</div>
+				<div class="terminal-header-right">
+					<span class="badge-online">
+						<span class="dot-online"></span> Online
+					</span>
+					<a href="{% url 'stock' %}" class="btn-terminal-exit" title="Salir de recepción">⎋</a>
+				</div>
+			</div>
 
-	<section class="stock-edit-panel stock-receive-panel">
-		<div class="stock-edit-panel-heading">
-			<span class="stock-edit-panel-icon" aria-hidden="true">📦</span>
-			<div>
-				<h2>Cargar unidades de stock</h2>
-				<p>Escaneá con la lectora o cámara. El producto, color y talle se mantienen en pantalla para seguir sumando unidades o cambiar talle/color sin perder el artículo.</p>
+			<!-- Dynamic Feedback Message -->
+			<div id="scan-feedback-message" class="scan-feedback" style="display: none;"></div>
+
+			<!-- Card 1: Lector Código de Barras / SKU -->
+			<div class="terminal-card">
+				<div class="terminal-card-title-row">
+					<h3 class="terminal-card-title">⚡ LECTOR CÓDIGO DE BARRAS / SKU</h3>
+					<span class="badge-status-pill" id="scanner-status-pill">Lectora lista</span>
+				</div>
+				<div class="barcode-scan-box">
+					<span class="barcode-scan-icon" aria-hidden="true">
+						<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+							<path d="M3 4h2v16H3V4zm3 0h1v16H6V4zm2 0h2v16H8V4zm3 0h1v16h-1V4zm2 0h2v16h-2V4zm3 0h2v16h-2V4zm3 0h1v16h-1V4zm2 0h1v16h-1V4z"/>
+						</svg>
+					</span>
+					<input type="text" name="codigo" id="{{ form.codigo.id_for_label }}" class="barcode-scan-input" placeholder="Escaneá código o SKU..." autocomplete="off" autofocus value="{{ form.codigo.value|default:'' }}">
+					<button type="button" class="btn-scanner-camera" id="btn-open-camera-scanner" title="Escanear con cámara del celular">
+						📷 Cámara
+					</button>
+				</div>
+				<div class="scanner-options-row">
+					<label class="auto-sum-toggle-label">
+						<input type="checkbox" id="auto-sum-toggle" checked>
+						<span>Auto-sumar al escanear (+1 directo)</span>
+					</label>
+					<span class="scanner-sound-status">
+						<span class="dot-sound"></span> Sonido activo
+					</span>
+				</div>
+			</div>
+
+			<!-- Card 2: Artículo Detectado -->
+			<div class="terminal-card" id="detected-product-card" style="display: none;">
+				<div class="detected-product-header">
+					<div>
+						<span class="detected-eyebrow">ARTÍCULO DETECTADO</span>
+						<div class="detected-product-name" id="det-name">-</div>
+						<div class="detected-product-sku-row">
+							<span class="detected-product-sku" id="det-sku">SKU: -</span>
+							<span class="detected-product-price" id="det-price" style="display: none;">$ 0.00</span>
+						</div>
+					</div>
+					<div class="badge-stock-result" id="det-stock-badge">Stock: 0 u.</div>
+				</div>
+
+				<!-- Talle Selector con Chips -->
+				<div class="talles-selector-section">
+					<div class="section-label-with-action">
+						<span class="field-micro-label">TALLE</span>
+						<button type="button" class="link-quick-add" id="btn-quick-add-talle">+ Talle nuevo</button>
+					</div>
+					<div class="talle-chips-grid" id="talle-chips-container">
+						<!-- Chips rendered by JS from native select -->
+					</div>
+					<!-- Hidden native select for form submit -->
+					<select name="talle" id="{{ form.talle.id_for_label }}" style="display: none;">
+						{% for choice in form.talle.field.choices %}
+							<option value="{{ choice.0 }}" {% if form.talle.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>
+						{% endfor %}
+					</select>
+				</div>
+
+				<!-- Color + Estilo Row -->
+				<div class="attributes-two-col">
+					<div>
+						<div class="section-label-with-action">
+							<span class="field-micro-label">Color</span>
+							<button type="button" class="link-quick-add" id="btn-quick-add-color">+ Color</button>
+						</div>
+						<select name="color" id="{{ form.color.id_for_label }}" class="custom-select-styled">
+							{% for choice in form.color.field.choices %}
+								<option value="{{ choice.0 }}" {% if form.color.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div>
+						<div class="section-label-with-action">
+							<span class="field-micro-label">Estilo / Corte</span>
+							<button type="button" class="link-quick-add" id="btn-quick-add-estilo">+ Estilo</button>
+						</div>
+						<select name="estilo" id="{{ form.estilo.id_for_label }}" class="custom-select-styled">
+							{% for choice in form.estilo.field.choices %}
+								<option value="{{ choice.0 }}" {% if form.estilo.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+
+				<!-- Tipo de Tela Full Width -->
+				<div class="attribute-full-col">
+					<div class="section-label-with-action">
+						<span class="field-micro-label">Tipo de Tela / Composición</span>
+						<button type="button" class="link-quick-add" id="btn-quick-add-tipo">+ Tela</button>
+					</div>
+					<select name="tipo" id="{{ form.tipo.id_for_label }}" class="custom-select-styled">
+						{% for choice in form.tipo.field.choices %}
+							<option value="{{ choice.0 }}" {% if form.tipo.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>
+						{% endfor %}
+					</select>
+				</div>
+			</div>
+
+			<!-- Card 3: Cantidad a Sumar -->
+			<div class="terminal-card">
+				<div class="terminal-card-title-row">
+					<h3 class="terminal-card-title">CANTIDAD A SUMAR</h3>
+					<span style="font-size: 0.82rem; color: #475569;">Stock resultante: <strong id="stock-result-num" style="color: #0f172a; font-weight: 800;">0</strong> u.</span>
+				</div>
+				<div class="quantity-control-row">
+					<button type="button" class="btn-qty-large" id="btn-qty-minus">-</button>
+					<input type="number" name="cantidad" id="{{ form.cantidad.id_for_label }}" class="quantity-big-input" value="1" min="1" step="1">
+					<button type="button" class="btn-qty-large plus" id="btn-qty-plus">+</button>
+				</div>
+				<div class="quick-qty-shortcuts">
+					<span class="shortcuts-label">ATAJOS RÁPIDOS:</span>
+					<div class="shortcuts-buttons">
+						<button type="button" class="btn-shortcut" data-add="5">+5</button>
+						<button type="button" class="btn-shortcut" data-add="10">+10</button>
+						<button type="button" class="btn-shortcut" data-add="25">+25</button>
+						<button type="button" class="btn-shortcut reset" id="btn-qty-reset">Reset</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Card 4: Últimas Lecturas Ingresadas -->
+			<div class="terminal-card" id="recent-scans-card" style="display: none;">
+				<div class="recent-scans-header">
+					<h3 class="recent-scans-title"><span class="dot-recent"></span> ÚLTIMAS LECTURAS INGRESADAS</h3>
+					<span class="recent-scans-link" id="recent-scans-count-link">Ver lote completo (<span id="recent-scans-count">0</span>)</span>
+				</div>
+				<div class="recent-scans-list" id="recent-scans-list">
+					<!-- Generado dinámicamente -->
+				</div>
 			</div>
 		</div>
 
-		<!-- Card de Producto Detectado Activo -->
-		<div id="active-product-card" class="active-scanned-product" style="display: none;">
-			<div class="product-badge-icon">🏷️</div>
-			<div class="product-info-col">
-				<span class="eyebrow-text">Artículo en carga</span>
-				<h3 id="active-product-name">-</h3>
-				<span class="active-product-code" id="active-product-code">-</span>
-			</div>
-			<div class="product-stock-status-box">
-				<span class="stock-indicator-label">Stock variante actual:</span>
-				<div class="stock-counter-badge" id="current-variant-stock">0 u.</div>
-			</div>
-		</div>
-
-		<!-- Feedback dinámico tipo Toast/Alerta flotante -->
-		<div id="scan-feedback-message" class="scan-feedback" style="display: none;"></div>
-
-		<form method="post" class="stock-edit-form stock-receive-form" data-stock-receive-form>
-			{% csrf_token %}
-			{{ form.non_field_errors }}
-
-			<div class="stock-receive-fields">
-				<div class="stock-edit-field stock-receive-code-field">
-					<label for="{{ form.codigo.id_for_label }}">{{ form.codigo.label }}</label>
-					<div class="barcode-input-container">
-						{{ form.codigo }}
-						<button type="button" class="btn-camera-scanner" id="btn-open-camera-scanner" title="Escanear con la cámara del celular">
-							📷 Usar cámara
-						</button>
-					</div>
-					{{ form.codigo.errors }}
-					<small>Al escanear un código nuevo, se detectará el artículo automáticamente. Al volver a escanearlo, sumará la cantidad especificada.</small>
-				</div>
-
-				<div class="stock-edit-field stock-price-field">
-					<label for="scanned-product-price">Precio del Producto ($)</label>
-					<input type="text" id="scanned-product-price" class="form-control" placeholder="$ 0.00" readonly style="background: #f8fafc; font-weight: 700; color: #1e293b;">
-					<small>Precio de venta registrado para este artículo.</small>
-				</div>
-
-				<div class="stock-edit-field">
-					<label for="{{ form.color.id_for_label }}">{{ form.color.label }}</label>
-					<div class="field-with-add-btn">
-						{{ form.color }}
-						<button type="button" class="btn-quick-add" id="btn-quick-add-color" title="Crear nuevo color en el momento">
-							+ Color
-						</button>
-					</div>
-					{{ form.color.errors }}
-				</div>
-
-				<div class="stock-edit-field">
-					<label for="{{ form.talle.id_for_label }}">{{ form.talle.label }}</label>
-					<div class="field-with-add-btn">
-						{{ form.talle }}
-						<button type="button" class="btn-quick-add" id="btn-quick-add-talle" title="Crear nuevo talle en el momento">
-							+ Talle
-						</button>
-					</div>
-					{{ form.talle.errors }}
-				</div>
-
-				<div class="stock-edit-field">
-					<label for="{{ form.estilo.id_for_label }}">{{ form.estilo.label }}</label>
-					<div class="field-with-add-btn">
-						{{ form.estilo }}
-						<button type="button" class="btn-quick-add" id="btn-quick-add-estilo" title="Crear nuevo estilo en el momento">
-							+ Estilo
-						</button>
-					</div>
-					{{ form.estilo.errors }}
-				</div>
-
-				<div class="stock-edit-field">
-					<label for="{{ form.tipo.id_for_label }}">{{ form.tipo.label }}</label>
-					<div class="field-with-add-btn">
-						{{ form.tipo }}
-						<button type="button" class="btn-quick-add" id="btn-quick-add-tipo" title="Crear nuevo tipo de tela en el momento">
-							+ Tipo
-						</button>
-					</div>
-					{{ form.tipo.errors }}
-				</div>
-
-				<div class="stock-edit-field stock-qty-field">
-					<label for="{{ form.cantidad.id_for_label }}">{{ form.cantidad.label }}</label>
-					<div class="qty-input-stepper">
-						<button type="button" class="btn-step" id="btn-qty-minus">-</button>
-						{{ form.cantidad }}
-						<button type="button" class="btn-step" id="btn-qty-plus">+</button>
-					</div>
-					<small>Cantidad a sumar por lectura o al presionar "Ingresar Stock".</small>
-				</div>
-			</div>
-
-			<div class="stock-edit-submit-row">
-				<button class="btn btn-primary" type="submit" id="btn-submit-stock">
-					<span>➕</span> Ingresar Stock
+		<!-- Fixed Bottom Submit Bar -->
+		<div class="bottom-submit-bar">
+			<div class="bottom-submit-bar-inner">
+				<button type="submit" class="btn-main-submit" id="btn-main-submit-stock">
+					+ INGRESAR AL STOCK <span class="submit-badge-count" id="submit-qty-badge">+1</span>
 				</button>
-				<button type="button" class="btn btn-secondary" id="btn-reset-scanned-product" style="display: none;">
-					✕ Limpiar selección
+				<button type="button" class="btn-clear-trash" id="btn-clear-trash" title="Limpiar selección">
+					🗑
 				</button>
-				<a class="stock-edit-cancel" href="{% url 'stock' %}">Volver a Stock</a>
 			</div>
-		</form>
-	</section>
+		</div>
+	</form>
 </div>
+
 <!-- Modal Rápido para Crear Color -->
 <div class="quick-modal" id="modal-quick-color" style="display: none;">
 	<div class="quick-modal-dialog" role="dialog" aria-modal="true">
@@ -262,28 +313,66 @@
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="{% static 'js/camera_scanner.js' %}"></script>
 <script>
-	const stockReceiveForm = document.querySelector('[data-stock-receive-form]');
-	const stockReceiveCode = stockReceiveForm ? stockReceiveForm.querySelector('input[name="codigo"]') : null;
-	const stockReceiveQty = stockReceiveForm ? stockReceiveForm.querySelector('input[name="cantidad"]') : null;
+	const stockReceiveForm = document.getElementById('stock-receive-form');
+	const stockReceiveCode = document.getElementById('{{ form.codigo.id_for_label }}');
+	const stockReceiveQty = document.getElementById('{{ form.cantidad.id_for_label }}');
 	const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 	const colorSelect = document.getElementById('{{ form.color.id_for_label }}');
 	const talleSelect = document.getElementById('{{ form.talle.id_for_label }}');
 	const estiloSelect = document.getElementById('{{ form.estilo.id_for_label }}');
 	const tipoSelect = document.getElementById('{{ form.tipo.id_for_label }}');
+	const autoSumToggle = document.getElementById('auto-sum-toggle');
 
-	// Elementos de la Card del Producto Activo y Feedback
-	const activeProductCard = document.getElementById('active-product-card');
-	const activeProductName = document.getElementById('active-product-name');
-	const activeProductCode = document.getElementById('active-product-code');
-	const currentVariantStock = document.getElementById('current-variant-stock');
-	const scannedProductPrice = document.getElementById('scanned-product-price');
+	// Detected Card Elements
+	const detectedProductCard = document.getElementById('detected-product-card');
+	const detName = document.getElementById('det-name');
+	const detSku = document.getElementById('det-sku');
+	const detPrice = document.getElementById('det-price');
+	const detStockBadge = document.getElementById('det-stock-badge');
+	const talleChipsContainer = document.getElementById('talle-chips-container');
+	const stockResultNum = document.getElementById('stock-result-num');
+	const submitQtyBadge = document.getElementById('submit-qty-badge');
 	const scanFeedbackMessage = document.getElementById('scan-feedback-message');
-	const btnResetScannedProduct = document.getElementById('btn-reset-scanned-product');
+	const btnClearTrash = document.getElementById('btn-clear-trash');
 
-	// Estado local en memoria
-	let currentScannedData = null; // { producto: {id, nombre, codigo}, stocks: [...] }
+	// Recent Scans List
+	const recentScansCard = document.getElementById('recent-scans-card');
+	const recentScansList = document.getElementById('recent-scans-list');
+	const recentScansCount = document.getElementById('recent-scans-count');
+	let recentScans = [];
+
+	// Local State
+	let currentScannedData = null; // { producto: {...}, stocks: [...] }
+
+	function playFeedbackSound(isSuccess = true) {
+		try {
+			const AudioContext = window.AudioContext || window.webkitAudioContext;
+			if (!AudioContext) return;
+			const ctx = new AudioContext();
+			const osc = ctx.createOscillator();
+			const gain = ctx.createGain();
+			osc.connect(gain);
+			gain.connect(ctx.destination);
+			if (isSuccess) {
+				osc.frequency.setValueAtTime(880, ctx.currentTime);
+				gain.gain.setValueAtTime(0.12, ctx.currentTime);
+				gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+				osc.start();
+				osc.stop(ctx.currentTime + 0.12);
+			} else {
+				osc.frequency.setValueAtTime(300, ctx.currentTime);
+				gain.gain.setValueAtTime(0.18, ctx.currentTime);
+				gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.22);
+				osc.start();
+				osc.stop(ctx.currentTime + 0.22);
+			}
+		} catch (e) {
+			// AudioContext can be blocked until first user interaction
+		}
+	}
 
 	function showFeedback(text, isSuccess = true) {
+		playFeedbackSound(isSuccess);
 		scanFeedbackMessage.className = `scan-feedback ${isSuccess ? 'success' : 'error'}`;
 		scanFeedbackMessage.textContent = text;
 		scanFeedbackMessage.style.display = 'block';
@@ -293,107 +382,232 @@
 		}, 4000);
 	}
 
-	function updateCurrentVariantStockDisplay() {
-		if (!currentScannedData) {
-			activeProductCard.style.display = 'none';
-			btnResetScannedProduct.style.display = 'none';
-			if (scannedProductPrice) scannedProductPrice.value = '';
-			return;
-		}
+	// Render Talle Chips from Select
+	function renderTalleChips() {
+		talleChipsContainer.innerHTML = '';
+		Array.from(talleSelect.options).forEach(opt => {
+			if (!opt.value) return;
+			const btn = document.createElement('button');
+			btn.type = 'button';
+			btn.className = `talle-chip-btn ${opt.selected ? 'active' : ''}`;
+			btn.textContent = opt.text.trim();
+			btn.dataset.value = opt.value;
 
-		activeProductCard.style.display = 'flex';
-		btnResetScannedProduct.style.display = 'inline-flex';
-		activeProductName.textContent = currentScannedData.producto.nombre;
-		activeProductCode.textContent = `Código: ${currentScannedData.producto.codigo}`;
-		if (scannedProductPrice) {
-			const precioNum = parseFloat(currentScannedData.producto.precio) || 0;
-			scannedProductPrice.value = `$ ${precioNum.toFixed(2)}`;
-		}
-
-		// Sincronizar estilo y tipo si vienen del producto
-		if (estiloSelect && currentScannedData.producto.estilo_id) {
-			estiloSelect.value = currentScannedData.producto.estilo_id;
-		}
-		if (tipoSelect && currentScannedData.producto.tipo_id) {
-			tipoSelect.value = currentScannedData.producto.tipo_id;
-		}
-
-		const selectedColor = parseInt(colorSelect.value, 10);
-		const selectedTalle = parseInt(talleSelect.value, 10);
-
-		const variant = currentScannedData.stocks.find(
-			s => s.color_id === selectedColor && s.talle_id === selectedTalle
-		);
-
-		const qty = variant ? variant.stock : 0;
-		currentVariantStock.textContent = `${qty} u.`;
+			btn.addEventListener('click', () => {
+				talleSelect.value = opt.value;
+				updateTalleChipsActive();
+				updateStockDisplay();
+			});
+			talleChipsContainer.appendChild(btn);
+		});
 	}
 
-	// Al cambiar color o talle dentro del mismo producto escaneado, refrescar el indicador de stock
-	colorSelect.addEventListener('change', updateCurrentVariantStockDisplay);
-	talleSelect.addEventListener('change', updateCurrentVariantStockDisplay);
-
-	// Stepper para el input de cantidad
-	const btnQtyMinus = document.getElementById('btn-qty-minus');
-	const btnQtyPlus = document.getElementById('btn-qty-plus');
-
-	if (btnQtyMinus && stockReceiveQty) {
-		btnQtyMinus.addEventListener('click', () => {
-			let val = parseInt(stockReceiveQty.value, 10) || 1;
-			if (val > 1) {
-				stockReceiveQty.value = val - 1;
+	function updateTalleChipsActive() {
+		const val = talleSelect.value;
+		talleChipsContainer.querySelectorAll('.talle-chip-btn').forEach(btn => {
+			if (btn.dataset.value === val) {
+				btn.classList.add('active');
+			} else {
+				btn.classList.remove('active');
 			}
 		});
 	}
 
-	if (btnQtyPlus && stockReceiveQty) {
-		btnQtyPlus.addEventListener('click', () => {
-			let val = parseInt(stockReceiveQty.value, 10) || 1;
-			stockReceiveQty.value = val + 1;
-		});
+	renderTalleChips();
+
+	function getCurrentStockVariant() {
+		if (!currentScannedData || !currentScannedData.stocks) return 0;
+		const selectedColor = parseInt(colorSelect.value, 10);
+		const selectedTalle = parseInt(talleSelect.value, 10);
+		const variant = currentScannedData.stocks.find(
+			s => s.color_id === selectedColor && s.talle_id === selectedTalle
+		);
+		return variant ? variant.stock : 0;
 	}
 
-	// Botón limpiar selección
-	btnResetScannedProduct.addEventListener('click', () => {
+	function updateStockDisplay() {
+		const qtyToAdd = parseInt(stockReceiveQty.value, 10) || 1;
+		submitQtyBadge.textContent = `+${qtyToAdd}`;
+
+		if (!currentScannedData) {
+			detectedProductCard.style.display = 'none';
+			stockResultNum.textContent = '0';
+			return;
+		}
+
+		detectedProductCard.style.display = 'flex';
+		detName.textContent = currentScannedData.producto.nombre;
+		detSku.textContent = `SKU: ${currentScannedData.producto.codigo}`;
+
+		if (currentScannedData.producto.precio) {
+			const numPrecio = parseFloat(currentScannedData.producto.precio) || 0;
+			detPrice.textContent = `$ ${numPrecio.toFixed(2)}`;
+			detPrice.style.display = 'inline-block';
+		} else {
+			detPrice.style.display = 'none';
+		}
+
+		// Sincronizar estilo y tipo si vienen del producto
+		if (estiloSelect && currentScannedData.producto.estilo_id && !estiloSelect.value) {
+			estiloSelect.value = currentScannedData.producto.estilo_id;
+		}
+		if (tipoSelect && currentScannedData.producto.tipo_id && !tipoSelect.value) {
+			tipoSelect.value = currentScannedData.producto.tipo_id;
+		}
+
+		const currentStock = getCurrentStockVariant();
+		detStockBadge.textContent = `Stock: ${currentStock} u.`;
+		stockResultNum.textContent = currentStock + qtyToAdd;
+	}
+
+	colorSelect.addEventListener('change', updateStockDisplay);
+	talleSelect.addEventListener('change', () => {
+		updateTalleChipsActive();
+		updateStockDisplay();
+	});
+
+	// Stepper & Shortcuts
+	const btnQtyMinus = document.getElementById('btn-qty-minus');
+	const btnQtyPlus = document.getElementById('btn-qty-plus');
+	const btnQtyReset = document.getElementById('btn-qty-reset');
+
+	btnQtyMinus.addEventListener('click', () => {
+		let val = parseInt(stockReceiveQty.value, 10) || 1;
+		if (val > 1) stockReceiveQty.value = val - 1;
+		updateStockDisplay();
+	});
+
+	btnQtyPlus.addEventListener('click', () => {
+		let val = parseInt(stockReceiveQty.value, 10) || 1;
+		stockReceiveQty.value = val + 1;
+		updateStockDisplay();
+	});
+
+	btnQtyReset.addEventListener('click', () => {
+		stockReceiveQty.value = 1;
+		updateStockDisplay();
+	});
+
+	stockReceiveQty.addEventListener('input', updateStockDisplay);
+
+	document.querySelectorAll('.btn-shortcut[data-add]').forEach(btn => {
+		btn.addEventListener('click', () => {
+			const add = parseInt(btn.dataset.add, 10) || 0;
+			let current = parseInt(stockReceiveQty.value, 10) || 1;
+			stockReceiveQty.value = current + add;
+			updateStockDisplay();
+		});
+	});
+
+	// Clear / Reset
+	btnClearTrash.addEventListener('click', () => {
 		currentScannedData = null;
-		activeProductCard.style.display = 'none';
-		btnResetScannedProduct.style.display = 'none';
+		detectedProductCard.style.display = 'none';
 		stockReceiveCode.value = '';
 		stockReceiveQty.value = 1;
-		showFeedback('Se limpió el artículo actual. Podés escanear otro.', true);
+		updateStockDisplay();
+		showFeedback('Selección reiniciada. Podés escanear otro artículo.', true);
 		stockReceiveCode.focus();
 	});
 
-	// Función central para procesar lectura o envío
-	async function processStockEntry(explicitCode = null) {
+	// Recent Scans Rendering
+	function renderRecentScans() {
+		if (recentScans.length === 0) {
+			recentScansCard.style.display = 'none';
+			return;
+		}
+		recentScansCard.style.display = 'flex';
+		recentScansCount.textContent = recentScans.length;
+		recentScansList.innerHTML = '';
+
+		recentScans.slice(0, 5).forEach((item, index) => {
+			const row = document.createElement('div');
+			row.className = 'recent-scan-item';
+			row.innerHTML = `
+				<div class="recent-scan-info">
+					<div class="recent-scan-name">${item.nombre} (Talle ${item.talle_abbr})</div>
+					<div class="recent-scan-details">${item.color_nombre} • ${item.estilo_nombre || 'Estándar'} • hace ${item.timeAgo}</div>
+				</div>
+				<div class="recent-scan-actions">
+					<span class="badge-scan-added">+${item.cantidad} u.</span>
+					<button type="button" class="btn-undo-scan" data-index="${index}" title="Deshacer este ingreso">↩</button>
+				</div>
+			`;
+
+			row.querySelector('.btn-undo-scan').addEventListener('click', () => {
+				undoScan(item, index);
+			});
+
+			recentScansList.appendChild(row);
+		});
+	}
+
+	async function undoScan(item, index) {
+		const formData = new FormData();
+		formData.append('producto_id', item.producto_id);
+		formData.append('color_id', item.color_id);
+		formData.append('talle_id', item.talle_id);
+		formData.append('cantidad', item.cantidad);
+
+		try {
+			const res = await fetch('{% url "api_deshacer_stock" %}', {
+				method: 'POST',
+				headers: {
+					'X-CSRFToken': csrfToken
+				},
+				body: formData
+			});
+			const data = await res.json();
+			if (data.success) {
+				recentScans.splice(index, 1);
+				renderRecentScans();
+				if (currentScannedData && currentScannedData.producto.id === item.producto_id) {
+					currentScannedData.stocks = data.stocks;
+					updateStockDisplay();
+				}
+				showFeedback(`Se revirtió el ingreso de ${item.cantidad} u. de "${item.nombre}".`, true);
+			} else {
+				showFeedback(data.error || 'Error al deshacer el ingreso.', false);
+			}
+		} catch (err) {
+			console.error(err);
+			showFeedback('Error de conexión al deshacer.', false);
+		}
+	}
+
+	// Main Scan & Submit Logic
+	async function processStockEntry(explicitCode = null, forceSubmit = false) {
 		const code = (explicitCode !== null ? explicitCode : stockReceiveCode.value).trim();
 		if (!code) {
 			showFeedback('Ingresá o escaneá un código de barras primero.', false);
 			return;
 		}
 
-		// Si el usuario escanea un código DIFERENTE al que ya tenía cargado en pantalla,
-		// primero cargamos los datos de ese nuevo producto sin sumar stock todavía para que pueda ver/elegir color y talle.
-		const isDifferentProduct = currentScannedData && currentScannedData.producto.codigo !== code;
+		const isSameProduct = currentScannedData && currentScannedData.producto.codigo === code;
+		const autoSum = autoSumToggle.checked;
 
-		if (!currentScannedData || isDifferentProduct) {
+		// Si es producto nuevo en pantalla o no hay producto detectado
+		if (!currentScannedData || !isSameProduct) {
 			try {
 				const response = await fetch(`{% url 'recibir_stock' %}?buscar_codigo=${encodeURIComponent(code)}`, {
-					headers: {
-						'X-Requested-With': 'XMLHttpRequest'
-					}
+					headers: { 'X-Requested-With': 'XMLHttpRequest' }
 				});
 				const data = await response.json();
 
 				if (data.success) {
 					currentScannedData = data;
 					stockReceiveCode.value = code;
-					updateCurrentVariantStockDisplay();
-					showFeedback(`Detectado: ${data.producto.nombre}. Elegí color/talle y presioná "Ingresar Stock" o volvé a escanearlo.`, true);
-					stockReceiveCode.select();
+					updateStockDisplay();
+					showFeedback(`Detectado: ${data.producto.nombre}.`, true);
+
+					if (autoSum || forceSubmit) {
+						// Si auto-sumar está activo, enviamos el ingreso de inmediato
+						await submitStockForm();
+					} else {
+						stockReceiveCode.select();
+					}
 					return;
 				} else {
-					// Abrir modal de creación rápida de producto si no existe
 					promptCreateMissingProduct(code);
 					return;
 				}
@@ -404,12 +618,15 @@
 			}
 		}
 
-		// Si es el MISMO producto (o si ya estaba confirmado y se presionó Enter o el botón), enviamos la suma de stock
+		// Si es el MISMO producto y se vuelve a escanear o se presiona enviar
+		await submitStockForm();
+	}
+
+	async function submitStockForm() {
 		const formData = new FormData(stockReceiveForm);
-		formData.set('codigo', code);
 
 		try {
-			const response = await fetch(stockReceiveForm.action || window.location.href, {
+			const response = await fetch(stockReceiveForm.action, {
 				method: 'POST',
 				headers: {
 					'X-Requested-With': 'XMLHttpRequest',
@@ -422,18 +639,33 @@
 			if (result.success) {
 				showFeedback(result.mensaje, true);
 
-				// Actualizar los stocks en memoria sin borrar el formulario
 				if (currentScannedData) {
 					currentScannedData.stocks = result.stocks;
-					updateCurrentVariantStockDisplay();
+					updateStockDisplay();
+
+					// Agregar a últimas lecturas
+					const talleText = talleSelect.options[talleSelect.selectedIndex] ? talleSelect.options[talleSelect.selectedIndex].text : '';
+					const colorText = colorSelect.options[colorSelect.selectedIndex] ? colorSelect.options[colorSelect.selectedIndex].text : '';
+					const estiloText = estiloSelect.options[estiloSelect.selectedIndex] ? estiloSelect.options[estiloSelect.selectedIndex].text : '';
+
+					recentScans.unshift({
+						producto_id: currentScannedData.producto.id,
+						color_id: parseInt(colorSelect.value, 10),
+						talle_id: parseInt(talleSelect.value, 10),
+						nombre: currentScannedData.producto.nombre,
+						talle_abbr: talleText,
+						color_nombre: colorText,
+						estilo_nombre: estiloText,
+						cantidad: parseInt(stockReceiveQty.value, 10) || 1,
+						timeAgo: '1 min'
+					});
+					renderRecentScans();
 				}
 
-				// Retroalimentación háptica en móvil
 				if (navigator.vibrate) {
-					navigator.vibrate([80, 50, 80]);
+					navigator.vibrate([70, 40, 70]);
 				}
 
-				// Mantener el foco y selección en el input para la siguiente pistola
 				stockReceiveCode.select();
 			} else {
 				showFeedback(result.error || 'Error al procesar el ingreso de stock.', false);
@@ -444,21 +676,20 @@
 		}
 	}
 
-	// Interceptar Enter en el input de código
-	stockReceiveCode.addEventListener('keydown', (event) => {
-		if (event.key === 'Enter') {
-			event.preventDefault();
+	// Listeners
+	stockReceiveCode.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter') {
+			e.preventDefault();
 			processStockEntry();
 		}
 	});
 
-	// Interceptar el envío del formulario completo
 	stockReceiveForm.addEventListener('submit', (e) => {
 		e.preventDefault();
-		processStockEntry();
+		processStockEntry(null, true);
 	});
 
-	// Integración del lector por cámara
+	// Cámara Scanner
 	setupCameraScanner({
 		triggerBtnId: 'btn-open-camera-scanner',
 		inputElement: stockReceiveCode,
@@ -468,8 +699,8 @@
 		}
 	});
 
-	// Lógica de Modales Rápidos (Color y Talle)
-	function setupModal(triggerBtnId, modalId, formId, endpoint, targetSelect, focusInputId) {
+	// Modales Rápidos (Color, Talle, Estilo, Tipo)
+	function setupModal(triggerBtnId, modalId, formId, endpoint, targetSelect, focusInputId, isTalle = false) {
 		const triggerBtn = document.getElementById(triggerBtnId);
 		const modal = document.getElementById(modalId);
 		const form = document.getElementById(formId);
@@ -503,9 +734,7 @@
 			try {
 				const response = await fetch(endpoint, {
 					method: 'POST',
-					headers: {
-						'X-CSRFToken': csrfToken
-					},
+					headers: { 'X-CSRFToken': csrfToken },
 					body: formData
 				});
 
@@ -518,8 +747,13 @@
 					}
 					targetSelect.value = result.id;
 					closeModal();
-					updateCurrentVariantStockDisplay();
 
+					if (isTalle) {
+						renderTalleChips();
+						updateTalleChipsActive();
+					}
+
+					updateStockDisplay();
 					if (stockReceiveCode) stockReceiveCode.focus();
 				} else {
 					alert(result.error || 'Ocurrió un error al guardar.');
@@ -532,11 +766,11 @@
 	}
 
 	setupModal('btn-quick-add-color', 'modal-quick-color', 'form-quick-color', '{% url "api_agregar_color" %}', colorSelect, 'quick-color-nombre');
-	setupModal('btn-quick-add-talle', 'modal-quick-talle', 'form-quick-talle', '{% url "api_agregar_talle" %}', talleSelect, 'quick-talle-abbr');
+	setupModal('btn-quick-add-talle', 'modal-quick-talle', 'form-quick-talle', '{% url "api_agregar_talle" %}', talleSelect, 'quick-talle-abbr', true);
 	setupModal('btn-quick-add-estilo', 'modal-quick-estilo', 'form-quick-estilo', '{% url "api_agregar_estilo" %}', estiloSelect, 'quick-estilo-nombre');
 	setupModal('btn-quick-add-tipo', 'modal-quick-tipo', 'form-quick-tipo', '{% url "api_agregar_tipo" %}', tipoSelect, 'quick-tipo-nombre');
 
-	// Lógica para registrar Producto inexistente al escanear
+	// Registrar Producto Inexistente
 	const modalQuickProd = document.getElementById('modal-quick-producto');
 	const formQuickProd = document.getElementById('form-quick-producto');
 	const quickProdCodigo = document.getElementById('quick-prod-codigo');
@@ -571,9 +805,7 @@
 		try {
 			const response = await fetch('{% url "api_crear_producto_rapido" %}', {
 				method: 'POST',
-				headers: {
-					'X-CSRFToken': csrfToken
-				},
+				headers: { 'X-CSRFToken': csrfToken },
 				body: formData
 			});
 
@@ -583,8 +815,8 @@
 				formQuickProd.reset();
 				currentScannedData = result;
 				stockReceiveCode.value = result.producto.codigo;
-				updateCurrentVariantStockDisplay();
-				showFeedback(`¡Producto "${result.producto.nombre}" creado exitosamente! Elegí color/talle y presioná "Ingresar Stock".`, true);
+				updateStockDisplay();
+				showFeedback(`¡Producto "${result.producto.nombre}" creado exitosamente! Elegí talle/color y presioná "Ingresar al Stock".`, true);
 				stockReceiveCode.select();
 			} else {
 				alert(result.error || 'Error al crear el producto.');

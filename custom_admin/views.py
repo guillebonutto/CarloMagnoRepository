@@ -1476,6 +1476,48 @@ def api_agregar_tipo(request):
     })
 
 
+@login_required(login_url='login')
+def api_deshacer_stock(request):
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+    producto_id = request.POST.get('producto_id')
+    color_id = request.POST.get('color_id')
+    talle_id = request.POST.get('talle_id')
+    cantidad = request.POST.get('cantidad', 1)
+
+    try:
+        cantidad = int(cantidad)
+    except (ValueError, TypeError):
+        cantidad = 1
+
+    stock_item = ProductoStock.objects.filter(
+        producto_id=producto_id,
+        color_id=color_id,
+        talle_id=talle_id,
+    ).first()
+
+    if not stock_item:
+        return JsonResponse({'success': False, 'error': 'Variante de stock no encontrada.'})
+
+    with transaction.atomic():
+        nuevo_stock = max(0, stock_item.stock - cantidad)
+        stock_item.stock = nuevo_stock
+        stock_item.save(update_fields=['stock'])
+        stock_item.producto.sync_active_status_with_stock()
+
+    stocks = list(ProductoStock.objects.filter(producto_id=producto_id).values('color_id', 'talle_id', 'stock'))
+    return JsonResponse({
+        'success': True,
+        'mensaje': f'Se restaron {cantidad} u. Nuevo stock: {nuevo_stock}.',
+        'nuevo_stock': nuevo_stock,
+        'stocks': stocks,
+    })
+
+
 def importar_datos_maestros(request):
     if not request.user.is_staff:
         from django.http import HttpResponseForbidden
