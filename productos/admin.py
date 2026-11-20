@@ -6,7 +6,7 @@ from django.db.models import F
 from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
-from .forms import IngresoStockPorLectorForm
+from .forms import IngresoStockPorLectorForm, ProductoForm
 from .models import Categoria, Color, Talle, Marca, Producto, ProductoStock, Cliente, GrupoCliente, Direccion, Carrito, CarritoItem, Pedido, PedidoItem, Cupon
 
 @admin.register(Categoria)
@@ -103,25 +103,28 @@ class ProductoStockInline(admin.TabularInline):  # ← Nombre corregido
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):  # ← Nombre corregido
     list_display = ['codigo', 'nombre', 'marca', 'categoria', 'precio', 'esta_activo', 'image_thumbnail', 'colores_display', 'created_at']
-    list_filter = ['esta_activo', 'categoria', 'marca', 'colores', 'created_at']
+    list_filter = ['esta_activo', 'categoria', 'marca', 'stock_items__color', 'stock_items__talle', 'created_at']
     search_fields = ['codigo', 'nombre', 'descripcion', 'marca__nombre']
     inlines = [ProductoStockInline]
+    form = ProductoForm
     readonly_fields = ['image_preview', 'created_at', 'updated_at']
-    filter_horizontal = ['colores']
     autocomplete_fields = ['marca', 'categoria']
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
-        form.instance.sync_stock_variants()
+        form.instance.sync_stock_variants(
+            form.cleaned_data['colores'],
+            form.cleaned_data['talles'],
+        )
     
     fieldsets = (
         ('Información básica', {
             'fields': ('codigo', 'nombre', 'descripcion', 'categoria', 'marca', 'precio', 'esta_activo'),
             'description': 'Información principal del producto'  # ← Corregido (debe ser 'description')
         }),
-        ('Atributos', {
-            'fields': ('colores',),
-            'description': 'Colores disponibles para este producto'  # ← Corregido
+        ('Variantes disponibles', {
+            'fields': ('colores', 'talles'),
+            'description': 'Se crea una variante por cada combinación de color y talle.'
         }),
         ('Imagen', {
             'fields': ('imagen', 'image_preview'),
@@ -158,13 +161,15 @@ class ProductoAdmin(admin.ModelAdmin):  # ← Nombre corregido
     
     def colores_display(self, obj):
         """Mostrar colores disponibles"""
-        colores = obj.colores.all()[:3]
+        colores = Color.objects.filter(
+            productostock__producto=obj,
+        ).distinct()[:3]
         html = ''
         for color in colores:
             border = 'border: 1px solid #ccc;' if color.hex_code in ['#FFFFFF', '#ffffff'] else ''
             html += f'<span style="display: inline-block; width: 20px; height: 20px; background: {color.hex_code}; border-radius: 50%; margin-right: 3px; {border}"></span>'
         
-        total = obj.colores.count()
+        total = Color.objects.filter(productostock__producto=obj).distinct().count()
         if total > 3:
             html += f' <small>+{total - 3}</small>'
         
@@ -222,8 +227,6 @@ class ProductoStockAdmin(admin.ModelAdmin):  # ← Nombre corregido
                                 stock=F('stock') + 1
                             )
                             stock.refresh_from_db(using=db)
-                        producto.colores.add(color)
-
                     messages.success(
                         request,
                         f'{producto.nombre}: stock de {color.nombre}, talle {talle.abbreviation} '

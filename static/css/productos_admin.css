@@ -83,6 +83,25 @@
 	transform: scale(1.1);
 }
 
+.size-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.size-option {
+	display: inline-flex !important;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 12px;
+	border: 1px solid #e0e0e0;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.size-option input {
+	margin: 0;
+}
 
 .form-actions {
 	display: flex;

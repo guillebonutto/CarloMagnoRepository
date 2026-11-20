@@ -267,8 +267,7 @@ def agregar_producto(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES)
         if form.is_valid():
-            product = form.save()
-            product.sync_stock_variants()
+            form.save()
             messages.success(request, '✅ Producto creado exitosamente')
             return redirect('admin_productos')
         else:
@@ -292,8 +291,7 @@ def editar_producto(request, pk):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            product = form.save()
-            product.sync_stock_variants()
+            form.save()
             messages.success(request, '✅ Producto actualizado exitosamente')
             return redirect('admin_productos')
         else:

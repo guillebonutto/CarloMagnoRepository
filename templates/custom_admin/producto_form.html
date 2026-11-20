@@ -66,8 +66,16 @@
 			</div>
 
 			<div class="form-group">
-				<label for="{{ form.talle.id_for_label }}">Talle</label>
-				{{ form.talle }} {{ form.talle.errors }}
+				<label>Talles disponibles</label>
+				<div class="size-options">
+					{% for checkbox in form.talles %}
+					<label class="size-option">
+						{{ checkbox.tag }}
+						<span>{{ checkbox.choice_label }}</span>
+					</label>
+					{% endfor %}
+				</div>
+				{{ form.talles.errors }}
 			</div>
 
 			<div class="form-group colores-container">

@@ -72,7 +72,7 @@ def producto_list(request):
     talles = Talle.objects.filter(esta_activo=True)
     marcas = Marca.objects.all()
     
-    productos = Producto.objects.filter(esta_activo=True).select_related('categoria', 'marca').prefetch_related('colores', 'stock_items')
+    productos = Producto.objects.filter(esta_activo=True).select_related('categoria', 'marca').prefetch_related('stock_items')
     
     # Filtrar por categorías (incluyendo subcategorías recursivamente)
     all_cat_ids = set()
@@ -90,7 +90,7 @@ def producto_list(request):
     
     # Filtrar por color
     if color_id:
-        productos = productos.filter(colores__id=color_id).distinct()
+        productos = productos.filter(stock_items__color_id=color_id).distinct()
     
     # Filtrar por talle
     if talle_id:
@@ -126,8 +126,14 @@ def producto_list(request):
     if max_price:
         base_productos = base_productos.filter(precio__lte=max_price)
     
-    colores_con_stock = Color.objects.filter(productostock__stock__gt=0, productos__in=base_productos).values_list('id', flat=True).distinct()
-    talles_con_stock = Talle.objects.filter(productostock__stock__gt=0, productos__in=base_productos).values_list('id', flat=True).distinct()
+    colores_con_stock = Color.objects.filter(
+        productostock__stock__gt=0,
+        productostock__producto__in=base_productos,
+    ).values_list('id', flat=True).distinct()
+    talles_con_stock = Talle.objects.filter(
+        productostock__stock__gt=0,
+        productostock__producto__in=base_productos,
+    ).values_list('id', flat=True).distinct()
     
     # Mapeo Maestro UX/UI Premium - Estructura completa y visible
     MASTER_GROUPS = {
@@ -223,7 +229,7 @@ def producto_list(request):
 
 def producto_detail(request, producto_id):
     producto = get_object_or_404(
-        Producto.objects.select_related('categoria', 'marca').prefetch_related('colores', 'stock_items'),
+        Producto.objects.select_related('categoria', 'marca').prefetch_related('stock_items'),
         id=producto_id
     )
     stock_items = producto.stock_items.select_related('color', 'talle').filter(stock__gt=0)

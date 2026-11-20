@@ -121,20 +121,6 @@ class Producto(models.Model):
         related_name='productos',
         verbose_name='Marca'
     )
-    talle = models.ForeignKey(
-        Talle,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='productos',
-        verbose_name='Talle'
-    )
-    colores = models.ManyToManyField(
-        Color,
-        related_name='productos',
-        verbose_name='Colores disponibles',
-        blank=True
-    )
     imagen = models.ImageField(
         upload_to='productos/', 
         null=True, 
@@ -153,19 +139,20 @@ class Producto(models.Model):
     def __str__(self):
         return self.nombre
 
-    def sync_stock_variants(self):
-        if not self.pk or not self.talle_id:
+    def sync_stock_variants(self, colores, talles):
+        if not self.pk:
             return
 
         database = self._state.db or 'default'
         with transaction.atomic(using=database):
-            for color in self.colores.using(database).all():
-                ProductoStock.objects.using(database).get_or_create(
-                    producto=self,
-                    color=color,
-                    talle_id=self.talle_id,
-                    defaults={'stock': 0},
-                )
+            for color in colores:
+                for talle in talles:
+                    ProductoStock.objects.using(database).get_or_create(
+                        producto_id=self.pk,
+                        color_id=color.pk,
+                        talle_id=talle.pk,
+                        defaults={'stock': 0},
+                    )
     
     def save(self, *args, **kwargs):
         """Redimensionar imagen y auto-categorizar si es necesario"""
@@ -235,7 +222,7 @@ class Producto(models.Model):
     
     def get_colores_disponibles(self):
         """Retorna los colores disponibles para este producto"""
-        return self.colores.all()
+        return Color.objects.filter(productostock__producto=self).distinct()
     
     def get_talles_disponibles(self):
         """Retorna los talles disponibles para este producto"""

@@ -206,7 +206,6 @@ def migrate_data():
             prod_variants = [v for v in variants_data if v['id_product'] == p_id]
             for v in prod_variants:
                 color_obj = color_map[v['attr_name']]
-                prod.colores.add(color_obj)
                 ProductoStock.objects.update_or_create(
                     producto=prod, color=color_obj, talle=talle_u,
                     defaults={'stock': int(v['quantity'])}

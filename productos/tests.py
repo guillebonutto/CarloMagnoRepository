@@ -44,7 +44,13 @@ class IngresoStockPorLectorTests(TestCase):
         self.assertEqual(stock.stock, 2)
         self.producto.refresh_from_db()
         self.assertFalse(self.producto.esta_activo)
-        self.assertIn(self.color, self.producto.colores.all())
+        self.assertTrue(
+            ProductoStock.objects.filter(
+                producto=self.producto,
+                color=self.color,
+                talle=self.talle,
+            ).exists()
+        )
 
     def test_unknown_code_does_not_change_stock(self):
         response = self.client.post(self.url, {

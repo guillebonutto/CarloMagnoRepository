@@ -121,7 +121,7 @@ class PanelProductEditTests(TestCase):
                 'precio': str(self.product.precio),
                 'categoria': '',
                 'marca': str(self.updated_brand.pk),
-                'talle': '',
+                'talles': [],
                 'esta_activo': 'on',
             },
         )
@@ -150,6 +150,10 @@ class PanelProductEditTests(TestCase):
             nombre='Mediano',
             abbreviation='M',
         )
+        second_size = Talle.objects.create(
+            nombre='Grande',
+            abbreviation='L',
+        )
         response = self.client.post(
             reverse('editar_producto', args=[self.product.pk]),
             {
@@ -159,7 +163,7 @@ class PanelProductEditTests(TestCase):
                 'precio': str(self.product.precio),
                 'categoria': '',
                 'marca': str(self.original_brand.pk),
-                'talle': str(size.pk),
+                'talles': [str(size.pk), str(second_size.pk)],
                 'colores': [str(first_color.pk), str(second_color.pk)],
                 'esta_activo': 'on',
             },
@@ -167,10 +171,13 @@ class PanelProductEditTests(TestCase):
 
         self.assertRedirects(response, reverse('admin_productos'))
         variants = ProductoStock.objects.filter(producto=self.product)
-        self.assertEqual(variants.count(), 2)
+        self.assertEqual(variants.count(), 4)
         self.assertSetEqual(
             set(variants.values_list('color_id', flat=True)),
             {first_color.pk, second_color.pk},
         )
-        self.assertSetEqual(set(variants.values_list('talle_id', flat=True)), {size.pk})
+        self.assertSetEqual(
+            set(variants.values_list('talle_id', flat=True)),
+            {size.pk, second_size.pk},
+        )
         self.assertSetEqual(set(variants.values_list('stock', flat=True)), {0})
