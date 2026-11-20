@@ -410,6 +410,143 @@
     line-height: 1.45;
 }
 
+/* Escáner de cámara móvil / web */
+.barcode-input-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+.barcode-input-container input {
+    flex: 1 1 auto;
+}
+
+.btn-camera-scanner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 1px solid #c7d2fe;
+    background: #eef2ff;
+    color: #4338ca;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.btn-camera-scanner:hover {
+    background: #e0e7ff;
+    color: #3730a3;
+    border-color: #a5b4fc;
+}
+
+.camera-scanner-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.75);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(3px);
+}
+
+.camera-scanner-dialog {
+    background: #fff;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.camera-scanner-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid #f1f5f9;
+    background: #f8fafc;
+}
+
+.camera-scanner-header h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.camera-scanner-close {
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: #64748b;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.camera-scanner-close:hover {
+    color: #0f172a;
+    background: #e2e8f0;
+}
+
+.camera-scanner-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#camera-reader-viewport {
+    width: 100%;
+    min-height: 260px;
+    max-height: 360px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    border: 2px dashed #94a3b8;
+}
+
+#camera-reader-viewport video {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 340px !important;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.camera-scanner-status {
+    margin-top: 12px;
+    font-size: 0.88rem;
+    color: #475569;
+    text-align: center;
+}
+
+.camera-scanner-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 18px;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+}
+
 .stock-edit-submit-row {
     display: flex;
     align-items: center;

@@ -40,9 +40,14 @@
 				</div>
 				<div class="stock-edit-field stock-receive-code-field">
 					<label for="{{ form.codigo.id_for_label }}">{{ form.codigo.label }}</label>
-					{{ form.codigo }}
+					<div class="barcode-input-container">
+						{{ form.codigo }}
+						<button type="button" class="btn-camera-scanner" id="btn-open-camera-scanner" title="Escanear con la cámara del celular">
+							📷 Usar cámara
+						</button>
+					</div>
 					{{ form.codigo.errors }}
-					<small>La lectora envía Enter para registrar la unidad. El color y el talle quedan seleccionados para la próxima lectura.</small>
+					<small>Podés ingresar el código con lectora física de código de barras, ingresarlo manualmente, o presionar <strong>"Usar cámara"</strong> desde tu celular.</small>
 				</div>
 			</div>
 
@@ -53,6 +58,8 @@
 		</form>
 	</section>
 </div>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="{% static 'js/camera_scanner.js' %}"></script>
 <script>
 	const stockReceiveForm = document.querySelector('[data-stock-receive-form]');
 	const stockReceiveCode = stockReceiveForm
@@ -63,6 +70,14 @@
 		stockReceiveCode.addEventListener('keydown', (event) => {
 			if (event.key === 'Enter') {
 				event.preventDefault();
+				stockReceiveForm.requestSubmit();
+			}
+		});
+
+		setupCameraScanner({
+			triggerBtnId: 'btn-open-camera-scanner',
+			inputElement: stockReceiveCode,
+			onDetected: (code) => {
 				stockReceiveForm.requestSubmit();
 			}
 		});

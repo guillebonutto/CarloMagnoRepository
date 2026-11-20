@@ -53,9 +53,14 @@
 				</div>
 				<div class="stock-edit-field stock-barcode-field">
 					<label for="{{ barcode_form.codigo.id_for_label }}">{{ barcode_form.codigo.label }}</label>
-					{{ barcode_form.codigo }}
+					<div class="barcode-input-container">
+						{{ barcode_form.codigo }}
+						<button type="button" class="btn-camera-scanner" id="btn-open-camera-scanner-edit" title="Escanear con la cámara del celular">
+							📷 Usar cámara
+						</button>
+					</div>
 					{{ barcode_form.codigo.errors }}
-					<small>La lectora procesa cada lectura válida y suma una unidad automáticamente.</small>
+					<small>Podés ingresar el código con lectora física de código de barras o escanear directo con la cámara del celular para sumar una unidad automáticamente.</small>
 				</div>
 			</div>
 			<div class="stock-edit-submit-row">
@@ -65,6 +70,8 @@
 		</form>
 	</section>
 </div>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="{% static 'js/camera_scanner.js' %}"></script>
 <script>
 	document.querySelectorAll('[data-color-hex]').forEach((element) => {
 		element.style.backgroundColor = element.dataset.colorHex;
@@ -78,6 +85,15 @@
 		stockBarcodeInput.addEventListener('keydown', (event) => {
 			if (event.key === 'Enter') {
 				event.preventDefault();
+				stockActionInput.value = 'escanear';
+				stockEditForm.requestSubmit();
+			}
+		});
+
+		setupCameraScanner({
+			triggerBtnId: 'btn-open-camera-scanner-edit',
+			inputElement: stockBarcodeInput,
+			onDetected: (code) => {
 				stockActionInput.value = 'escanear';
 				stockEditForm.requestSubmit();
 			}
