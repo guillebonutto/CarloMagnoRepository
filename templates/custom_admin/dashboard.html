@@ -1,479 +1,291 @@
 {% extends 'custom_admin/base.html' %}
 {% load static %}
-{% block title %}Dashboard | PrestaShop Admin Carlo Magno{% endblock %}
+{% block title %}Dashboard - Panel de Administración{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+<style>
+    /* Estilos extra para métricas de venta */
+    .sales-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .sales-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border-left: 5px solid #8b0000;
+    }
+
+    .sales-card .label {
+        color: #888;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .sales-card .value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #333;
+        margin: 10px 0;
+    }
+
+    .charts-container {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .charts-two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .charts-two-col,
+        .charts-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-box {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .recent-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .recent-table th {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 2px solid #eee;
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    .recent-table td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 0.9rem;
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-pagado {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .status-pendiente {
+        background: #fff3e0;
+        color: #ef6c00;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="ps-dashboard-header">
-    <div class="ps-dashboard-title-area">
-        <div class="ps-breadcrumb">Inicio &gt; Dashboard</div>
-        <h1>Dashboard</h1>
+<div class="main-content">
+    <div class="header d-flex justify-content-between align-items-center mb-4">
+        <h1>Centro de Control Carlo Magno</h1>
+        <div class="d-flex gap-3 align-items-center">
+            <span class="badge bg-dark p-2">{{ today|date:"d M Y" }}</span>
+            <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">Cerrar Sesión</a>
+        </div>
     </div>
-    <div class="ps-header-controls">
-        <a href="?demo={% if demo_mode %}0{% else %}1{% endif %}&periodo={{ periodo }}" class="ps-demo-switch {% if demo_mode %}active{% endif %}" title="Activar/desactivar datos de demostración">
-            <span class="ps-demo-dot"></span> Demo mode: {% if demo_mode %}ON{% else %}OFF{% endif %}
-        </a>
-        <a href="{% url 'stock' %}" class="btn btn-sm btn-outline-secondary" title="Ayuda y documentación">
-            <i class="fas fa-question-circle me-1"></i> Ayuda
-        </a>
-    </div>
-</div>
 
-<!-- Barra de Filtros de Período -->
-<div class="ps-period-bar">
-    <div class="ps-period-btn-group">
-        <a href="?periodo=day{% if demo_mode %}&demo=1{% endif %}" class="ps-period-btn {% if periodo == 'day' %}active{% endif %}">Día</a>
-        <a href="?periodo=month{% if demo_mode %}&demo=1{% endif %}" class="ps-period-btn {% if periodo == 'month' %}active{% endif %}">Mes</a>
-        <a href="?periodo=year{% if demo_mode %}&demo=1{% endif %}" class="ps-period-btn {% if periodo == 'year' %}active{% endif %}">Año</a>
-        <a href="?periodo=day-1{% if demo_mode %}&demo=1{% endif %}" class="ps-period-btn {% if periodo == 'day-1' %}active{% endif %}">Día-1</a>
-        <a href="?periodo=month-1{% if demo_mode %}&demo=1{% endif %}" class="ps-period-btn {% if periodo == 'month-1' %}active{% endif %}">Mes-1</a>
-        <a href="?periodo=year-1{% if demo_mode %}&demo=1{% endif %}" class="ps-period-btn {% if periodo == 'year-1' %}active{% endif %}">Año-1</a>
+    <!-- MÉTRICAS DE NEGOCIO -->
+    <div class="sales-stats">
+        <div class="sales-card">
+            <div class="label">Ventas Totales</div>
+            <div class="value">${{ ventas_totales|floatformat:2 }}</div>
+            <div class="small text-success fw-bold"><i class="fas fa-arrow-up"></i> Ingresos Netos</div>
+        </div>
+        <div class="sales-card" style="border-left-color: #2196f3;">
+            <div class="label">Pedidos Pagados</div>
+            <div class="value">{{ cantidad_pedidos }}</div>
+            <div class="small text-muted">Transacciones exitosas</div>
+        </div>
+        <div class="sales-card" style="border-left-color: #4caf50;">
+            <div class="label">Ticket Promedio</div>
+            <div class="value">${{ ticket_promedio|floatformat:2 }}</div>
+            <div class="small text-muted">Gasto por cliente</div>
+        </div>
+        <div class="sales-card" style="border-left-color: #9c27b0;">
+            <div class="label">Uso de Cupones</div>
+            <div class="value">{{ pedidos_con_cupon }}</div>
+            <div class="small text-muted">Efectividad de promos</div>
+        </div>
     </div>
-    <div class="ps-daterange-picker">
-        <i class="far fa-calendar-alt text-primary"></i>
-        <span>Desde {{ fecha_inicio }} Hasta {{ fecha_fin }}</span>
-        <i class="fas fa-caret-down text-muted ms-1"></i>
-    </div>
-</div>
 
-<!-- Grid Principal de 3 Columnas Estilo PrestaShop -->
-<div class="ps-dashboard-grid">
-
-    <!-- COLUMNA IZQUIERDA: Visión General de Actividad -->
-    <div class="ps-left-column">
-        <!-- Banner Pro / Tips -->
-        <div class="ps-tip-banner">
-            <h4><i class="fas fa-bolt me-2"></i>Gestión de Stock Ágil</h4>
-            <ul>
-                <li><i class="fas fa-check-circle"></i> Escaneá artículos con lectora o cámara.</li>
-                <li><i class="fas fa-check-circle"></i> Sincronización instantánea de stock.</li>
-            </ul>
-            <a href="{% url 'recibir_stock' %}" class="ps-btn-tip">Abrir Terminal Depósito</a>
+    <!-- NUEVOS GRÁFICOS SOLICITADOS (Datos reales de Supabase) -->
+    <div class="charts-two-col">
+        <!-- Gráfico 1: Forecast (Ventas Reales vs Metas de Supabase) -->
+        <div class="chart-box">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="m-0 fw-bold"><i class="fas fa-chart-bar text-warning me-2"></i>Forecast: Ventas vs Metas ({{ año_actual }})</h5>
+            </div>
+            <div style="height: 240px; position: relative;">
+                <canvas id="forecastChart"></canvas>
+            </div>
         </div>
 
-        <!-- Activity Overview Card -->
-        <div class="ps-card">
-            <div class="ps-card-header">
-                <h3 class="ps-card-title"><i class="far fa-clock text-primary"></i> Activity overview</h3>
-                <div class="ps-card-tools">
-                    <i class="fas fa-cog"></i>
-                    <i class="fas fa-sync-alt" onclick="window.location.reload();"></i>
-                </div>
+        <!-- Gráfico 2: Tendencias de Ventas (Año Actual vs Año Anterior) -->
+        <div class="chart-box">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="m-0 fw-bold"><i class="fas fa-chart-line text-info me-2"></i>Evolución de Ventas ({{ año_actual }} vs {{ año_anterior }})</h5>
             </div>
-            <div class="ps-card-body">
-                <!-- Carritos Activos -->
-                <div class="ps-active-carts-box">
-                    <div>
-                        <span class="ps-active-carts-label">Carritos de Compra Activos</span>
-                        <span class="ps-active-carts-sub">en los últimos 30 minutos</span>
-                    </div>
-                    <div class="ps-active-carts-num text-primary">{{ carritos_activos }}</div>
-                </div>
+            <div style="height: 240px; position: relative;">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
 
-                <!-- Currently Pending -->
-                <div class="ps-activity-section">
-                    <div class="ps-activity-section-title">
-                        <i class="far fa-hourglass"></i> Currently Pending (Pendientes)
-                    </div>
-                    <div class="ps-activity-list">
-                        <div class="ps-activity-row">
-                            <span>Pedidos Pendientes</span>
-                            <span class="val">{{ pedidos_pendientes }}</span>
-                        </div>
-                        <div class="ps-activity-row">
-                            <span>Devoluciones / Cambios</span>
-                            <span class="val">{{ devoluciones }}</span>
-                        </div>
-                        <div class="ps-activity-row">
-                            <span>Carritos Abandonados</span>
-                            <span class="val text-danger">{{ carritos_abandonados }}</span>
-                        </div>
-                        <div class="ps-activity-row">
-                            <span>Productos sin Stock</span>
-                            <span class="val text-danger fw-bold">{{ productos_sin_stock }}</span>
-                        </div>
-                    </div>
-                </div>
+    <div class="charts-container">
+        <!-- Gráfico Estacional -->
+        <div class="chart-box">
+            <h5 class="mb-4 fw-bold">Ventas por Estación del Año</h5>
+            <canvas id="seasonChart" height="150"></canvas>
+        </div>
 
-                <!-- Notifications -->
-                <div class="ps-activity-section">
-                    <div class="ps-activity-section-title">
-                        <i class="far fa-bell"></i> Notifications
-                    </div>
-                    <div class="ps-notif-grid">
-                        <div class="ps-notif-box">
-                            <span class="ps-notif-label">Mensajes Nuevos</span>
-                            <span class="ps-notif-val">{{ nuevos_mensajes }}</span>
-                        </div>
-                        <div class="ps-notif-box">
-                            <span class="ps-notif-label">Reseñas / Consultas</span>
-                            <span class="ps-notif-val">{{ reviews_count }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Customers & Newsletters -->
-                <div class="ps-activity-section mb-0">
-                    <div class="ps-activity-section-title">
-                        <i class="far fa-user"></i> Customers &amp; Newsletters
-                    </div>
-                    <div class="ps-activity-list">
-                        <div class="ps-activity-row">
-                            <span>Nuevos Clientes</span>
-                            <span class="val">{{ nuevos_clientes }}</span>
-                        </div>
-                        <div class="ps-activity-row">
-                            <span>Nuevas Suscripciones</span>
-                            <span class="val">{{ nuevos_suscriptores }}</span>
-                        </div>
-                        <div class="ps-activity-row">
-                            <span>Total Suscriptores</span>
-                            <span class="val">{{ total_suscriptores }}</span>
-                        </div>
-                    </div>
+        <!-- Stock y Otros -->
+        <div class="chart-box">
+            <h5 class="mb-4 fw-bold">Estado del Inventario</h5>
+            <div class="d-flex align-items-center justify-content-center h-100">
+                <div class="text-center">
+                    <h1 class="display-1 fw-bold text-danger">{{ low_stock }}</h1>
+                    <p class="text-muted text-uppercase fw-bold">Productos con Stock Bajo</p>
+                    <a href="{% url 'stock' %}" class="btn btn-danger btn-sm rounded-pill px-4">Gestionar Stock</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- COLUMNA CENTRAL: Gráficos de Forecast y KPIs de Ventas -->
-    <div class="ps-center-column">
-
-        <!-- Card 1: Forecast (Previsiones) -->
-        <div class="ps-card">
-            <div class="ps-card-header">
-                <h3 class="ps-card-title"><i class="fas fa-chart-bar text-warning"></i> Forecast <span class="badge bg-dark ms-2">{{ año_actual }}</span></h3>
-                <div class="ps-card-tools">
-                    <i class="fas fa-sync-alt" onclick="window.location.reload();"></i>
-                </div>
-            </div>
-            <div class="ps-card-body">
-                <div class="ps-forecast-controls">
-                    <button type="button" class="ps-tab-pill" data-metric="traffic">
-                        <span class="dot" style="background:#8b5cf6;"></span> Traffic
-                    </button>
-                    <button type="button" class="ps-tab-pill" data-metric="conversion">
-                        <span class="dot" style="background:#10b981;"></span> Conversion
-                    </button>
-                    <button type="button" class="ps-tab-pill" data-metric="orders">
-                        <span class="dot" style="background:#3b82f6;"></span> Orders
-                    </button>
-                    <button type="button" class="ps-tab-pill active" data-metric="sales">
-                        <span class="dot" style="background:#f59e0b;"></span> Sales
-                    </button>
-                </div>
-                <div style="height: 230px; position: relative;">
-                    <canvas id="forecastChart"></canvas>
-                </div>
-            </div>
+    <!-- TABLA DE PEDIDOS RECIENTES -->
+    <div class="chart-box">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h5 class="m-0 fw-bold">Últimos Pedidos Recibidos</h5>
+            <a href="#" class="btn btn-link btn-sm text-dark p-0">Ver todos los pedidos</a>
         </div>
-
-        <!-- Card 2: Dashboard KPIs & Trend Line Chart -->
-        <div class="ps-card">
-            <div class="ps-card-header">
-                <h3 class="ps-card-title"><i class="fas fa-chart-line text-info"></i> Dashboard</h3>
-                <div class="ps-card-tools">
-                    <i class="fas fa-cog"></i>
-                    <i class="fas fa-sync-alt" onclick="window.location.reload();"></i>
-                </div>
-            </div>
-            <div class="ps-card-body">
-                <!-- 6 KPIs Grid PrestaShop -->
-                <div class="ps-kpis-grid">
-                    <!-- Sales -->
-                    <div class="ps-kpi-card highlight">
-                        <div class="ps-kpi-title">Sales</div>
-                        <div class="ps-kpi-value">${{ ventas_display|floatformat:2 }}</div>
-                        <span class="ps-kpi-badge {% if ventas_diff >= 0 %}up{% else %}down{% endif %}">
-                            <i class="fas fa-arrow-{% if ventas_diff >= 0 %}up{% else %}down{% endif %}"></i> {{ ventas_diff }}%
-                        </span>
-                    </div>
-
-                    <!-- Orders -->
-                    <div class="ps-kpi-card">
-                        <div class="ps-kpi-title">Orders</div>
-                        <div class="ps-kpi-value">{{ pedidos_display }}</div>
-                        <span class="ps-kpi-badge {% if pedidos_diff >= 0 %}up{% else %}down{% endif %}">
-                            <i class="fas fa-arrow-{% if pedidos_diff >= 0 %}up{% else %}down{% endif %}"></i> {{ pedidos_diff }}%
-                        </span>
-                    </div>
-
-                    <!-- Cart Value -->
-                    <div class="ps-kpi-card">
-                        <div class="ps-kpi-title">Cart Value</div>
-                        <div class="ps-kpi-value">${{ ticket_display|floatformat:2 }}</div>
-                        <span class="ps-kpi-badge {% if ticket_diff >= 0 %}up{% else %}down{% endif %}">
-                            <i class="fas fa-arrow-{% if ticket_diff >= 0 %}up{% else %}down{% endif %}"></i> {{ ticket_diff }}%
-                        </span>
-                    </div>
-
-                    <!-- Visits -->
-                    <div class="ps-kpi-card">
-                        <div class="ps-kpi-title">Visits</div>
-                        <div class="ps-kpi-value">{{ visitas_display }}</div>
-                        <span class="ps-kpi-badge {% if visitas_diff >= 0 %}up{% else %}down{% endif %}">
-                            <i class="fas fa-arrow-{% if visitas_diff >= 0 %}up{% else %}down{% endif %}"></i> {{ visitas_diff }}%
-                        </span>
-                    </div>
-
-                    <!-- Conversion Rate -->
-                    <div class="ps-kpi-card">
-                        <div class="ps-kpi-title">Conversion Rate</div>
-                        <div class="ps-kpi-value">{{ conversion_display }}%</div>
-                        <span class="ps-kpi-badge {% if conversion_diff >= 0 %}up{% else %}down{% endif %}">
-                            <i class="fas fa-arrow-{% if conversion_diff >= 0 %}up{% else %}down{% endif %}"></i> {{ conversion_diff }} pts
-                        </span>
-                    </div>
-
-                    <!-- Net Profit -->
-                    <div class="ps-kpi-card">
-                        <div class="ps-kpi-title">Net Profit</div>
-                        <div class="ps-kpi-value">${{ beneficio_display|floatformat:2 }}</div>
-                        <span class="ps-kpi-badge {% if beneficio_diff >= 0 %}up{% else %}down{% endif %}">
-                            <i class="fas fa-arrow-{% if beneficio_diff >= 0 %}up{% else %}down{% endif %}"></i> {{ beneficio_diff }}%
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Gráfico de Tendencias Multi-Línea -->
-                <div style="height: 250px; position: relative;">
-                    <canvas id="trendChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- COLUMNA DERECHA: Noticias y Accesos Rápidos -->
-    <div class="ps-right-column">
-        <!-- PrestaShop News Card -->
-        <div class="ps-card">
-            <div class="ps-card-header">
-                <h3 class="ps-card-title"><i class="fas fa-bullhorn text-danger"></i> Carlo Magno Insights</h3>
-            </div>
-            <div class="ps-card-body">
-                <div class="ps-news-item">
-                    <span class="ps-news-date">Hoy</span>
-                    <h4 class="ps-news-title">Control de Stock por Lector en Móviles</h4>
-                    <p class="ps-news-desc">Podés usar la cámara de cualquier teléfono para ingresar mercadería directamente desde el depósito.</p>
-                </div>
-                <div class="ps-news-item">
-                    <span class="ps-news-date">Catálogo</span>
-                    <h4 class="ps-news-title">Atributos de Prenda Completos</h4>
-                    <p class="ps-news-desc">Los productos ahora cuentan con soporte directo para Color, Talle, Estilo/Corte y Tipo de Tela.</p>
-                </div>
-                <a href="{% url 'stock' %}" class="btn btn-outline-dark btn-sm w-100 mt-2">Ir a Gestión de Stock</a>
-            </div>
-        </div>
-
-        <!-- Learn & Grow Card -->
-        <div class="ps-card">
-            <div class="ps-card-header">
-                <h3 class="ps-card-title"><i class="fas fa-rocket text-primary"></i> Accesos Rápidos</h3>
-            </div>
-            <div class="ps-card-body">
-                <a href="{% url 'recibir_stock' %}" class="ps-quick-action-link">
-                    <i class="fas fa-barcode"></i>
-                    <span>Recibir Stock con Lector</span>
-                </a>
-                <a href="{% url 'agregar_producto' %}" class="ps-quick-action-link">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Registrar Nuevo Producto</span>
-                </a>
-                <a href="{% url 'admin_productos' %}" class="ps-quick-action-link">
-                    <i class="fas fa-tshirt"></i>
-                    <span>Ver Catálogo Completo</span>
-                </a>
-                <a href="{% url 'stock' %}" class="ps-quick-action-link">
-                    <i class="fas fa-boxes"></i>
-                    <span>Auditar Variantes de Stock</span>
-                </a>
-            </div>
+        <div class="table-responsive">
+            <table class="recent-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in recent_pedidos %}
+                    <tr>
+                        <td>#{{ pedido.id }}</td>
+                        <td><strong>{{ pedido.nombre_completo }}</strong><br><small>{{ pedido.email }}</small></td>
+                        <td>{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <span class="status-badge status-{{ pedido.estado_pago }}">
+                                {{ pedido.get_estado_pago_display|default:pedido.estado_pago }}
+                            </span>
+                        </td>
+                        <td class="fw-bold">${{ pedido.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">No hay pedidos registrados todavía.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
-<!-- Tabla de Pedidos Recientes -->
-<div class="ps-card">
-    <div class="ps-card-header">
-        <h3 class="ps-card-title"><i class="fas fa-shopping-bag text-success"></i> Últimos Pedidos Recibidos</h3>
-        <span class="badge bg-secondary">{{ recent_pedidos|length }} recientes</span>
-    </div>
-    <div class="table-responsive">
-        <table class="recent-table w-100">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Cliente</th>
-                    <th>Fecha</th>
-                    <th>Estado de Pago</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for pedido in recent_pedidos %}
-                <tr>
-                    <td>#{{ pedido.id }}</td>
-                    <td>
-                        <strong>{{ pedido.nombre_completo }}</strong><br>
-                        <small class="text-muted">{{ pedido.email }}</small>
-                    </td>
-                    <td>{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
-                    <td>
-                        <span class="status-badge status-{{ pedido.estado_pago }}">
-                            {{ pedido.get_estado_pago_display|default:pedido.estado_pago }}
-                        </span>
-                    </td>
-                    <td class="fw-bold">${{ pedido.total }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center py-4 text-muted">
-                        No hay pedidos recientes registrados aún.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- Scripts Chart.js -->
+<!-- Scripts para los gráficos -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Datos inyectados desde Django
-        const mesesLabels = {{ meses_nombres_json|safe }};
-        const salesActual = {{ forecast_sales_actual_json|safe }};
-        const salesTarget = {{ forecast_sales_target_json|safe }};
-        const trafficData = {{ forecast_traffic_json|safe }};
-        const ordersData = {{ forecast_orders_json|safe }};
+        // 1. Gráfico Estacional Original
+        const ctxSeason = document.getElementById('seasonChart').getContext('2d');
+        const seasonLabels = ['Verano', 'Otoño', 'Invierno', 'Primavera'];
+        const seasonData = [
+            parseFloat("{{ estaciones_data.Verano|default:0 }}"),
+            parseFloat("{{ estaciones_data.Otoño|default:0 }}"),
+            parseFloat("{{ estaciones_data.Invierno|default:0 }}"),
+            parseFloat("{{ estaciones_data.Primavera|default:0 }}")
+        ];
 
-        const trendLabels = {{ trend_labels_json|safe }};
-        const trendSales = {{ trend_sales_json|safe }};
-        const trendSalesPrev = {{ trend_sales_prev_json|safe }};
-
-        // 1. Gráfico Forecast (Barras Estilo PrestaShop con degradado naranja/oro)
-        const ctxForecast = document.getElementById('forecastChart').getContext('2d');
-        
-        const forecastDatasets = {
-            sales: [
-                {
-                    label: 'Ventas Reales ($)',
-                    data: salesActual,
-                    backgroundColor: 'rgba(245, 158, 11, 0.85)',
-                    borderRadius: 4,
-                    barPercentage: 0.6
-                },
-                {
-                    label: 'Meta / Previsión ($)',
-                    data: salesTarget,
-                    backgroundColor: 'rgba(253, 230, 138, 0.6)',
-                    borderRadius: 4,
-                    barPercentage: 0.6
-                }
-            ],
-            orders: [
-                {
-                    label: 'Pedidos',
-                    data: ordersData,
-                    backgroundColor: 'rgba(59, 130, 246, 0.85)',
-                    borderRadius: 4,
-                    barPercentage: 0.6
-                }
-            ],
-            traffic: [
-                {
-                    label: 'Tráfico / Visitas',
-                    data: trafficData,
-                    backgroundColor: 'rgba(139, 92, 246, 0.85)',
-                    borderRadius: 4,
-                    barPercentage: 0.6
-                }
-            ],
-            conversion: [
-                {
-                    label: 'Conversión (%)',
-                    data: ordersData.map((ord, i) => {
-                        const traf = trafficData[i] || 1;
-                        return parseFloat(((ord / traf) * 100).toFixed(2));
-                    }),
-                    backgroundColor: 'rgba(16, 185, 129, 0.85)',
-                    borderRadius: 4,
-                    barPercentage: 0.6
-                }
-            ]
-        };
-
-        const forecastChart = new Chart(ctxForecast, {
+        new Chart(ctxSeason, {
             type: 'bar',
             data: {
-                labels: mesesLabels,
-                datasets: forecastDatasets.sales
+                labels: seasonLabels,
+                datasets: [{
+                    label: 'Ventas por Estación ($)',
+                    data: seasonData,
+                    backgroundColor: [
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(255, 205, 86, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(75, 192, 192, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgb(255, 159, 64)',
+                        'rgb(255, 205, 86)',
+                        'rgb(54, 162, 235)',
+                        'rgb(75, 192, 192)'
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
-                }
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
             }
         });
 
-        // Pestañas de control del Forecast
-        document.querySelectorAll('.ps-tab-pill').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.ps-tab-pill').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                const metric = this.dataset.metric;
-                if (forecastDatasets[metric]) {
-                    forecastChart.data.datasets = forecastDatasets[metric];
-                    forecastChart.update();
-                }
-            });
-        });
+        // 2. Gráfico Forecast (Datos 100% de Supabase: Pedido vs MetaMensual)
+        const ctxForecast = document.getElementById('forecastChart').getContext('2d');
+        const mesesLabels = {{ meses_labels_json|safe }};
+        const forecastActual = {{ forecast_actual_json|safe }};
+        const forecastMetas = {{ forecast_metas_json|safe }};
 
-        // 2. Gráfico de Tendencias (Líneas comparativas PrestaShop)
-        const ctxTrend = document.getElementById('trendChart').getContext('2d');
-        new Chart(ctxTrend, {
-            type: 'line',
+        new Chart(ctxForecast, {
+            type: 'bar',
             data: {
-                labels: trendLabels,
+                labels: mesesLabels,
                 datasets: [
                     {
-                        label: 'Sales (Ventas actuales)',
-                        data: trendSales,
-                        borderColor: '#25b9d7',
-                        backgroundColor: 'rgba(37, 185, 215, 0.08)',
-                        fill: true,
-                        tension: 0.35,
-                        borderWidth: 2,
-                        pointRadius: 2,
-                        pointHoverRadius: 5
+                        label: 'Ventas Reales ($)',
+                        data: forecastActual,
+                        backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                        borderRadius: 4
                     },
                     {
-                        label: 'Sales (previous period)',
-                        data: trendSalesPrev,
-                        borderColor: '#94a3b8',
-                        borderDash: [5, 5],
-                        fill: false,
-                        tension: 0.35,
-                        borderWidth: 1.5,
-                        pointRadius: 0
+                        label: 'Meta Configurada ($)',
+                        data: forecastMetas,
+                        backgroundColor: 'rgba(253, 230, 138, 0.65)',
+                        borderRadius: 4
                     }
                 ]
             },
@@ -481,19 +293,54 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: { boxWidth: 14, font: { size: 11, weight: 'bold' } }
-                    }
+                    legend: { position: 'top' }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // 3. Gráfico de Tendencias (Datos 100% de Supabase: Año actual vs Año anterior)
+        const ctxTrend = document.getElementById('trendChart').getContext('2d');
+        const tendenciaEsteAño = {{ tendencia_este_año_json|safe }};
+        const tendenciaAñoAnt = {{ tendencia_año_anterior_json|safe }};
+
+        new Chart(ctxTrend, {
+            type: 'line',
+            data: {
+                labels: mesesLabels,
+                datasets: [
+                    {
+                        label: 'Ventas {{ año_actual }}',
+                        data: tendenciaEsteAño,
+                        borderColor: '#25b9d7',
+                        backgroundColor: 'rgba(37, 185, 215, 0.1)',
+                        fill: true,
+                        tension: 0.35,
+                        borderWidth: 2,
+                        pointRadius: 3
                     },
-                    x: {
-                        grid: { display: false }
+                    {
+                        label: 'Ventas {{ año_anterior }}',
+                        data: tendenciaAñoAnt,
+                        borderColor: '#94a3b8',
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.35,
+                        borderWidth: 1.5,
+                        pointRadius: 2
                     }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
                 }
             }
         });
