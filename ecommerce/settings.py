@@ -1,11 +1,14 @@
 from pathlib import Path
 import os
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-%h!a1lf_h0a05(#=(_aabbq0a*z+s&c1=a^9zualpba%f424is'
-
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-local-development-only',
+)
 
 ALLOWED_HOSTS = ['*']
 
@@ -63,10 +66,15 @@ try:
     DATABASES = {
         'default': dj_database_url.config(
             default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-            conn_max_age=600
+            conn_max_age=600,
+            ssl_require=not DEBUG,
         )
     }
-except ImportError:
+except ImportError as exc:
+    if os.environ.get('DATABASE_URL'):
+        raise ImproperlyConfigured(
+            'Install dj-database-url to use DATABASE_URL.'
+        ) from exc
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -103,14 +111,27 @@ STORAGES = {
     },
 }
 
-# Supabase Storage (Nube)
-SUPABASE_URL = os.environ.get('SUPABASE_URL')
-SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
+# Supabase Storage
+SUPABASE_PROJECT_ID = os.environ.get('SUPABASE_PROJECT_ID', '').strip()
+SUPABASE_URL = os.environ.get('SUPABASE_URL') or (
+    f'https://{SUPABASE_PROJECT_ID}.supabase.co'
+    if SUPABASE_PROJECT_ID else ''
+)
+SUPABASE_KEY = (
+    os.environ.get('SUPABASE_SERVICE_ROLE_KEY')
+    or os.environ.get('SUPABASE_KEY')
+)
 SUPABASE_BUCKET = os.environ.get('SUPABASE_BUCKET', 'productos')
+
+if bool(SUPABASE_URL) != bool(SUPABASE_KEY):
+    raise ImproperlyConfigured(
+        'Configure SUPABASE_URL (or SUPABASE_PROJECT_ID) and '
+        'SUPABASE_SERVICE_ROLE_KEY together.'
+    )
 
 if SUPABASE_URL and SUPABASE_KEY:
     STORAGES["default"] = {
-        "BACKEND": "django_supabase_storage.SupabaseStorage",
+        "BACKEND": "django_supabase_storage.SupabaseMediaStorage",
     }
     SUPABASE_PUBLIC_URL = True 
 
@@ -118,21 +139,21 @@ if SUPABASE_URL and SUPABASE_KEY:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Mercado Pago
-MERCADO_PAGO_PUBLIC_KEY = "APP_USR-94cc2d5d-82e5-44da-8612-afee97d487fb"
-MERCADO_PAGO_ACCESS_TOKEN = "APP_USR-7762497834204355-042410-ec020e65e4436130b4f6a98387a60ee3-1109104702"
+MERCADO_PAGO_PUBLIC_KEY = os.environ.get('MERCADO_PAGO_PUBLIC_KEY', '')
+MERCADO_PAGO_ACCESS_TOKEN = os.environ.get('MERCADO_PAGO_ACCESS_TOKEN', '')
 
 # Wavespeed AI
-WAVESPEED_API_TOKEN = "953d8203e32cf8dfa905e5e848793beba21295defdf928876d07efe86199f050"
+WAVESPEED_API_TOKEN = os.environ.get('WAVESPEED_API_TOKEN', '')
 
 # Upload Limits para VTON (20 MB en el servidor, validamos 15 MB en el código)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 20971520   # 20 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520   # 20 MB
 
 # ========== CONFIGURACIÓN DE EMAIL ==========
-_email_user = os.environ.get('EMAIL_HOST_USER', 'carlomagnocordoba@gmail.com')
-_email_pass = os.environ.get('EMAIL_HOST_PASSWORD', 'yjco aysa fdhu fskd')
+_email_user = os.environ.get('EMAIL_HOST_USER', '')
+_email_pass = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
-if DEBUG and not _email_user:
+if DEBUG and not (_email_user and _email_pass):
     # En desarrollo: muestra el email en la consola del servidor (no envía nada real)
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:

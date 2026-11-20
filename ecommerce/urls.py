@@ -112,6 +112,18 @@ urlpatterns = [
     path('panel/talles/<int:pk>/editar/', admin_views.editar_talle, name='editar_talle'),
     path('panel/talles/<int:pk>/eliminar/', admin_views.eliminar_talle, name='eliminar_talle'),
 
+    # Estilos
+    path('panel/estilos/', admin_views.estilos, name='estilos'),
+    path('panel/estilos/agregar/', admin_views.agregar_estilo, name='agregar_estilo'),
+    path('panel/estilos/<int:pk>/editar/', admin_views.editar_estilo, name='editar_estilo'),
+    path('panel/estilos/<int:pk>/eliminar/', admin_views.eliminar_estilo, name='eliminar_estilo'),
+
+    # Tipos de tela
+    path('panel/tipos/', admin_views.tipos, name='tipos'),
+    path('panel/tipos/agregar/', admin_views.agregar_tipo, name='agregar_tipo'),
+    path('panel/tipos/<int:pk>/editar/', admin_views.editar_tipo, name='editar_tipo'),
+    path('panel/tipos/<int:pk>/eliminar/', admin_views.eliminar_tipo, name='eliminar_tipo'),
+
     # Clientes
     path('panel/clientes/', admin_views.clientes, name='clientes'),
     path('panel/clientes/agregar/', admin_views.agregar_cliente, name='agregar_cliente'),

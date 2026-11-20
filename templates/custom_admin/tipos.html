@@ -1,0 +1,56 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Gestión de Tipos de tela{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/talles.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>Gestión de Tipos de tela</h1>
+		<a href="{% url 'agregar_tipo' %}" class="btn btn-primary">+ Nuevo tipo de tela</a>
+	</div>
+
+	{% if tipos %}
+	<div class="estilos-table">
+		<table>
+			<thead>
+				<tr>
+					<th>Tipo de tela</th>
+					<th>Orden</th>
+					<th>En productos</th>
+					<th>Estado</th>
+					<th>Acciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for tipo in tipos %}
+				<tr>
+					<td><span class="tipo-badge">{{ tipo.nombre }}</span></td>
+					<td><span class="order-badge">{{ tipo.order }}</span></td>
+					<td>{{ tipo.productos_count }} productos</td>
+					<td>
+						{% if tipo.esta_activo %}
+						<span class="badge bg-success">Activo</span>
+						{% else %}
+						<span class="badge bg-secondary">Inactivo</span>
+						{% endif %}
+					</td>
+					<td>
+						<a href="{% url 'editar_tipo' tipo.pk %}" class="btn-edit">✏️ Editar</a>
+						<a href="{% url 'eliminar_tipo' tipo.pk %}" class="btn-delete">🗑️ Eliminar</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% else %}
+	<div class="empty-state">
+		<h2>No hay tipos de tela registrados</h2>
+		<p>Creá tipos como Piqué, Jersey o Bastón.</p>
+	</div>
+	{% endif %}
+</div>
+{% endblock %}

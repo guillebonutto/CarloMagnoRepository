@@ -69,6 +69,34 @@ class Talle(models.Model):
         return f"{self.abbreviation} - {self.nombre}"
 
 
+class Estilo(models.Model):
+    nombre = models.CharField(max_length=100, unique=True, verbose_name='Nombre')
+    order = models.PositiveIntegerField(default=0, verbose_name='Orden de visualización')
+    esta_activo = models.BooleanField(default=True, verbose_name='Está activo')
+
+    class Meta:
+        verbose_name = 'Estilo'
+        verbose_name_plural = 'Estilos'
+        ordering = ['order', 'nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
+class Tipo(models.Model):
+    nombre = models.CharField(max_length=100, unique=True, verbose_name='Nombre')
+    order = models.PositiveIntegerField(default=0, verbose_name='Orden de visualización')
+    esta_activo = models.BooleanField(default=True, verbose_name='Está activo')
+
+    class Meta:
+        verbose_name = 'Tipo de tela'
+        verbose_name_plural = 'Tipos de tela'
+        ordering = ['order', 'nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
 class Marca(models.Model):
     nombre = models.CharField(max_length=100, unique=True, verbose_name='Nombre')
     logo = models.ImageField(
@@ -112,6 +140,22 @@ class Producto(models.Model):
         blank=True,
         related_name='productos',
         verbose_name='Categoría'
+    )
+    estilo = models.ForeignKey(
+        Estilo,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos',
+        verbose_name='Estilo',
+    )
+    tipo = models.ForeignKey(
+        Tipo,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos',
+        verbose_name='Tipo de tela',
     )
     marca = models.ForeignKey(
         Marca,

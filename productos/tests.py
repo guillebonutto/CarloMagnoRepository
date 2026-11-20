@@ -1,8 +1,42 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.core.management import call_command, CommandError
 from django.urls import reverse
 
 from .models import Categoria, Color, Producto, ProductoStock, Talle
+
+
+class ReemplazoCatalogoFixtureSafetyTests(TestCase):
+    def test_requires_confirmation_before_changing_catalog(self):
+        producto = Producto.objects.create(
+            nombre='Producto de prueba',
+            descripcion='Producto de prueba',
+            precio=100,
+        )
+
+        with self.assertRaises(CommandError):
+            call_command(
+                'replace_catalog_from_fixture',
+                'unused-fixture.json',
+            )
+
+        self.assertTrue(Producto.objects.filter(pk=producto.pk).exists())
+
+    def test_refuses_sqlite_even_with_confirmation(self):
+        producto = Producto.objects.create(
+            nombre='Producto de prueba',
+            descripcion='Producto de prueba',
+            precio=100,
+        )
+
+        with self.assertRaises(CommandError):
+            call_command(
+                'replace_catalog_from_fixture',
+                'unused-fixture.json',
+                confirm=True,
+            )
+
+        self.assertTrue(Producto.objects.filter(pk=producto.pk).exists())
 
 
 class IngresoStockPorLectorTests(TestCase):

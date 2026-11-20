@@ -5,7 +5,7 @@ from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from productos.models import Color, Marca, Producto, ProductoStock, Talle
+from productos.models import Color, Estilo, Marca, Producto, ProductoStock, Talle, Tipo
 
 
 @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
@@ -130,6 +130,109 @@ class PanelProductEditTests(TestCase):
         self.product.refresh_from_db()
         self.assertEqual(self.product.codigo, 'TEST-PANEL-001')
         self.assertEqual(self.product.marca, self.updated_brand)
+
+    def test_product_create_and_edit_form_save_a_single_style(self):
+        first_style = Estilo.objects.create(nombre='Estilo de prueba A')
+        second_style = Estilo.objects.create(nombre='Estilo de prueba B')
+        first_type = Tipo.objects.create(nombre='Tela de prueba A')
+        second_type = Tipo.objects.create(nombre='Tela de prueba B')
+        response = self.client.post(
+            reverse('agregar_producto'),
+            {
+                'codigo': 'TEST-PANEL-STYLE-001',
+                'nombre': 'Producto con estilo',
+                'descripcion': 'Producto de prueba',
+                'precio': '100.00',
+                'categoria': '',
+                'marca': str(self.original_brand.pk),
+                'estilo': str(first_style.pk),
+                'tipo': str(first_type.pk),
+                'talles': [],
+                'colores': [],
+                'esta_activo': 'on',
+            },
+        )
+
+        self.assertRedirects(response, reverse('admin_productos'))
+        product = Producto.objects.get(codigo='TEST-PANEL-STYLE-001')
+        self.assertEqual(product.estilo, first_style)
+        self.assertEqual(product.tipo, first_type)
+
+        response = self.client.post(
+            reverse('editar_producto', args=[product.pk]),
+            {
+                'codigo': product.codigo,
+                'nombre': product.nombre,
+                'descripcion': product.descripcion,
+                'precio': str(product.precio),
+                'categoria': '',
+                'marca': str(self.original_brand.pk),
+                'estilo': str(second_style.pk),
+                'tipo': str(second_type.pk),
+                'talles': [],
+                'colores': [],
+                'esta_activo': 'on',
+            },
+        )
+
+        self.assertRedirects(response, reverse('admin_productos'))
+        product.refresh_from_db()
+        self.assertEqual(product.estilo, second_style)
+        self.assertEqual(product.tipo, second_type)
+
+    def test_talles_render_as_abbreviation_badges_in_product_form(self):
+        Talle.objects.create(nombre='Mediano', abbreviation='M')
+
+        response = self.client.get(
+            reverse('editar_producto', args=[self.product.pk]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'class="size-option"')
+        self.assertContains(response, '>M</span>')
+
+    def test_edit_form_keeps_an_assigned_inactive_style_available(self):
+        style = Estilo.objects.create(
+            nombre='Estilo inactivo',
+            esta_activo=False,
+        )
+        self.product.estilo = style
+        self.product.save(update_fields=['estilo'])
+
+        response = self.client.get(
+            reverse('editar_producto', args=[self.product.pk]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            str(response.context['form']['estilo'].value()),
+            str(style.pk),
+        )
+
+    def test_styles_can_be_managed_from_the_panel(self):
+        response = self.client.post(reverse('agregar_estilo'), {
+            'nombre': 'Estilo de prueba nuevo',
+            'order': '1',
+            'esta_activo': 'on',
+        })
+
+        self.assertRedirects(response, reverse('estilos'))
+        self.assertTrue(Estilo.objects.filter(nombre='Estilo de prueba nuevo').exists())
+        self.assertContains(
+            self.client.get(reverse('estilos')),
+            'Estilo de prueba nuevo',
+        )
+
+    def test_fabric_types_can_be_managed_from_the_panel(self):
+        response = self.client.post(reverse('agregar_tipo'), {
+            'nombre': 'Tela de prueba',
+            'order': '1',
+            'esta_activo': 'on',
+        })
+
+        self.assertRedirects(response, reverse('tipos'))
+        self.assertTrue(Tipo.objects.filter(nombre='Tela de prueba').exists())
+        self.assertContains(self.client.get(reverse('tipos')), 'Tela de prueba')
 
     def test_product_list_search_finds_product_by_code_without_stock(self):
         product = Producto.objects.get(codigo='001067')

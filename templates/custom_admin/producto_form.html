@@ -66,6 +66,19 @@
 			</div>
 
 			<div class="form-group">
+				<label for="{{ form.estilo.id_for_label }}">Estilo</label>
+				{{ form.estilo }} {{ form.estilo.errors }}
+				<small>Corte, calce o uso de la prenda: clásico, casual, deportivo o corporativo.</small>
+				<a href="{% url 'estilos' %}" class="manage-styles-link">Administrar estilos</a>
+			</div>
+
+			<div class="form-group">
+				<label for="{{ form.tipo.id_for_label }}">Tipo de tela</label>
+				{{ form.tipo }} {{ form.tipo.errors }}
+				<a href="{% url 'tipos' %}" class="manage-styles-link">Administrar tipos de tela</a>
+			</div>
+
+			<div class="form-group">
 				<label>Talles disponibles</label>
 				<div class="size-options">
 					{% for checkbox in form.talles %}

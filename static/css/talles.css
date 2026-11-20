@@ -1,13 +1,16 @@
 @import url('style_admin.css');
 
-.talles-table {
+.talles-table,
+.estilos-table {
     background: white;
     border-radius: 15px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     overflow: hidden;
 }
 
-.talle-badge {
+.talle-badge,
+.estilo-badge,
+.tipo-badge {
     display: inline-block;
     background: #e3f2fd;
     color: #1976d2;

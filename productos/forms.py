@@ -1,6 +1,7 @@
 from django import forms
+from django.db.models import Q
 from django.utils.safestring import mark_safe
-from productos.models import Color, Producto, Talle
+from productos.models import Color, Estilo, Producto, Talle, Tipo
 
 class ProductoForm(forms.ModelForm):
     colores = forms.ModelMultipleChoiceField(
@@ -25,6 +26,8 @@ class ProductoForm(forms.ModelForm):
             'precio',
             'categoria',
             'marca',
+            'estilo',
+            'tipo',
             'imagen',
             'esta_activo',
         ]
@@ -34,6 +37,18 @@ class ProductoForm(forms.ModelForm):
         self.fields['colores'].label_from_instance = lambda obj: obj.hex_code
         self.fields['colores'].queryset = Color.objects.order_by('order', 'nombre')
         self.fields['talles'].queryset = Talle.objects.order_by('order', 'nombre')
+        estilo_filter = Q(esta_activo=True)
+        if self.instance.estilo_id:
+            estilo_filter |= Q(pk=self.instance.estilo_id)
+        self.fields['estilo'].queryset = Estilo.objects.filter(
+            estilo_filter,
+        ).order_by('order', 'nombre')
+        tipo_filter = Q(esta_activo=True)
+        if self.instance.tipo_id:
+            tipo_filter |= Q(pk=self.instance.tipo_id)
+        self.fields['tipo'].queryset = Tipo.objects.filter(
+            tipo_filter,
+        ).order_by('order', 'nombre')
         if self.instance.pk:
             stock_variants = self.instance.stock_items.all()
             self.initial['colores'] = stock_variants.values_list(
@@ -42,6 +57,7 @@ class ProductoForm(forms.ModelForm):
             self.initial['talles'] = stock_variants.values_list(
                 'talle_id', flat=True,
             ).distinct()
+        self.fields['talles'].label_from_instance = lambda obj: obj.abbreviation
 
     def save(self, commit=True):
         product = super().save(commit=commit)

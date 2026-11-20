@@ -48,6 +48,8 @@
                     <a href="{% url 'colores' %}" class="{% if request.resolver_match.url_name == 'colores' %}active{% endif %}">🎨 Colores</a>
                     <a href="{% url 'marcas' %}" class="{% if request.resolver_match.url_name == 'marcas' %}active{% endif %}">🏷️ Marcas</a>
                     <a href="{% url 'talles' %}" class="{% if request.resolver_match.url_name == 'talles' %}active{% endif %}">📏 Talles</a>
+                    <a href="{% url 'estilos' %}" class="{% if request.resolver_match.url_name == 'estilos' %}active{% endif %}">✨ Estilos</a>
+                    <a href="{% url 'tipos' %}" class="{% if request.resolver_match.url_name == 'tipos' %}active{% endif %}">🧵 Tipos de tela</a>
                     <a href="{% url 'stock' %}" class="{% if request.resolver_match.url_name == 'stock' %}active{% endif %}">📊 Stock</a>
                     <a href="#"><i class="fas fa-ticket-alt me-2"></i> Cupones</a>
                 </div>

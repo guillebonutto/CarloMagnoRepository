@@ -7,13 +7,13 @@ from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
 from .forms import IngresoStockPorLectorForm, ProductoForm
-from .models import Categoria, Color, Talle, Marca, Producto, ProductoStock, Cliente, GrupoCliente, Direccion, Carrito, CarritoItem, Pedido, PedidoItem, Cupon
+from .models import Categoria, Color, Estilo, Tipo, Talle, Marca, Producto, ProductoStock, Cliente, GrupoCliente, Direccion, Carrito, CarritoItem, Pedido, PedidoItem, Cupon
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
     list_display = ['nombre', 'descripcion', 'producto_count']
     search_fields = ['nombre']
-    
+
     def producto_count(self, obj):
         count = obj.categorias.count()  # ← Corregido
         return format_html(
@@ -21,6 +21,20 @@ class CategoriaAdmin(admin.ModelAdmin):
             count
         )
     producto_count.short_description = 'Cantidad de productos'  # ← Corregido
+
+
+@admin.register(Estilo)
+class EstiloAdmin(admin.ModelAdmin):
+    list_display = ['nombre', 'order', 'esta_activo']
+    list_editable = ['order', 'esta_activo']
+    search_fields = ['nombre']
+
+
+@admin.register(Tipo)
+class TipoAdmin(admin.ModelAdmin):
+    list_display = ['nombre', 'order', 'esta_activo']
+    list_editable = ['order', 'esta_activo']
+    search_fields = ['nombre']
 
 
 @admin.register(Color)
@@ -102,9 +116,9 @@ class ProductoStockInline(admin.TabularInline):  # ← Nombre corregido
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):  # ← Nombre corregido
-    list_display = ['codigo', 'nombre', 'marca', 'categoria', 'precio', 'esta_activo', 'image_thumbnail', 'colores_display', 'created_at']
-    list_filter = ['esta_activo', 'categoria', 'marca', 'stock_items__color', 'stock_items__talle', 'created_at']
-    search_fields = ['codigo', 'nombre', 'descripcion', 'marca__nombre']
+    list_display = ['codigo', 'nombre', 'marca', 'categoria', 'estilo', 'tipo', 'precio', 'esta_activo', 'image_thumbnail', 'colores_display', 'created_at']
+    list_filter = ['esta_activo', 'categoria', 'marca', 'estilo', 'tipo', 'stock_items__color', 'stock_items__talle', 'created_at']
+    search_fields = ['codigo', 'nombre', 'descripcion', 'marca__nombre', 'estilo__nombre', 'tipo__nombre']
     inlines = [ProductoStockInline]
     form = ProductoForm
     readonly_fields = ['image_preview', 'created_at', 'updated_at']
@@ -119,7 +133,7 @@ class ProductoAdmin(admin.ModelAdmin):  # ← Nombre corregido
     
     fieldsets = (
         ('Información básica', {
-            'fields': ('codigo', 'nombre', 'descripcion', 'categoria', 'marca', 'precio', 'esta_activo'),
+            'fields': ('codigo', 'nombre', 'descripcion', 'categoria', 'estilo', 'tipo', 'marca', 'precio', 'esta_activo'),
             'description': 'Información principal del producto'  # ← Corregido (debe ser 'description')
         }),
         ('Variantes disponibles', {

@@ -1,0 +1,39 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}{{ title }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/talle_form.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>{{ title }}</h1>
+	</div>
+
+	<div class="form-container">
+		<form method="post">
+			{% csrf_token %}
+			<div class="form-group">
+				<label for="{{ form.nombre.id_for_label }}">Nombre del tipo de tela *</label>
+				{{ form.nombre }}
+				{{ form.nombre.errors }}
+			</div>
+			<div class="form-group">
+				<label for="{{ form.order.id_for_label }}">Orden de visualización</label>
+				{{ form.order }}
+				{{ form.order.errors }}
+			</div>
+			<div class="form-group form-check">
+				{{ form.esta_activo }}
+				<label class="form-check-label" for="{{ form.esta_activo.id_for_label }}">Tipo de tela activo para productos</label>
+				{{ form.esta_activo.errors }}
+			</div>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary">Guardar tipo de tela</button>
+				<a href="{% url 'tipos' %}" class="btn btn-secondary">Cancelar</a>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

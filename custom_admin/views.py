@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.forms import ModelForm
 from django import forms
-from productos.models import Producto, Categoria, Color, Marca, Talle, Cliente, Direccion, ProductoStock, Pedido, PedidoItem, Cupon
+from productos.models import Producto, Categoria, Color, Estilo, Tipo, Marca, Talle, Cliente, Direccion, ProductoStock, Pedido, PedidoItem, Cupon
 from productos.forms import ProductoForm, IngresoStockPorLectorForm
 from django.db import router, transaction
 from django.db.models import F, Q, Sum, Count, Avg
@@ -44,6 +44,16 @@ class TalleForm(ModelForm):
     class Meta:
         model = Talle
         fields = ['abbreviation', 'nombre', 'order']
+
+class EstiloForm(ModelForm):
+    class Meta:
+        model = Estilo
+        fields = ['nombre', 'order', 'esta_activo']
+
+class TipoForm(ModelForm):
+    class Meta:
+        model = Tipo
+        fields = ['nombre', 'order', 'esta_activo']
 
 class ClienteForm(ModelForm):
     class Meta:
@@ -698,6 +708,145 @@ def eliminar_talle(request, pk):
         'object': talle,
         'type': 'talle'
     })
+
+
+@login_required(login_url='login')
+def estilos(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    style_options = Estilo.objects.annotate(productos_count=Count('productos'))
+    return render(request, 'custom_admin/estilos.html', {
+        'estilos': style_options,
+    })
+
+
+@login_required(login_url='login')
+def agregar_estilo(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = EstiloForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Estilo creado exitosamente')
+            return redirect('estilos')
+    else:
+        form = EstiloForm()
+
+    return render(request, 'custom_admin/estilo_form.html', {
+        'form': form,
+        'title': 'Agregar estilo',
+    })
+
+
+@login_required(login_url='login')
+def editar_estilo(request, pk):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    estilo = get_object_or_404(Estilo, pk=pk)
+    if request.method == 'POST':
+        form = EstiloForm(request.POST, instance=estilo)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Estilo actualizado exitosamente')
+            return redirect('estilos')
+    else:
+        form = EstiloForm(instance=estilo)
+
+    return render(request, 'custom_admin/estilo_form.html', {
+        'form': form,
+        'title': 'Editar estilo',
+    })
+
+
+@login_required(login_url='login')
+def eliminar_estilo(request, pk):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    estilo = get_object_or_404(Estilo, pk=pk)
+    if request.method == 'POST':
+        estilo.delete()
+        messages.success(request, 'Estilo eliminado exitosamente')
+        return redirect('estilos')
+
+    return render(request, 'custom_admin/confirm_eliminar.html', {
+        'object': estilo,
+        'type': 'estilo',
+    })
+
+
+@login_required(login_url='login')
+def tipos(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    fabric_types = Tipo.objects.annotate(productos_count=Count('productos'))
+    return render(request, 'custom_admin/tipos.html', {
+        'tipos': fabric_types,
+    })
+
+
+@login_required(login_url='login')
+def agregar_tipo(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = TipoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tipo de tela creado exitosamente')
+            return redirect('tipos')
+    else:
+        form = TipoForm()
+
+    return render(request, 'custom_admin/tipo_form.html', {
+        'form': form,
+        'title': 'Agregar tipo de tela',
+    })
+
+
+@login_required(login_url='login')
+def editar_tipo(request, pk):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    tipo = get_object_or_404(Tipo, pk=pk)
+    if request.method == 'POST':
+        form = TipoForm(request.POST, instance=tipo)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tipo de tela actualizado exitosamente')
+            return redirect('tipos')
+    else:
+        form = TipoForm(instance=tipo)
+
+    return render(request, 'custom_admin/tipo_form.html', {
+        'form': form,
+        'title': 'Editar tipo de tela',
+    })
+
+
+@login_required(login_url='login')
+def eliminar_tipo(request, pk):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    tipo = get_object_or_404(Tipo, pk=pk)
+    if request.method == 'POST':
+        tipo.delete()
+        messages.success(request, 'Tipo de tela eliminado exitosamente')
+        return redirect('tipos')
+
+    return render(request, 'custom_admin/confirm_eliminar.html', {
+        'object': tipo,
+        'type': 'tipo de tela',
+    })
+
 
 @login_required(login_url='login')
 def clientes(request):

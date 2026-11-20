@@ -1,0 +1,56 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block title %}Gestión de Estilos{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/talles.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="header">
+		<h1>Gestión de Estilos</h1>
+		<a href="{% url 'agregar_estilo' %}" class="btn btn-primary">+ Nuevo Estilo</a>
+	</div>
+
+	{% if estilos %}
+	<div class="estilos-table">
+		<table>
+			<thead>
+				<tr>
+					<th>Estilo</th>
+					<th>Orden</th>
+					<th>En productos</th>
+					<th>Estado</th>
+					<th>Acciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for estilo in estilos %}
+				<tr>
+					<td><span class="estilo-badge">{{ estilo.nombre }}</span></td>
+					<td><span class="order-badge">{{ estilo.order }}</span></td>
+					<td>{{ estilo.productos_count }} productos</td>
+					<td>
+						{% if estilo.esta_activo %}
+						<span class="badge bg-success">Activo</span>
+						{% else %}
+						<span class="badge bg-secondary">Inactivo</span>
+						{% endif %}
+					</td>
+					<td>
+						<a href="{% url 'editar_estilo' estilo.pk %}" class="btn-edit">✏️ Editar</a>
+						<a href="{% url 'eliminar_estilo' estilo.pk %}" class="btn-delete">🗑️ Eliminar</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% else %}
+	<div class="empty-state">
+		<h2>No hay estilos registrados</h2>
+		<p>Creá estilos como Manga corta, Manga larga, Piqué o Jersey.</p>
+	</div>
+	{% endif %}
+</div>
+{% endblock %}

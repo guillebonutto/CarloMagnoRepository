@@ -18,7 +18,7 @@
 	margin-bottom: 8px;
 }
 
-.form-group input {
+.form-group input:not([type="checkbox"]) {
 	width: 100%;
 	padding: 12px;
 	border: 2px solid #e0e0e0;
@@ -26,9 +26,16 @@
 	font-size: 1em;
 }
 
-.form-group input:focus {
+.form-group input:not([type="checkbox"]):focus {
 	outline: none;
 	border-color: #667eea;
+}
+
+.form-group input[type="checkbox"] {
+	width: 20px;
+	height: 20px;
+	margin-right: 8px;
+	vertical-align: middle;
 }
 
 .form-actions {
