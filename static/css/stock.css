@@ -1403,6 +1403,57 @@
     box-shadow: 0 0 0 3px rgba(127, 29, 29, 0.1);
 }
 
+/* Product Price Section */
+.product-price-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.product-price-input-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.product-price-input-box .price-currency-sign {
+    position: absolute;
+    left: 12px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #64748b;
+    pointer-events: none;
+}
+
+.product-price-input {
+    width: 100%;
+    height: 44px;
+    padding: 8px 12px 8px 30px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #f8fafc;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+.product-price-input:focus {
+    border-color: #7f1d1d;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(127, 29, 29, 0.1);
+}
+
+.detected-product-name.is-empty {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-style: italic;
+}
+
 /* Cantidad Stepper Card */
 .quantity-control-row {
     display: grid;
