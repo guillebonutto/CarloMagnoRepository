@@ -1945,7 +1945,7 @@ def _generar_tspl_50x25(items, opts):
     oy = int(round(float(opts.get('offset_y', 0) or 0) * 8))
 
     cmds = [
-        'SIZE 50 mm, 25 mm',
+        'SIZE 58 mm, 34 mm',
         'GAP 2 mm, 0 mm',
         'REFERENCE 0,0',
         'DIRECTION 0,0',
@@ -1988,18 +1988,18 @@ def _generar_tspl_50x25(items, opts):
                 precio_txt = f"${int(round(float(precio))):,}".replace(',', '.')
             except Exception:
                 precio_txt = f"${precio}"
-            cmds.append(f'TEXT {285 + ox},{8 + oy},"2",0,1,1,"{precio_txt}"')
+            cmds.append(f'TEXT {345 + ox},{10 + oy},"2",0,1,1,"{precio_txt}"')
 
-        cmds.append(f'TEXT {12 + ox},{28 + oy},"2",0,1,1,"{nombre}"')
+        cmds.append(f'TEXT {14 + ox},{34 + oy},"2",0,1,1,"{nombre}"')
         if show_variant and variant_str:
-            cmds.append(f'TEXT {12 + ox},{52 + oy},"1",0,1,1,"{variant_str}"')
+            cmds.append(f'TEXT {14 + ox},{62 + oy},"1",0,1,1,"{variant_str}"')
 
         if show_barcode:
             ean13 = _to_ean13(codigo)
-            cmds.append(f'BARCODE {12 + ox},{78 + oy},"EAN13",64,0,0,2,2,"{ean13}"')
-            cmds.append(f'TEXT {12 + ox},{148 + oy},"1",0,1,1,"{_tspl_escape(codigo)}"')
+            cmds.append(f'BARCODE {14 + ox},{105 + oy},"EAN13",84,0,0,2,2,"{ean13}"')
+            cmds.append(f'TEXT {14 + ox},{195 + oy},"1",0,1,1,"{_tspl_escape(codigo)}"')
         else:
-            cmds.append(f'TEXT {12 + ox},{100 + oy},"2",0,1,1,"{_tspl_escape(codigo)}"')
+            cmds.append(f'TEXT {14 + ox},{120 + oy},"2",0,1,1,"{_tspl_escape(codigo)}"')
 
         if show_qr:
             if qr_mode == 'url' and item.get('id'):
@@ -2021,7 +2021,7 @@ def _generar_tspl_50x25(items, opts):
                 qr_data = ' | '.join(parts)
             else:
                 qr_data = codigo
-            cmds.append(f'QRCODE {295 + ox},{76 + oy},M,3,A,0,"{_tspl_escape(qr_data)}"')
+            cmds.append(f'QRCODE {340 + ox},{102 + oy},M,4,A,0,"{_tspl_escape(qr_data)}"')
 
         cmds.append(f'PRINT {qty},1')
 
