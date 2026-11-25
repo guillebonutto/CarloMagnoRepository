@@ -1947,7 +1947,9 @@ def _generar_tspl_50x25(items, opts):
     cmds = [
         'SIZE 50 mm, 25 mm',
         'GAP 2 mm, 0 mm',
-        'DIRECTION 1',
+        'REFERENCE 0,0',
+        'DIRECTION 0,0',
+        'SET TEAR ON',
         'DENSITY 8',
         'SPEED 4',
     ]
