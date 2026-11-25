@@ -85,6 +85,7 @@
         justify-content: space-between;
         gap: 1.5mm;
         width: 100%;
+        flex-shrink: 0;
     }
 
     .label-barcode-wrap {
@@ -142,10 +143,10 @@
         display: none;
     }
 
-    /* Configuración exacta para Xprinter XP-365B (papel troquelado 50x25mm) */
+    /* Configuración exacta para Xprinter XP-365B (papel troquelado 58x34mm) */
     @media print {
         @page {
-            size: 50mm 25mm;
+            size: 58mm 34mm;
             margin: 0;
         }
 
@@ -153,7 +154,7 @@
             margin: 0 !important;
             padding: 0 !important;
             background: #fff !important;
-            width: 50mm !important;
+            width: 58mm !important;
         }
 
         .sidebar,
@@ -167,8 +168,8 @@
         .main-content {
             margin: 0 !important;
             padding: 0 !important;
-            width: 50mm !important;
-            max-width: 50mm !important;
+            width: 58mm !important;
+            max-width: 58mm !important;
         }
 
         #print-sheet {
@@ -519,7 +520,7 @@
             height: 80,
             colorDark: '#000000',
             colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M
+            correctLevel: QRCode.CorrectLevel.L
         });
     }
 
@@ -850,7 +851,10 @@
         }
         if (!usbDevice) {
             const devices = await navigator.usb.getDevices();
-            usbDevice = devices.find(d => (d.productName || '').toLowerCase().includes('xprinter') || (d.productName || '').toLowerCase().includes('365')) || devices[0];
+            usbDevice = devices.find(d => {
+                const n = (d.productName || '').toLowerCase();
+                return n.includes('xprinter') || n.includes('365') || n.includes('printer-80');
+            }) || devices[0];
             if (!usbDevice) {
                 usbDevice = await navigator.usb.requestDevice({ filters: [] });
             }
@@ -874,37 +878,16 @@
         if (queue.length === 0) return;
         const originalHtml = btnPrintAll.innerHTML;
         btnPrintAll.disabled = true;
-        btnPrintAll.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
+        btnPrintAll.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Imprimiendo...';
 
         try {
-            if (navigator.usb) {
-                const rawBytes = buildTspl58x34(queue);
-                await printViaWebUsb(rawBytes);
-                const total = queue.reduce((acc, it) => acc + it.qty, 0);
-                alert(`Se enviaron ${total} etiqueta(s) directo por USB.`);
-                return;
-            }
+            const rawBytes = buildTspl58x34(queue);
+            const rawTspl = new TextDecoder().decode(rawBytes);
 
-            const resp = await fetch("{% url 'api_imprimir_etiquetas_directo' %}", {
+            const resp = await fetch('http://127.0.0.1:9100/imprimir', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    printer: '',
-                    items: queue,
-                    options: {
-                        show_store: optStore.checked,
-                        show_price: optPrice.checked,
-                        show_variant: optVariant.checked,
-                        show_barcode: optBarcode.checked,
-                        show_qr: optQr.checked,
-                        qr_mode: optQrMode.value,
-                        offset_x: optOffsetX.value,
-                        offset_y: optOffsetY.value
-                    }
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ raw_tspl: rawTspl })
             });
             const data = await resp.json();
             if (!resp.ok || !data.success) {
@@ -913,7 +896,7 @@
                 alert(data.mensaje);
             }
         } catch (err) {
-            alert('Error al imprimir: ' + err.message);
+            alert('No se pudo conectar con el agente de impresión local (http://127.0.0.1:9100). Verificá que agente_impresion.py esté ejecutándose en la PC.');
         } finally {
             btnPrintAll.innerHTML = originalHtml;
             btnPrintAll.disabled = queue.length === 0;
