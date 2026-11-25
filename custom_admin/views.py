@@ -11,9 +11,9 @@ from django.forms import ModelForm
 from django import forms
 from productos.models import Producto, Categoria, Color, Estilo, Tipo, Marca, Talle, Cliente, Direccion, ProductoStock, Pedido, PedidoItem, Cupon, Carrito, CarritoItem, MetaMensual, RegistroVisita
 from productos.forms import ProductoForm, IngresoStockPorLectorForm
-from django.db import router, transaction
-from django.db.models import F, Q, Sum, Count, Avg
-from django.db.models.functions import ExtractMonth
+from django.db import connection, router, transaction
+from django.db.models import F, Q, Sum, Count, Avg, Value
+from django.db.models.functions import Coalesce, ExtractMonth
 from django.utils import timezone
 from datetime import timedelta
 import unicodedata
@@ -166,6 +166,18 @@ def cambiar_contrasena(request):
 
     return render(request, 'custom_admin/cambiar_contrasena.html', {'form': form})
 
+def _estacion_desde_fecha(fecha):
+    """Estación del año (Hemisferio Sur) para una fecha."""
+    m, d = fecha.month, fecha.day
+    if (m == 12 and d >= 21) or m in (1, 2) or (m == 3 and d < 21):
+        return 'Verano'
+    if (m == 3 and d >= 21) or m in (4, 5) or (m == 6 and d < 21):
+        return 'Otoño'
+    if (m == 6 and d >= 21) or m in (7, 8) or (m == 9 and d < 21):
+        return 'Invierno'
+    return 'Primavera'
+
+
 # Dashboard
 @login_required(login_url='login')
 def dashboard(request):
@@ -176,56 +188,73 @@ def dashboard(request):
     año_actual = now.year
     año_anterior = año_actual - 1
 
-    # Métricas de Ventas Reales desde la Base de Datos (Supabase)
-    ventas_totales = Pedido.objects.filter(estado_pago='pagado').aggregate(Sum('total'))['total__sum'] or 0
-    cantidad_pedidos = Pedido.objects.filter(estado_pago='pagado').count()
-    ticket_promedio = Pedido.objects.filter(estado_pago='pagado').aggregate(Avg('total'))['total__avg'] or 0
-    pedidos_con_cupon = Pedido.objects.filter(estado_pago='pagado', cupon__isnull=False).count()
-    
-    # Ventas por Estación (Cálculo dinámico basado en pedidos reales)
+    # Métricas de ventas: una sola consulta en lugar de cuatro.
+    metricas = Pedido.objects.filter(estado_pago='pagado').aggregate(
+        suma_total=Sum('total'),
+        cantidad=Count('id'),
+        promedio=Avg('total'),
+        con_cupon=Count('id', filter=Q(cupon__isnull=False)),
+    )
+    ventas_totales = metricas['suma_total'] or 0
+    cantidad_pedidos = metricas['cantidad'] or 0
+    ticket_promedio = metricas['promedio'] or 0
+    pedidos_con_cupon = metricas['con_cupon'] or 0
+
+    # estaciones y ventas mensuales salen de una sola consulta (antes eran dos).
     estaciones = {'Verano': 0, 'Otoño': 0, 'Invierno': 0, 'Primavera': 0}
-    pedidos_pagados = Pedido.objects.filter(estado_pago='pagado')
-    for p in pedidos_pagados:
-        estacion = p.get_estacion()
-        estaciones[estacion] += float(p.total)
+    ventas_por_mes = {}
+    pedidos_pagados = Pedido.objects.filter(estado_pago='pagado').values_list(
+        'fecha_creacion', 'total'
+    )
+    for fecha, total in pedidos_pagados:
+        total_float = float(total)
+        estaciones[_estacion_desde_fecha(fecha)] += total_float
+        if fecha.year in (año_actual, año_anterior):
+            clave = (fecha.year, fecha.month)
+            ventas_por_mes[clave] = ventas_por_mes.get(clave, 0.0) + total_float
 
     # 1. Gráfico Forecast: Ventas Reales por mes vs Metas registradas en la tabla MetaMensual
     meses_labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
-    forecast_actual = []
-    forecast_metas = []
 
-    # Consultar metas configuradas en Supabase (MetaMensual)
-    metas_db = {m.mes: float(m.meta_ventas) for m in MetaMensual.objects.filter(año=año_actual)}
-    
-    for m in range(1, 13):
-        v_real = Pedido.objects.filter(
-            estado_pago='pagado',
-            fecha_creacion__year=año_actual,
-            fecha_creacion__month=m
-        ).aggregate(Sum('total'))['total__sum'] or 0
-        
-        forecast_actual.append(float(v_real))
-        forecast_metas.append(metas_db.get(m, 0.0))
+    forecast_actual = [ventas_por_mes.get((año_actual, m), 0.0) for m in range(1, 13)]
 
     # 2. Gráfico de Tendencias: Ventas Año Actual vs Ventas Año Anterior
     tendencia_este_año = forecast_actual
-    tendencia_año_anterior = []
-    for m in range(1, 13):
-        v_ant = Pedido.objects.filter(
-            estado_pago='pagado',
-            fecha_creacion__year=año_anterior,
-            fecha_creacion__month=m
-        ).aggregate(Sum('total'))['total__sum'] or 0
-        tendencia_año_anterior.append(float(v_ant))
-    
+    tendencia_año_anterior = [
+        ventas_por_mes.get((año_anterior, m), 0.0) for m in range(1, 13)
+    ]
+
+    # Contadores y metas del año en una sola consulta (antes eran cinco).
+    with connection.cursor() as cursor:
+        cursor.execute(
+            'SELECT '
+            f'(SELECT COUNT(*) FROM {Producto._meta.db_table}), '
+            f'(SELECT COUNT(*) FROM {Categoria._meta.db_table}), '
+            f'(SELECT COUNT(*) FROM {Marca._meta.db_table}), '
+            f'(SELECT COUNT(*) FROM {ProductoStock._meta.db_table} WHERE stock < 5), '
+            f'(SELECT array_agg(ARRAY["mes"::text, "meta_ventas"::text]) '
+            f'FROM {MetaMensual._meta.db_table} WHERE "año" = %s)',
+            [año_actual],
+        )
+        total_productos, total_categories, total_marcas, low_stock, metas_filas = cursor.fetchone()
+
+    metas_db = {}
+    for mes, meta in metas_filas or []:
+        try:
+            metas_db[int(mes)] = float(meta)
+        except (TypeError, ValueError):
+            continue
+
+    forecast_metas = [metas_db.get(m, 0.0) for m in range(1, 13)]
+
     context = {
         'today': now,
         'año_actual': año_actual,
         'año_anterior': año_anterior,
-        'total_productos': Producto.objects.count(),
-        'total_categories': Categoria.objects.count(),
-        'total_marcas': Marca.objects.count(),
-        'low_stock': ProductoStock.objects.filter(stock__lt=5).count(),
+        'total_productos': total_productos,
+        'total_categories': total_categories,
+        'total_marcas': total_marcas,
+        'low_stock': low_stock,
         
         # Métricas principales
         'ventas_totales': ventas_totales,
@@ -259,8 +288,10 @@ def productos(request):
     marca_filter = request.GET.get('marca')
     search_query = request.GET.get('buscar', '').strip()
     
-    # Queryset base
-    productos_qs = Producto.objects.select_related('categoria', 'marca').all()
+    # Queryset base con stock total por producto (unificado con el producto)
+    productos_qs = Producto.objects.select_related('categoria', 'marca').annotate(
+        stock_total=Coalesce(Sum('stock_items__stock'), Value(0))
+    ).all()
     
     # Aplicar filtros
     if search_query:
@@ -288,6 +319,7 @@ def productos(request):
         'precio': 'precio',
         'categoria': 'categoria__nombre',
         'marca': 'marca__nombre',
+        'stock': 'stock_total',
         'fecha': 'created_at'
     }
     
@@ -310,51 +342,165 @@ def productos(request):
     
     return render(request, 'custom_admin/productos.html', context)
 
+def _stock_matrix_context(producto, post_data=None):
+    """Matriz de stock (talle x color) de un producto, lista para el template.
+
+    Si se pasa ``post_data`` se usan los valores enviados en el formulario, para
+    que los totales reflejen lo que el usuario está editando antes de guardar.
+    """
+    stock_items = list(
+        ProductoStock.objects.filter(producto=producto).select_related('color', 'talle')
+    )
+    colores = {}
+    talles = {}
+    cantidades = {}
+    for item in stock_items:
+        colores[item.color_id] = item.color
+        talles[item.talle_id] = item.talle
+        cantidades[(item.talle_id, item.color_id)] = item.stock
+
+    colores_list = sorted(colores.values(), key=lambda color: (color.order, color.nombre))
+    talles_list = sorted(talles.values(), key=lambda talle: (talle.order, talle.nombre))
+
+    rows = []
+    totales_color = {color.id: 0 for color in colores_list}
+    stock_total = 0
+
+    for talle in talles_list:
+        celdas = []
+        total_talle = 0
+        for color in colores_list:
+            stock = cantidades.get((talle.id, color.id), 0)
+            field_name = 'stock_{}_{}'.format(talle.id, color.id)
+            if post_data is not None and field_name in post_data:
+                valor = str(post_data[field_name]).strip()
+                if valor:
+                    try:
+                        stock = max(0, int(valor))
+                    except ValueError:
+                        pass
+            celdas.append({
+                'color': color,
+                'stock': stock,
+                'field_name': field_name,
+            })
+            total_talle += stock
+            totales_color[color.id] += stock
+        stock_total += total_talle
+        rows.append({'talle': talle, 'celdas': celdas, 'total': total_talle})
+
+    return {
+        'colores': colores_list,
+        'talles': talles_list,
+        'rows': rows,
+        'totales_color': [totales_color[color.id] for color in colores_list],
+        'stock_total': stock_total,
+        'variant_count': len(stock_items),
+    }
+
+
+def _guardar_stock_desde_post(request, producto, stock_context):
+    """Persiste la matriz de stock editada dentro del formulario de producto."""
+    cambios = 0
+    with transaction.atomic():
+        for row in stock_context['rows']:
+            for celda in row['celdas']:
+                field_name = celda['field_name']
+                if field_name not in request.POST:
+                    continue
+                valor = str(request.POST[field_name]).strip()
+                try:
+                    cantidad = max(0, int(valor)) if valor else 0
+                except ValueError:
+                    continue
+                variant, creada = ProductoStock.objects.get_or_create(
+                    producto=producto,
+                    color_id=celda['color'].id,
+                    talle_id=row['talle'].id,
+                    defaults={'stock': cantidad},
+                )
+                if not creada and variant.stock != cantidad:
+                    variant.stock = cantidad
+                    variant.save(update_fields=['stock'])
+                cambios += 1
+    return cambios
+
+
 @login_required(login_url='login')
 def agregar_producto(request):
     if not request.user.is_staff:
         return redirect('inicio')
-    
+
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, '✅ Producto creado exitosamente')
+            messages.success(request, '✅ Producto creado exitosamente. Ya podés cargar el stock por color y talle.')
             return redirect('admin_productos')
         else:
             messages.error(request, '❌ Error al crear el producto. Por favor revisa los datos ingresados.')
     else:
         form = ProductoForm()
-    
+
     return render(request, 'custom_admin/producto_form.html', {
         'form': form,
         'title': 'Agregar Producto',
-        'button_text': 'Agregar Producto'
+        'button_text': 'Agregar Producto',
     })
+
 
 @login_required(login_url='login')
 def editar_producto(request, pk):
     if not request.user.is_staff:
         return redirect('inicio')
-    
-    product = get_object_or_404(Producto, pk=pk)
-    
+
+    producto = get_object_or_404(Producto, pk=pk)
+    stock_context = _stock_matrix_context(
+        producto, request.POST if request.method == 'POST' else None
+    )
+
     if request.method == 'POST':
-        form = ProductoForm(request.POST, request.FILES, instance=product)
+        form = ProductoForm(request.POST, request.FILES, instance=producto)
         if form.is_valid():
             form.save()
-            messages.success(request, '✅ Producto actualizado exitosamente')
+            _guardar_stock_desde_post(request, producto, stock_context)
+            messages.success(request, '✅ Producto y stock actualizados exitosamente')
             return redirect('admin_productos')
         else:
             messages.error(request, '❌ Error al actualizar el producto. Por favor revisa los datos ingresados.')
     else:
-        form = ProductoForm(instance=product)
-    
-    return render(request, 'custom_admin/producto_form.html', {
+        form = ProductoForm(instance=producto)
+
+    context = {
         'form': form,
         'title': 'Editar Producto',
-        'button_text': 'Guardar Cambios'
-    })
+        'button_text': 'Guardar Cambios',
+        'producto': producto,
+    }
+    context.update(stock_context)
+    return render(request, 'custom_admin/producto_form.html', context)
+
+
+@login_required(login_url='login')
+def detalle_producto(request, pk):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    producto = get_object_or_404(
+        Producto.objects.select_related('categoria', 'marca', 'estilo', 'tipo'),
+        pk=pk
+    )
+
+    if request.method == 'POST':
+        stock_context = _stock_matrix_context(producto, request.POST)
+        _guardar_stock_desde_post(request, producto, stock_context)
+        messages.success(request, '✅ Stock del producto actualizado')
+        return redirect('detalle_producto', pk=pk)
+
+    context = {'producto': producto}
+    context.update(_stock_matrix_context(producto))
+    return render(request, 'custom_admin/producto_detalle.html', context)
+
 
 @login_required(login_url='login')
 def eliminar_producto(request, pk):
@@ -1109,6 +1255,27 @@ def stock(request):
     )
 
 
+def _producto_recepcion_data(producto):
+    """Datos del producto necesarios por la terminal de recepción de stock."""
+    return {
+        'id': producto.id,
+        'nombre': producto.nombre,
+        'codigo': producto.codigo,
+        'precio': float(producto.precio),
+        'marca_id': producto.marca_id,
+        'estilo_id': producto.estilo_id,
+        'tipo_id': producto.tipo_id,
+    }
+
+
+def _stocks_recepcion_data(producto, database='default'):
+    return list(
+        ProductoStock.objects.using(database)
+        .filter(producto=producto)
+        .values('id', 'color_id', 'talle_id', 'stock')
+    )
+
+
 @login_required(login_url='login')
 def recibir_stock(request):
     if not request.user.is_staff:
@@ -1122,17 +1289,10 @@ def recibir_stock(request):
             return JsonResponse({'success': False, 'error': f'No se encontró un artículo con el código {codigo}.'})
         
         # Obtener los stocks actuales de las variantes de este producto
-        stocks = list(ProductoStock.objects.filter(producto=producto).values('color_id', 'talle_id', 'stock'))
+        stocks = list(ProductoStock.objects.filter(producto=producto).values('id', 'color_id', 'talle_id', 'stock'))
         return JsonResponse({
             'success': True,
-            'producto': {
-                'id': producto.id,
-                'nombre': producto.nombre,
-                'codigo': producto.codigo,
-                'precio': float(producto.precio),
-                'estilo_id': producto.estilo_id,
-                'tipo_id': producto.tipo_id,
-            },
+            'producto': _producto_recepcion_data(producto),
             'stocks': stocks,
         })
 
@@ -1141,11 +1301,14 @@ def recibir_stock(request):
         if form.is_valid():
             color = form.cleaned_data['color']
             talle = form.cleaned_data['talle']
+            marca = form.cleaned_data.get('marca')
             estilo = form.cleaned_data.get('estilo')
             tipo = form.cleaned_data.get('tipo')
             cantidad = form.cleaned_data.get('cantidad') or 1
             request.session['recepcion_stock_color'] = color.pk
             request.session['recepcion_stock_talle'] = talle.pk
+            if 'marca' in request.POST:
+                request.session['recepcion_stock_marca'] = marca.pk if marca else ''
             codigo = form.cleaned_data['codigo']
             database = router.db_for_write(ProductoStock)
             producto = Producto.objects.using(database).filter(
@@ -1164,8 +1327,11 @@ def recibir_stock(request):
                     'No se modificó el stock.',
                 )
             else:
-                # Si se enviaron estilo o tipo, actualizar el producto
+                # Si se enviaron marca, estilo o tipo, actualizar el producto
                 campos_a_actualizar = []
+                if 'marca' in request.POST and producto.marca != marca:
+                    producto.marca = marca
+                    campos_a_actualizar.append('marca')
                 if estilo is not None and producto.estilo != estilo:
                     producto.estilo = estilo
                     campos_a_actualizar.append('estilo')
@@ -1197,7 +1363,6 @@ def recibir_stock(request):
                 )
 
                 if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                    stocks = list(ProductoStock.objects.filter(producto=producto).values('color_id', 'talle_id', 'stock'))
                     return JsonResponse({
                         'success': True,
                         'mensaje': msg,
@@ -1206,9 +1371,8 @@ def recibir_stock(request):
                         'producto_nombre': producto.nombre,
                         'color_id': color.id,
                         'talle_id': talle.id,
-                        'estilo_id': producto.estilo_id,
-                        'tipo_id': producto.tipo_id,
-                        'stocks': stocks,
+                        'producto': _producto_recepcion_data(producto),
+                        'stocks': _stocks_recepcion_data(producto, database),
                     })
 
                 messages.success(request, msg)
@@ -1224,6 +1388,7 @@ def recibir_stock(request):
         form = IngresoStockPorLectorForm(initial={
             'color': request.session.get('recepcion_stock_color'),
             'talle': request.session.get('recepcion_stock_talle'),
+            'marca': request.session.get('recepcion_stock_marca') or None,
             'cantidad': 1,
         })
 
@@ -1232,6 +1397,127 @@ def recibir_stock(request):
         'custom_admin/stock_recepcion.html',
         {'form': form},
     )
+
+
+@login_required(login_url='login')
+@require_POST
+def api_modificar_stock(request):
+    """Aplica correcciones sobre el producto/variante ya detectado en la recepción.
+
+    No suma stock: corrige marca/estilo/tipo del producto y mueve el stock de la
+    variante elegida cuando se cambió el color o el talle cargados por error.
+    """
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=403)
+
+    form = IngresoStockPorLectorForm(request.POST)
+    if not form.is_valid():
+        return JsonResponse({
+            'success': False,
+            'error': 'Formulario inválido. Verificá los datos seleccionados.',
+        })
+
+    color = form.cleaned_data['color']
+    talle = form.cleaned_data['talle']
+    marca = form.cleaned_data.get('marca')
+    estilo = form.cleaned_data.get('estilo')
+    tipo = form.cleaned_data.get('tipo')
+    codigo = form.cleaned_data['codigo']
+    stock_id = request.POST.get('stock_id')
+
+    database = router.db_for_write(ProductoStock)
+    producto = Producto.objects.using(database).filter(codigo=codigo).first()
+    if producto is None:
+        return JsonResponse({
+            'success': False,
+            'error': f'No se encontró un artículo con el código {codigo}. No se modificó nada.',
+        })
+
+    request.session['recepcion_stock_color'] = color.pk
+    request.session['recepcion_stock_talle'] = talle.pk
+    if 'marca' in request.POST:
+        request.session['recepcion_stock_marca'] = marca.pk if marca else ''
+
+    cambios = []
+
+    with transaction.atomic(using=database):
+        if 'marca' in request.POST and producto.marca != marca:
+            producto.marca = marca
+            cambios.append('marca')
+        if estilo is not None and producto.estilo != estilo:
+            producto.estilo = estilo
+            cambios.append('estilo')
+        if tipo is not None and producto.tipo != tipo:
+            producto.tipo = tipo
+            cambios.append('tipo')
+        if cambios:
+            producto.save(update_fields=cambios)
+
+        item = None
+        if stock_id:
+            item = (
+                ProductoStock.objects.using(database)
+                .select_for_update()
+                .filter(pk=stock_id, producto=producto)
+                .first()
+            )
+
+        cambio_variante = bool(
+            item and (item.color_id != color.pk or item.talle_id != talle.pk)
+        )
+        if cambio_variante:
+            destino = (
+                ProductoStock.objects.using(database)
+                .select_for_update()
+                .filter(producto=producto, color=color, talle=talle)
+                .exclude(pk=item.pk)
+                .first()
+            )
+            if destino:
+                # La combinación correcta ya existía: unimos el stock y quitamos
+                # la variante cargada por error para no duplicar unidades.
+                ProductoStock.objects.using(database).filter(pk=destino.pk).update(
+                    stock=F('stock') + item.stock,
+                )
+                item.delete()
+            else:
+                item.color = color
+                item.talle = talle
+                item.save(update_fields=['color', 'talle'])
+        elif not item:
+            # No había variante cargada: dejamos armada la combinación correcta.
+            ProductoStock.objects.using(database).get_or_create(
+                producto=producto,
+                color=color,
+                talle=talle,
+                defaults={'stock': 0},
+            )
+
+        producto.sync_active_status_with_stock()
+
+    descripcion_cambios = []
+    if 'marca' in cambios:
+        descripcion_cambios.append(f'marca "{marca.nombre if marca else "sin marca"}"')
+    if cambio_variante:
+        descripcion_cambios.append(f'color {color.nombre}, talle {talle.abbreviation}')
+    if 'estilo' in cambios:
+        descripcion_cambios.append('estilo')
+    if 'tipo' in cambios:
+        descripcion_cambios.append('tipo de tela')
+
+    msg = f'{producto.nombre}: datos actualizados'
+    if descripcion_cambios:
+        msg += f' ({", ".join(descripcion_cambios)})'
+    msg += '.'
+
+    return JsonResponse({
+        'success': True,
+        'mensaje': msg,
+        'producto': _producto_recepcion_data(producto),
+        'stocks': _stocks_recepcion_data(producto, database),
+        'color_id': color.pk,
+        'talle_id': talle.pk,
+    })
 
 
 @login_required(login_url='login')
@@ -1422,17 +1708,10 @@ def api_crear_producto_rapido(request):
             esta_activo=True,
         )
 
-    stocks = list(ProductoStock.objects.filter(producto=producto).values('color_id', 'talle_id', 'stock'))
+    stocks = _stocks_recepcion_data(producto, database='default')
     return JsonResponse({
         'success': True,
-        'producto': {
-            'id': producto.id,
-            'nombre': producto.nombre,
-            'codigo': producto.codigo,
-            'precio': float(producto.precio),
-            'estilo_id': producto.estilo_id,
-            'tipo_id': producto.tipo_id,
-        },
+        'producto': _producto_recepcion_data(producto),
         'stocks': stocks,
     })
 
@@ -1550,7 +1829,10 @@ def api_deshacer_stock(request):
         stock_item.save(update_fields=['stock'])
         stock_item.producto.sync_active_status_with_stock()
 
-    stocks = list(ProductoStock.objects.filter(producto_id=producto_id).values('color_id', 'talle_id', 'stock'))
+    stocks = list(
+        ProductoStock.objects.filter(producto_id=producto_id)
+        .values('id', 'color_id', 'talle_id', 'stock')
+    )
     return JsonResponse({
         'success': True,
         'mensaje': f'Se restaron {cantidad} u. Nuevo stock: {nuevo_stock}.',
@@ -1574,3 +1856,42 @@ def importar_datos_maestros(request):
     except Exception as e:
         from django.http import HttpResponse
         return HttpResponse(f"❌ Error al importar: {str(e)}")
+
+
+@login_required(login_url='login')
+def imprimir_etiquetas(request):
+    """Módulo para diseñar e imprimir etiquetas 50x25mm (Xprinter XP-365B)."""
+    productos = (
+        Producto.objects
+        .select_related('marca', 'categoria', 'estilo', 'tipo')
+        .prefetch_related('stock_items__color', 'stock_items__talle')
+        .order_by('nombre')
+    )
+
+    productos_data = []
+    for p in productos:
+        variantes = []
+        for s in p.stock_items.all():
+            variantes.append({
+                'stock_id': s.id,
+                'color': s.color.nombre,
+                'color_hex': s.color.hex_code,
+                'talle': s.talle.abbreviation or s.talle.name,
+                'stock': s.stock,
+            })
+        productos_data.append({
+            'id': p.id,
+            'codigo': p.codigo or f"CM-{p.id:04d}",
+            'nombre': p.nombre,
+            'precio': float(p.precio),
+            'marca': p.marca.nombre if p.marca else '',
+            'estilo': p.estilo.nombre if p.estilo else '',
+            'tipo': p.tipo.nombre if p.tipo else '',
+            'esta_activo': p.esta_activo,
+            'variantes': variantes,
+        })
+
+    return render(request, 'custom_admin/etiquetas.html', {
+        'productos_json': json.dumps(productos_data, ensure_ascii=False),
+        'total_productos': len(productos_data),
+    })

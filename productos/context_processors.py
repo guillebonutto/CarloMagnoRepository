@@ -1,26 +1,39 @@
+from django.db.models import Sum, Value
+from django.db.models.functions import Coalesce
+from django.utils.functional import SimpleLazyObject
+
 from .models import Carrito
 
-def cart_processor(request):
-    """Context processor para hacer el carrito disponible en todos los templates"""
-    carrito = None
-    cantidad_total = 0
-    
+
+def _obtener_carrito(request):
+    """Busca el carrito y su cantidad total en una sola consulta."""
     if request.user.is_authenticated:
-        try:
-            carrito = Carrito.objects.get(usuario=request.user)
-            cantidad_total = carrito.get_cantidad_total()
-        except Carrito.DoesNotExist:
-            pass
+        filtro = {'usuario': request.user}
     else:
         session_key = request.session.session_key
-        if session_key:
-            try:
-                carrito = Carrito.objects.get(session_key=session_key)
-                cantidad_total = carrito.get_cantidad_total()
-            except Carrito.DoesNotExist:
-                pass
-    
+        if not session_key:
+            return None
+        filtro = {'session_key': session_key}
+
+    return (
+        Carrito.objects.filter(**filtro)
+        .annotate(cantidad_total=Coalesce(Sum('items__cantidad'), Value(0)))
+        .first()
+    )
+
+
+def cart_processor(request):
+    """Carrito disponible en los templates, sin consultar si no se usa.
+
+    El panel no muestra el contador del carrito, así que en esas páginas no
+    se ejecuta ninguna consulta extra.
+    """
+    carrito = SimpleLazyObject(lambda: _obtener_carrito(request))
+
+    def cantidad_total():
+        return getattr(carrito, 'cantidad_total', 0) or 0
+
     return {
         'carrito': carrito,
-        'carrito_cantidad': cantidad_total
+        'carrito_cantidad': SimpleLazyObject(cantidad_total),
     }

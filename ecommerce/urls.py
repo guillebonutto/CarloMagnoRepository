@@ -84,6 +84,7 @@ urlpatterns = [
     path('panel/productos/', admin_views.productos, name='admin_productos'),
     path('panel/productos/agregar/', admin_views.agregar_producto, name='agregar_producto'),
     path('panel/productos/<int:pk>/editar/', admin_views.editar_producto, name='editar_producto'),
+    path('panel/productos/<int:pk>/detalle/', admin_views.detalle_producto, name='detalle_producto'),
     path('panel/productos/<int:pk>/eliminar/', admin_views.eliminar_producto, name='eliminar_producto'),
     path('panel/productos/<int:pk>/toggle-status/', admin_views.toggle_producto_status, name='toggle_producto_status'),
     
@@ -194,7 +195,11 @@ urlpatterns = [
     path('panel/stock/api/estilo/agregar/', admin_views.api_agregar_estilo, name='api_agregar_estilo'),
     path('panel/stock/api/tipo/agregar/', admin_views.api_agregar_tipo, name='api_agregar_tipo'),
     path('panel/stock/api/producto/crear-rapido/', admin_views.api_crear_producto_rapido, name='api_crear_producto_rapido'),
+    path('panel/stock/api/modificar/', admin_views.api_modificar_stock, name='api_modificar_stock'),
     path('panel/stock/api/deshacer/', admin_views.api_deshacer_stock, name='api_deshacer_stock'),
+
+    # Etiquetas (Xprinter XP-365B 50x25mm)
+    path('panel/etiquetas/', admin_views.imprimir_etiquetas, name='imprimir_etiquetas'),
     path('health/', admin_views.health_check, name='health_check'),
     path('importar-datos-maestros/', admin_views.importar_datos_maestros, name='importar_datos'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

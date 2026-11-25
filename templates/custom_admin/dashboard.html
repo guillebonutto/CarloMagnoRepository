@@ -173,7 +173,7 @@
                 <div class="text-center">
                     <h1 class="display-1 fw-bold text-danger">{{ low_stock }}</h1>
                     <p class="text-muted text-uppercase fw-bold">Productos con Stock Bajo</p>
-                    <a href="{% url 'stock' %}" class="btn btn-danger btn-sm rounded-pill px-4">Gestionar Stock</a>
+                    <a href="{% url 'admin_productos' %}?sort=stock&direction=asc" class="btn btn-danger btn-sm rounded-pill px-4">Ver productos con stock bajo</a>
                 </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load imagen_tags %}
 
 {% block title %}Productos - Carlo Magno{% endblock %}
 
@@ -547,8 +548,8 @@
                     {% for producto in productos %}
                     <div class="product-card">
                         <a href="{% url 'producto_detail' producto.id %}" class="product-image-wrapper">
-                            {% if producto.imagen %}
-                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                            {% if producto.imagen.name %}
+                            <img src="{{ producto.imagen|imagen_url }}" alt="{{ producto.nombre }}">
                             {% else %}
                             <div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
                                 <i class="fas fa-box fa-3x"></i>

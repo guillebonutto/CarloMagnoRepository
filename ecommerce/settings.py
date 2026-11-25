@@ -4,6 +4,12 @@ from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(BASE_DIR / '.env')
+except ImportError:
+    pass
+
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
 SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY',
@@ -56,7 +62,15 @@ TEMPLATES = [
     },
 ]
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+# Leer la sesión desde memoria evita una consulta a Supabase en cada request.
+# La BD sigue siendo la fuente de verdad (cached_db).
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'cm-sessions',
+    },
+}
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 SESSION_COOKIE_AGE = 86400
 
 WSGI_APPLICATION = 'ecommerce.wsgi.application'
@@ -83,6 +97,12 @@ except ImportError as exc:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+# Con Supabase a ~190 ms por viaje, los cursores server-side de PostgreSQL
+# hacen varios FETCH por consulta (por ejemplo al renderizar los <select> del
+# formulario de recepción). Desactivarlos reduce cada consulta a un solo viaje.
+for _db_config in DATABASES.values():
+    _db_config['DISABLE_SERVER_SIDE_CURSORS'] = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

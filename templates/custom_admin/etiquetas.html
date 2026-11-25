@@ -1,0 +1,875 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}Imprimir Etiquetas 50x25mm - Carlo Magno{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Vista previa en pantalla */
+    .preview-stage {
+        background: #e9ecef;
+        border: 1px dashed #adb5bd;
+        border-radius: 8px;
+        padding: 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .label-50x25 {
+        width: 50mm;
+        height: 25mm;
+        background: #ffffff;
+        color: #000000;
+        box-sizing: border-box;
+        padding: 1.4mm 2mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+        font-family: Arial, Helvetica, sans-serif;
+        border: 1px solid #ced4da;
+        border-radius: 2px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .label-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1.5mm;
+        line-height: 1.1;
+    }
+
+    .label-brand {
+        font-size: 6pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: #000;
+    }
+
+    .label-price {
+        font-size: 8.5pt;
+        font-weight: 800;
+        white-space: nowrap;
+        color: #000;
+    }
+
+    .label-name {
+        font-size: 7.2pt;
+        font-weight: 700;
+        line-height: 1.12;
+        max-height: 5.5mm;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        color: #000;
+    }
+
+    .label-variant {
+        font-size: 6.5pt;
+        font-weight: 600;
+        line-height: 1.1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #000;
+    }
+
+    .label-codes-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5mm;
+        width: 100%;
+    }
+
+    .label-barcode-wrap {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        line-height: 1;
+    }
+
+    .label-barcode-wrap svg {
+        width: 100%;
+        max-width: 44mm;
+        height: 8mm;
+        display: block;
+    }
+
+    .label-qr-wrap {
+        width: 10.5mm;
+        height: 10.5mm;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .label-qr-wrap img,
+    .label-qr-wrap canvas {
+        width: 10.5mm !important;
+        height: 10.5mm !important;
+        display: block;
+    }
+
+    .label-code-text {
+        font-size: 6pt;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        margin-top: 0.3mm;
+        color: #000;
+    }
+
+    .product-list-scroll {
+        max-height: 540px;
+        overflow-y: auto;
+    }
+
+    .queue-scroll {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    #print-sheet {
+        display: none;
+    }
+
+    /* Configuración exacta para Xprinter XP-365B (papel troquelado 50x25mm) */
+    @media print {
+        @page {
+            size: 50mm 25mm;
+            margin: 0;
+        }
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fff !important;
+            width: 50mm !important;
+        }
+
+        .sidebar,
+        .mobile-navbar,
+        .sidebar-overlay,
+        .no-print,
+        .alert {
+            display: none !important;
+        }
+
+        .main-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 50mm !important;
+            max-width: 50mm !important;
+        }
+
+        #print-sheet {
+            display: block !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        #print-sheet .label-50x25 {
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            page-break-after: always;
+            break-after: page;
+            margin: 0;
+        }
+
+        #print-sheet .label-50x25:last-child {
+            page-break-after: auto;
+            break-after: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="no-print">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h2 class="mb-1"><i class="fas fa-barcode me-2"></i>Impresión de Etiquetas (50x25mm)</h2>
+            <p class="text-muted mb-0">Módulo calibrado para impresora térmica <strong>Xprinter XP-365B</strong> con papel troquelado de 50×25 mm.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#driverHelp">
+                <i class="fas fa-circle-info me-1"></i> Config. Xprinter XP-365B
+            </button>
+            <button type="button" class="btn btn-dark" id="btn-print-all" disabled>
+                <i class="fas fa-print me-1"></i> Imprimir (<span id="total-labels-count">0</span>)
+            </button>
+        </div>
+    </div>
+
+    <div class="collapse mb-3" id="driverHelp">
+        <div class="alert alert-info mb-0 small">
+            <strong>Configuración recomendada en Windows / Chrome para Xprinter XP-365B:</strong>
+            <ul class="mb-0 mt-1">
+                <li>En el cuadro de diálogo de impresión, seleccioná la impresora <strong>Xprinter XP-365B</strong>.</li>
+                <li>Tamaño de papel: <strong>50 x 25 mm</strong> (si no aparece, crealo en Preferencias de impresora &rarr; Nuevo tamaño: Ancho 50 mm, Alto 25 mm).</li>
+                <li>Márgenes: <strong>Ninguno</strong> &middot; Escala: <strong>100%</strong> (Predeterminado).</li>
+                <li>Desmarcá <strong>Encabezados y pies de página</strong>.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Columna izquierda: Creador de códigos + Buscador de productos -->
+        <div class="col-lg-7">
+            <!-- Creador manual de código de barras / QR -->
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold"><i class="fas fa-plus-circle me-1"></i> Crear código de barras / etiqueta</span>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-gen-code">
+                        <i class="fas fa-wand-magic-sparkles me-1"></i> Generar código
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-sm-5">
+                            <label class="form-label small mb-1">Código *</label>
+                            <input type="text" id="custom-code" class="form-control form-control-sm" placeholder="Ej: CM-001234">
+                        </div>
+                        <div class="col-sm-7">
+                            <label class="form-label small mb-1">Nombre / Título *</label>
+                            <input type="text" id="custom-name" class="form-control form-control-sm" placeholder="Ej: Remera Oversize">
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="form-label small mb-1">Precio</label>
+                            <input type="number" id="custom-price" class="form-control form-control-sm" placeholder="25000" min="0">
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="form-label small mb-1">Marca</label>
+                            <input type="text" id="custom-marca" class="form-control form-control-sm" placeholder="Carlo Magno">
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="form-label small mb-1">Color</label>
+                            <input type="text" id="custom-color" class="form-control form-control-sm" placeholder="Negro">
+                        </div>
+                        <div class="col-sm-3">
+                            <label class="form-label small mb-1">Talle</label>
+                            <input type="text" id="custom-talle" class="form-control form-control-sm" placeholder="M">
+                        </div>
+                        <div class="col-sm-3">
+                            <label class="form-label small mb-1">Estilo</label>
+                            <input type="text" id="custom-estilo" class="form-control form-control-sm" placeholder="Oversize">
+                        </div>
+                        <div class="col-sm-3">
+                            <label class="form-label small mb-1">Tipo (tela)</label>
+                            <input type="text" id="custom-tipo" class="form-control form-control-sm" placeholder="Algodón">
+                        </div>
+                        <div class="col-sm-3">
+                            <label class="form-label small mb-1">Cantidad</label>
+                            <div class="input-group input-group-sm">
+                                <input type="number" id="custom-qty" class="form-control" value="1" min="1" max="500">
+                                <button type="button" class="btn btn-dark" id="btn-add-custom">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buscador de productos del catálogo -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="product-search" class="form-control border-start-0" placeholder="Buscar producto por nombre, código o marca...">
+                    </div>
+                </div>
+                <div class="card-body p-0 product-list-scroll" id="product-list">
+                    <!-- Renderizado dinámico -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: Vista previa, opciones y cola de impresión -->
+        <div class="col-lg-5">
+            <!-- Vista previa -->
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold"><i class="fas fa-eye me-1"></i> Vista previa (50×25 mm)</span>
+                    <small class="text-muted">Tamaño real</small>
+                </div>
+                <div class="card-body">
+                    <div class="preview-stage mb-3">
+                        <div id="preview-label" class="label-50x25"></div>
+                    </div>
+
+                    <div class="row g-2 small">
+                        <div class="col-6">
+                            <div class="form-check">
+                                <input class="form-check-input opt-toggle" type="checkbox" id="opt-store" checked>
+                                <label class="form-check-label" for="opt-store">Mostrar "CARLO MAGNO"</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check">
+                                <input class="form-check-input opt-toggle" type="checkbox" id="opt-price" checked>
+                                <label class="form-check-label" for="opt-price">Mostrar precio</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check">
+                                <input class="form-check-input opt-toggle" type="checkbox" id="opt-variant" checked>
+                                <label class="form-check-label" for="opt-variant">Mostrar color / talle</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check">
+                                <input class="form-check-input opt-toggle" type="checkbox" id="opt-barcode" checked>
+                                <label class="form-check-label" for="opt-barcode">Código de barras</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check">
+                                <input class="form-check-input opt-toggle" type="checkbox" id="opt-qr" checked>
+                                <label class="form-check-label" for="opt-qr">Incluir QR al lado</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <label class="form-label mb-0 text-muted">Contenido del QR</label>
+                            <select id="opt-qr-mode" class="form-select form-select-sm">
+                                <option value="full" selected>Datos completos de la prenda</option>
+                                <option value="code">Mismo código de barras</option>
+                                <option value="url">URL del producto en la tienda</option>
+                            </select>
+                        </div>
+                        <div class="col-6 mt-2">
+                            <label class="form-label mb-0 text-muted">Ajuste vertical (mm)</label>
+                            <input type="number" step="0.5" min="-5" max="5" value="0" id="opt-offset-y" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6 mt-2">
+                            <label class="form-label mb-0 text-muted">Ajuste horizontal (mm)</label>
+                            <input type="number" step="0.5" min="-5" max="5" value="0" id="opt-offset-x" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cola de impresión -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold"><i class="fas fa-list-ol me-1"></i> Cola de impresión</span>
+                    <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none p-0" id="btn-clear-queue">Vaciar</button>
+                </div>
+                <div class="card-body p-0 queue-scroll" id="queue-list">
+                    <div class="text-center text-muted py-4 small">
+                        Agregá productos o variantes desde la izquierda para armar la tanda de impresión.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hoja de impresión oculta en pantalla, visible en @media print -->
+<div id="print-sheet"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+(function() {
+    const productos = {{ productos_json|safe }};
+    const queue = []; // { key, codigo, nombre, precio, marca, color, talle, qty }
+
+    const productListEl = document.getElementById('product-list');
+    const searchInput = document.getElementById('product-search');
+    const queueListEl = document.getElementById('queue-list');
+    const previewLabelEl = document.getElementById('preview-label');
+    const printSheetEl = document.getElementById('print-sheet');
+    const totalCountEl = document.getElementById('total-labels-count');
+    const btnPrintAll = document.getElementById('btn-print-all');
+    const btnClearQueue = document.getElementById('btn-clear-queue');
+
+    const optStore = document.getElementById('opt-store');
+    const optPrice = document.getElementById('opt-price');
+    const optVariant = document.getElementById('opt-variant');
+    const optBarcode = document.getElementById('opt-barcode');
+    const optQr = document.getElementById('opt-qr');
+    const optQrMode = document.getElementById('opt-qr-mode');
+    const optOffsetX = document.getElementById('opt-offset-x');
+    const optOffsetY = document.getElementById('opt-offset-y');
+
+    function formatPrice(val) {
+        return '$' + Number(val || 0).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function escapeHtml(str) {
+        return String(str || '').replace(/[&<>"']/g, s => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[s]));
+    }
+
+    function renderLabelHtml(item, svgId, qrId) {
+        const showStore = optStore.checked;
+        const showPrice = optPrice.checked;
+        const showVariant = optVariant.checked;
+        const showBarcode = optBarcode.checked;
+        const showQr = optQr.checked;
+        const ox = parseFloat(optOffsetX.value || 0);
+        const oy = parseFloat(optOffsetY.value || 0);
+
+        const variantParts = [];
+        if (item.color) variantParts.push(item.color);
+        if (item.talle) variantParts.push('Talle ' + item.talle);
+        if (item.estilo) variantParts.push(item.estilo);
+        if (item.tipo) variantParts.push(item.tipo);
+        const variantText = item.variantText || variantParts.join(' · ');
+
+        const brandParts = [];
+        if (showStore) brandParts.push('CARLO MAGNO');
+        if (item.marca && (!showStore || item.marca.toLowerCase() !== 'carlo magno')) {
+            brandParts.push(item.marca);
+        }
+        const topLeft = brandParts.join(' · ');
+        const styleAttr = (ox !== 0 || oy !== 0)
+            ? `style="transform: translate(${ox}mm, ${oy}mm);"`
+            : '';
+
+        return `
+            <div class="label-50x25" ${styleAttr}>
+                <div>
+                    <div class="label-header">
+                        <span class="label-brand">${escapeHtml(topLeft)}</span>
+                        ${showPrice && item.precio !== '' && item.precio !== null ? `<span class="label-price">${formatPrice(item.precio)}</span>` : ''}
+                    </div>
+                    <div class="label-name">${escapeHtml(item.nombre)}</div>
+                    ${showVariant && variantText ? `<div class="label-variant">${escapeHtml(variantText)}</div>` : ''}
+                </div>
+                <div class="label-codes-row">
+                    <div class="label-barcode-wrap">
+                        ${showBarcode ? `<svg id="${svgId}"></svg>` : ''}
+                        <div class="label-code-text">${escapeHtml(item.codigo)}</div>
+                    </div>
+                    ${showQr ? `<div class="label-qr-wrap" id="${qrId}"></div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    function getQrContent(item) {
+        if (optQrMode.value === 'url' && item.id) {
+            return `${window.location.origin}/productos/${item.id}/`;
+        }
+        if (optQrMode.value === 'full') {
+            const lines = [`COD: ${item.codigo || ''}`];
+            if (item.nombre) lines.push(`PROD: ${item.nombre}`);
+            if (item.marca) lines.push(`MARCA: ${item.marca}`);
+            if (item.color) lines.push(`COLOR: ${item.color}`);
+            if (item.talle) lines.push(`TALLE: ${item.talle}`);
+            if (item.estilo) lines.push(`ESTILO: ${item.estilo}`);
+            if (item.tipo) lines.push(`TIPO: ${item.tipo}`);
+            if (item.precio !== null && item.precio !== undefined && item.precio !== '') {
+                lines.push(`PRECIO: ${formatPrice(item.precio)}`);
+            }
+            return lines.join('\n');
+        }
+        return String(item.codigo || 'CM-0001');
+    }
+
+    function applyQr(qrId, text) {
+        const el = document.getElementById(qrId);
+        if (!el || typeof QRCode === 'undefined') return;
+        el.innerHTML = '';
+        new QRCode(el, {
+            text: String(text || '0000'),
+            width: 80,
+            height: 80,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+    }
+
+    function calcEan13CheckDigit(digits12) {
+        let sum = 0;
+        for (let i = 0; i < 12; i++) {
+            sum += parseInt(digits12[i], 10) * (i % 2 === 0 ? 1 : 3);
+        }
+        return (10 - (sum % 10)) % 10;
+    }
+
+    function toEan13(code) {
+        const str = String(code || '').trim().toUpperCase();
+        const onlyDigits = str.replace(/\D/g, '');
+        if (/^\d{13}$/.test(str)) return str;
+        // Codificar prefijo alfabético (ej. AMB -> 657766) + dígitos para EAN-13 único
+        const letters = str.replace(/[^A-Z]/g, '').slice(0, 3);
+        let prefix = '';
+        for (let i = 0; i < letters.length; i++) {
+            prefix += String(letters.charCodeAt(i)).slice(-2);
+        }
+        const combined = ('779' + prefix + onlyDigits).replace(/\D/g, '');
+        const base12 = combined.padEnd(12, '0').slice(0, 12);
+        return base12 + calcEan13CheckDigit(base12);
+    }
+
+    function applyBarcode(svgId, code) {
+        const svg = document.getElementById(svgId);
+        if (!svg || typeof JsBarcode === 'undefined') return;
+        const ean13 = toEan13(code);
+        try {
+            JsBarcode(svg, ean13, {
+                format: 'EAN13',
+                width: 1.35,
+                height: 26,
+                displayValue: false,
+                margin: 0
+            });
+        } catch (e) {
+            // Fallback si hay error inesperado
+        }
+    }
+
+    function getCustomDraft() {
+        const codigo = document.getElementById('custom-code').value.trim();
+        const nombre = document.getElementById('custom-name').value.trim();
+        const precioRaw = document.getElementById('custom-price').value.trim();
+        const marca = document.getElementById('custom-marca').value.trim();
+        const color = document.getElementById('custom-color').value.trim();
+        const talle = document.getElementById('custom-talle').value.trim();
+        const estilo = document.getElementById('custom-estilo').value.trim();
+        const tipo = document.getElementById('custom-tipo').value.trim();
+        if (!codigo && !nombre && !precioRaw && !marca && !color && !talle && !estilo && !tipo) {
+            return null;
+        }
+        return {
+            codigo: codigo || 'CM-0001',
+            nombre: nombre || 'Nombre del producto',
+            precio: precioRaw !== '' ? parseFloat(precioRaw) : null,
+            marca,
+            color,
+            talle,
+            estilo,
+            tipo,
+        };
+    }
+
+    function updatePreview() {
+        const draft = getCustomDraft();
+        const sample = draft || queue[0] || (productos[0] ? {
+            id: productos[0].id,
+            codigo: productos[0].codigo,
+            nombre: productos[0].nombre,
+            precio: productos[0].precio,
+            marca: productos[0].marca,
+            estilo: productos[0].estilo,
+            tipo: productos[0].tipo,
+            color: productos[0].variantes[0]?.color || 'Negro',
+            talle: productos[0].variantes[0]?.talle || 'M',
+        } : {
+            codigo: 'CM-0001',
+            nombre: 'Remera Carlo Magno',
+            precio: 25000,
+            marca: 'Carlo Magno',
+            color: 'Negro',
+            talle: 'M',
+            estilo: 'Oversize',
+            tipo: 'Algodón',
+        });
+
+        const previewEl = document.getElementById('preview-label');
+        previewEl.outerHTML = renderLabelHtml(sample, 'preview-barcode-svg', 'preview-qr-box').replace(
+            'class="label-50x25"',
+            'id="preview-label" class="label-50x25"'
+        );
+        if (optBarcode.checked) {
+            applyBarcode('preview-barcode-svg', sample.codigo);
+        }
+        if (optQr.checked) {
+            applyQr('preview-qr-box', getQrContent(sample));
+        }
+        return document.getElementById('preview-label');
+    }
+
+    function addToQueue(item, qty) {
+        qty = parseInt(qty, 10) || 1;
+        if (qty <= 0) return;
+        const existing = queue.find(q => q.key === item.key);
+        if (existing) {
+            existing.qty += qty;
+        } else {
+            queue.push({ ...item, qty });
+        }
+        renderQueue();
+    }
+
+    function renderQueue() {
+        const total = queue.reduce((acc, it) => acc + it.qty, 0);
+        totalCountEl.textContent = total;
+        btnPrintAll.disabled = total === 0;
+
+        if (queue.length === 0) {
+            queueListEl.innerHTML = `
+                <div class="text-center text-muted py-4 small">
+                    Agregá productos o variantes desde la izquierda para armar la tanda de impresión.
+                </div>`;
+            updatePreview();
+            return;
+        }
+
+        queueListEl.innerHTML = queue.map((it, idx) => `
+            <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
+                <div class="me-2" style="min-width: 0;">
+                    <div class="fw-semibold small text-truncate">${escapeHtml(it.nombre)}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">
+                        ${escapeHtml(it.codigo)} ${it.color ? '· ' + escapeHtml(it.color) : ''} ${it.talle ? '· ' + escapeHtml(it.talle) : ''}
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                    <input type="number" min="1" max="500" value="${it.qty}" data-idx="${idx}" class="form-control form-control-sm queue-qty" style="width: 64px;">
+                    <button type="button" class="btn btn-sm btn-outline-danger queue-remove" data-idx="${idx}" title="Quitar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+
+        queueListEl.querySelectorAll('.queue-qty').forEach(inp => {
+            inp.addEventListener('change', e => {
+                const i = parseInt(e.target.dataset.idx, 10);
+                const val = Math.max(1, parseInt(e.target.value, 10) || 1);
+                queue[i].qty = val;
+                renderQueue();
+            });
+        });
+
+        queueListEl.querySelectorAll('.queue-remove').forEach(btn => {
+            btn.addEventListener('click', e => {
+                const i = parseInt(e.currentTarget.dataset.idx, 10);
+                queue.splice(i, 1);
+                renderQueue();
+            });
+        });
+
+        updatePreview();
+    }
+
+    function renderProducts(filterText = '') {
+        const q = filterText.trim().toLowerCase();
+        const filtered = productos.filter(p =>
+            !q ||
+            p.nombre.toLowerCase().includes(q) ||
+            p.codigo.toLowerCase().includes(q) ||
+            (p.marca && p.marca.toLowerCase().includes(q))
+        );
+
+        if (filtered.length === 0) {
+            productListEl.innerHTML = '<div class="text-center text-muted py-4">No se encontraron productos.</div>';
+            return;
+        }
+
+        productListEl.innerHTML = filtered.slice(0, 80).map(p => {
+            const variantesHtml = p.variantes.length > 0
+                ? p.variantes.map(v => `
+                    <div class="d-flex align-items-center justify-content-between py-1 px-2 bg-light rounded mb-1 small">
+                        <div>
+                            <span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:${escapeHtml(v.color_hex || '#6c757d')};border:1px solid #ccc;"></span>
+                            <strong>${escapeHtml(v.color)}</strong> · Talle <strong>${escapeHtml(v.talle)}</strong>
+                            <span class="text-muted ms-1">(Stock: ${v.stock})</span>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-dark btn-add-var"
+                                data-pid="${p.id}" data-color="${escapeHtml(v.color)}" data-talle="${escapeHtml(v.talle)}" data-qty="1">+1</button>
+                            <button type="button" class="btn btn-outline-dark btn-add-var"
+                                data-pid="${p.id}" data-color="${escapeHtml(v.color)}" data-talle="${escapeHtml(v.talle)}" data-qty="5">+5</button>
+                            ${v.stock > 0 ? `<button type="button" class="btn btn-dark btn-add-var"
+                                data-pid="${p.id}" data-color="${escapeHtml(v.color)}" data-talle="${escapeHtml(v.talle)}" data-qty="${v.stock}">Stock (${v.stock})</button>` : ''}
+                        </div>
+                    </div>
+                `).join('')
+                : `<div class="d-flex justify-content-between align-items-center py-1 px-2 bg-light rounded small">
+                        <span class="text-muted">Sin variantes cargadas</span>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-dark btn-add-var" data-pid="${p.id}" data-color="" data-talle="" data-qty="1">+1</button>
+                            <button type="button" class="btn btn-outline-dark btn-add-var" data-pid="${p.id}" data-color="" data-talle="" data-qty="5">+5</button>
+                        </div>
+                   </div>`;
+
+            return `
+                <div class="p-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="badge bg-secondary me-1">${escapeHtml(p.codigo)}</span>
+                            <strong>${escapeHtml(p.nombre)}</strong>
+                        </div>
+                        <span class="fw-bold text-dark">${formatPrice(p.precio)}</span>
+                    </div>
+                    ${variantesHtml}
+                </div>
+            `;
+        }).join('');
+
+        productListEl.querySelectorAll('.btn-add-var').forEach(btn => {
+            btn.addEventListener('click', e => {
+                const b = e.currentTarget;
+                const pid = parseInt(b.dataset.pid, 10);
+                const p = productos.find(x => x.id === pid);
+                if (!p) return;
+                const color = b.dataset.color || '';
+                const talle = b.dataset.talle || '';
+                const qty = parseInt(b.dataset.qty, 10) || 1;
+                addToQueue({
+                    id: p.id,
+                    key: `${p.id}|${color}|${talle}`,
+                    codigo: p.codigo,
+                    nombre: p.nombre,
+                    precio: p.precio,
+                    marca: p.marca,
+                    estilo: p.estilo,
+                    tipo: p.tipo,
+                    color,
+                    talle,
+                }, qty);
+            });
+        });
+    }
+
+    btnPrintAll.addEventListener('click', () => {
+        if (queue.length === 0) return;
+        let html = '';
+        let idx = 0;
+        const codes = [];
+        queue.forEach(item => {
+            for (let i = 0; i < item.qty; i++) {
+                const svgId = `print-bc-${idx}`;
+                const qrId = `print-qr-${idx}`;
+                idx++;
+                html += renderLabelHtml(item, svgId, qrId);
+                codes.push({ svgId, qrId, codigo: item.codigo, qrText: getQrContent(item) });
+            }
+        });
+        printSheetEl.innerHTML = html;
+        codes.forEach(c => {
+            if (optBarcode.checked) applyBarcode(c.svgId, c.codigo);
+            if (optQr.checked) applyQr(c.qrId, c.qrText);
+        });
+        window.print();
+    });
+
+    // Creador manual de códigos de barras / etiquetas
+    const customCodeEl = document.getElementById('custom-code');
+    const customNameEl = document.getElementById('custom-name');
+    const customPriceEl = document.getElementById('custom-price');
+    const customMarcaEl = document.getElementById('custom-marca');
+    const customColorEl = document.getElementById('custom-color');
+    const customTalleEl = document.getElementById('custom-talle');
+    const customEstiloEl = document.getElementById('custom-estilo');
+    const customTipoEl = document.getElementById('custom-tipo');
+    const customQtyEl = document.getElementById('custom-qty');
+
+    let customCodeManual = false;
+    let autoSeq = 1;
+
+    function alphaPos(str) {
+        const clean = String(str || '')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^A-Za-z]/g, '')
+            .toUpperCase();
+        if (!clean) return null;
+        const num = (clean.charCodeAt(0) - 65) + 1;
+        return String(Math.max(1, Math.min(26, num))).padStart(3, '0');
+    }
+
+    function variantAlphaCode() {
+        const estiloCode = alphaPos(customEstiloEl.value.trim());
+        const tipoCode = alphaPos(customTipoEl.value.trim());
+
+        if (estiloCode && tipoCode) return `${estiloCode}-${tipoCode}`;
+        if (estiloCode) return estiloCode;
+        if (tipoCode) return tipoCode;
+        return String(autoSeq).padStart(3, '0');
+    }
+
+    function buildAutoCode() {
+        const source = (customNameEl.value.trim() || customMarcaEl.value.trim() || 'CM');
+        const base = source
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^A-Za-z]/g, '')
+            .toUpperCase()
+            .slice(0, 3)
+            .padEnd(3, 'X');
+        return `${base}-${variantAlphaCode()}`;
+    }
+
+    customCodeEl.addEventListener('input', () => {
+        customCodeManual = customCodeEl.value.trim().length > 0;
+        updatePreview();
+    });
+
+    [customNameEl, customPriceEl, customMarcaEl, customColorEl, customTalleEl, customEstiloEl, customTipoEl].forEach(el => {
+        el.addEventListener('input', () => {
+            if (!customCodeManual) {
+                customCodeEl.value = buildAutoCode();
+            }
+            updatePreview();
+        });
+        el.addEventListener('change', updatePreview);
+    });
+
+    document.getElementById('btn-gen-code').addEventListener('click', () => {
+        customCodeManual = false;
+        autoSeq++;
+        customCodeEl.value = buildAutoCode();
+        updatePreview();
+        customCodeEl.focus();
+    });
+
+    document.getElementById('btn-add-custom').addEventListener('click', () => {
+        const codigo = customCodeEl.value.trim();
+        const nombre = customNameEl.value.trim();
+        if (!codigo || !nombre) {
+            alert('Completá al menos el Código y el Nombre para crear la etiqueta.');
+            return;
+        }
+        const precioRaw = customPriceEl.value.trim();
+        const marca = customMarcaEl.value.trim();
+        const color = customColorEl.value.trim();
+        const talle = customTalleEl.value.trim();
+        const estilo = customEstiloEl.value.trim();
+        const tipo = customTipoEl.value.trim();
+        const qty = parseInt(customQtyEl.value, 10) || 1;
+        addToQueue({
+            key: `custom|${codigo}|${nombre}|${marca}|${color}|${talle}|${estilo}|${tipo}`,
+            codigo,
+            nombre,
+            precio: precioRaw !== '' ? parseFloat(precioRaw) : null,
+            marca,
+            color,
+            talle,
+            estilo,
+            tipo,
+        }, qty);
+    });
+
+    btnClearQueue.addEventListener('click', () => {
+        queue.length = 0;
+        renderQueue();
+    });
+
+    searchInput.addEventListener('input', e => renderProducts(e.target.value));
+    [optStore, optPrice, optVariant, optBarcode, optQr, optQrMode, optOffsetX, optOffsetY].forEach(el => {
+        el.addEventListener('change', updatePreview);
+        el.addEventListener('input', updatePreview);
+    });
+
+    renderProducts();
+    updatePreview();
+})();
+</script>
+{% endblock %}

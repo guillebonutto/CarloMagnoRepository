@@ -1,0 +1,139 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% load imagen_tags %}
+{% block title %}Detalle de {{ producto.nombre }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/productos_admin.css' %}" />
+<style>
+	.detail-header {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		flex-wrap: wrap;
+		margin-bottom: 18px;
+	}
+	.detail-image {
+		width: 110px;
+		height: 138px;
+		object-fit: cover;
+		border-radius: 12px;
+		border: 1px solid #e2e8f0;
+		background: #fff;
+	}
+	.detail-image-placeholder {
+		width: 110px;
+		height: 138px;
+		border-radius: 12px;
+		border: 1px dashed #cbd5e1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 2.4rem;
+		color: #cbd5e1;
+		background: #f8fafc;
+	}
+	.detail-title h1 {
+		font-size: 1.6rem;
+		font-weight: 800;
+		color: #0f172a;
+		margin: 0 0 4px;
+	}
+	.detail-title .sku {
+		font-size: 0.8rem;
+		color: #64748b;
+		letter-spacing: 0.04em;
+	}
+	.detail-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+		gap: 12px;
+	}
+	.detail-card {
+		background: #fff;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		padding: 12px 14px;
+	}
+	.detail-card span {
+		display: block;
+		font-size: 0.68rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: #94a3b8;
+		font-weight: 700;
+		margin-bottom: 4px;
+	}
+	.detail-card strong {
+		font-size: 0.95rem;
+		color: #0f172a;
+	}
+	.detail-actions {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+		margin: 20px 0 4px;
+	}
+	.detail-description {
+		background: #fff;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		padding: 14px;
+		margin-top: 12px;
+		color: #334155;
+		font-size: 0.9rem;
+		line-height: 1.55;
+	}
+	.detail-description h3 {
+		font-size: 0.85rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: #64748b;
+		margin: 0 0 6px;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="detail-header">
+		{% if producto.imagen.name %}
+		<img src="{{ producto.imagen|imagen_url }}" alt="{{ producto.nombre }}" class="detail-image">
+		{% else %}
+		<div class="detail-image-placeholder"><i class="fas fa-box-open"></i></div>
+		{% endif %}
+		<div class="detail-title">
+			<h1>{{ producto.nombre }}</h1>
+			<span class="sku">CÓDIGO: {{ producto.codigo|default:"Sin código" }}</span>
+		</div>
+	</div>
+
+	<div class="detail-grid">
+		<div class="detail-card"><span>Categoría</span><strong>{{ producto.categoria.nombre|default:"—" }}</strong></div>
+		<div class="detail-card"><span>Marca</span><strong>{{ producto.marca.nombre|default:"—" }}</strong></div>
+		<div class="detail-card"><span>Estilo</span><strong>{{ producto.estilo.nombre|default:"—" }}</strong></div>
+		<div class="detail-card"><span>Tipo de tela</span><strong>{{ producto.tipo.nombre|default:"—" }}</strong></div>
+		<div class="detail-card"><span>Precio</span><strong>${{ producto.precio }}</strong></div>
+		<div class="detail-card">
+			<span>Estado</span>
+			<strong>{% if producto.esta_activo %}🟢 Activo{% else %}🔴 Inactivo{% endif %}</strong>
+		</div>
+	</div>
+
+	{% if producto.descripcion %}
+	<div class="detail-description">
+		<h3>Descripción</h3>
+		{{ producto.descripcion|linebreaksbr }}
+	</div>
+	{% endif %}
+
+	<form method="post">
+		{% csrf_token %}
+		{% include 'custom_admin/includes/producto_stock_matrix.html' %}
+		<div class="detail-actions">
+			<button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Guardar stock</button>
+			<a href="{% url 'editar_producto' producto.id %}" class="btn btn-outline-primary"><i class="fas fa-edit me-1"></i> Editar producto</a>
+			<a href="{% url 'admin_productos' %}" class="btn btn-secondary">Volver a productos</a>
+		</div>
+	</form>
+</div>
+{% endblock %}

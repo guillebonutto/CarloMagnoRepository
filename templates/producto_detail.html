@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load imagen_tags %}
 
 {% block extra_css %}
 <style>
@@ -120,8 +121,8 @@
     <!-- GALLERY -->
     <div class="gallery-container">
         <span class="discount-badge-gallery">65% OFF</span>
-        {% if producto.imagen %}
-            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="main-img-mobile" id="mainImg">
+        {% if producto.imagen.name %}
+            <img src="{{ producto.imagen|imagen_url }}" alt="{{ producto.nombre }}" class="main-img-mobile" id="mainImg">
         {% else %}
             <div class="main-img-mobile d-flex align-items-center justify-content-center bg-light">
                 <i class="fas fa-image fa-3x text-muted"></i>
@@ -129,7 +130,7 @@
         {% endif %}
 
         <div class="thumbs-overlaid">
-            <div class="thumb-mobile active"><img src="{{ producto.imagen.url }}"></div>
+            <div class="thumb-mobile active"><img src="{{ producto.imagen|imagen_url }}"></div>
             <div class="thumb-mobile"><img src="https://images.unsplash.com/photo-1594932224828-b4b059b6f68e?q=80&w=200"></div>
             <div class="thumb-mobile"><img src="https://images.unsplash.com/photo-1598454061631-40ef993ba39d?q=80&w=200"></div>
         </div>
@@ -199,7 +200,7 @@
             <p class="bundle-title">COMPRADOS JUNTOS HABITUALMENTE</p>
             <div class="bundle-flex-container">
                 <div class="bundle-images-side">
-                    <img src="{{ producto.imagen.url }}" class="bundle-item-img">
+                    <img src="{{ producto.imagen|imagen_url }}" class="bundle-item-img">
                     <span class="bundle-plus">+</span>
                     <img src="https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=200" class="bundle-item-img">
                     <span class="bundle-plus">+</span>

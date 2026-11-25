@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load imagen_tags %}
 
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -770,8 +771,8 @@
     {% with suit=novedades.2 %}
     <section class="story-stage story-stage--person" id="capitulo-03" data-chapter data-title="La persona" aria-labelledby="chapter-03-title">
         <div class="story-media">
-            {% if suit and suit.imagen %}
-            <img src="{{ suit.imagen.url }}" alt="" loading="lazy">
+            {% if suit and suit.imagen.name %}
+            <img src="{{ suit.imagen|imagen_url }}" alt="" loading="lazy">
             {% else %}
             <img src="{% static 'images/hero-banner.jpg' %}" alt="" loading="lazy">
             {% endif %}

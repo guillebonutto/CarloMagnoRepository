@@ -1,5 +1,6 @@
 {% extends 'custom_admin/base.html' %}
 {% load static %}
+{% load imagen_tags %}
 {% block title %}{{ categoria.nombre }} | Gestión de Categorías{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/categorias.css' %}" />
@@ -52,8 +53,8 @@
 					{% for producto in group.productos %}
 					<article class="category-product-card">
 						<a class="category-product-edit" href="{% url 'editar_producto' producto.id %}" aria-label="Editar {{ producto.nombre }}">
-							{% if producto.imagen %}
-							<img src="{{ producto.imagen.url }}" alt="" class="category-product-image">
+							{% if producto.imagen.name %}
+							<img src="{{ producto.imagen|imagen_url }}" alt="" class="category-product-image">
 							{% else %}
 							<span class="category-product-image category-product-image-placeholder" aria-hidden="true">📦</span>
 							{% endif %}

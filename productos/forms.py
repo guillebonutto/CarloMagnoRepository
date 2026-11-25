@@ -1,7 +1,7 @@
 from django import forms
 from django.db.models import Q
 from django.utils.safestring import mark_safe
-from productos.models import Color, Estilo, Producto, Talle, Tipo
+from productos.models import Color, Estilo, Marca, Producto, Talle, Tipo
 
 class ProductoForm(forms.ModelForm):
     colores = forms.ModelMultipleChoiceField(
@@ -100,6 +100,11 @@ class IngresoStockPorLectorForm(forms.Form):
         label='Talle',
         queryset=Talle.objects.filter(esta_activo=True).order_by('order', 'nombre'),
     )
+    marca = forms.ModelChoiceField(
+        label='Marca',
+        queryset=Marca.objects.all().order_by('nombre'),
+        required=False,
+    )
     estilo = forms.ModelChoiceField(
         label='Estilo',
         queryset=Estilo.objects.filter(esta_activo=True).order_by('order', 'nombre'),
@@ -110,3 +115,8 @@ class IngresoStockPorLectorForm(forms.Form):
         queryset=Tipo.objects.filter(esta_activo=True).order_by('order', 'nombre'),
         required=False,
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'talle' in self.fields:
+            self.fields['talle'].label_from_instance = lambda obj: obj.abbreviation or obj.nombre

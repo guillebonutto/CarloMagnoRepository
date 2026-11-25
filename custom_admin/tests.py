@@ -1,11 +1,15 @@
+import json
 import re
+from datetime import datetime, timezone as dt_timezone
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
-from productos.models import Color, Estilo, Marca, Producto, ProductoStock, Talle, Tipo
+from productos.models import Color, Estilo, Marca, Pedido, Producto, ProductoStock, Talle, Tipo
 
 
 @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
@@ -318,3 +322,197 @@ class PanelProductEditTests(TestCase):
         page = self.client.get(receive_url)
         self.assertEqual(str(page.context['form']['color'].value()), str(color.pk))
         self.assertEqual(str(page.context['form']['talle'].value()), str(size.pk))
+
+
+class PanelReceiveStockModificationTests(TestCase):
+    def setUp(self):
+        self.admin = get_user_model().objects.create_user(
+            username='receive-stock-admin',
+            password='Test-Password-739!',
+            is_staff=True,
+        )
+        self.client.force_login(self.admin)
+        self.marca_vieja = Marca.objects.create(nombre='Marca vieja')
+        self.marca_nueva = Marca.objects.create(nombre='Marca nueva')
+        self.color_viejo = Color.objects.create(nombre='Azul', hex_code='#0000FF')
+        self.color_nuevo = Color.objects.create(nombre='Rojo', hex_code='#FF0000')
+        self.talle_viejo = Talle.objects.create(nombre='Chico', abbreviation='S')
+        self.talle_nuevo = Talle.objects.create(nombre='Grande', abbreviation='L')
+        self.producto = Producto.objects.create(
+            codigo='MOD-001',
+            nombre='Camisa de prueba',
+            descripcion='Descripción de prueba',
+            precio='100.00',
+            marca=self.marca_vieja,
+        )
+        self.stock = ProductoStock.objects.create(
+            producto=self.producto,
+            color=self.color_viejo,
+            talle=self.talle_viejo,
+            stock=7,
+        )
+        self.receive_url = reverse('recibir_stock')
+        self.modify_url = reverse('api_modificar_stock')
+
+    def _payload(self, **overrides):
+        payload = {
+            'codigo': self.producto.codigo,
+            'color': self.color_viejo.pk,
+            'talle': self.talle_viejo.pk,
+            'marca': self.marca_vieja.pk,
+            'stock_id': self.stock.pk,
+        }
+        payload.update(overrides)
+        return payload
+
+    def test_receive_stock_page_exposes_modify_button_and_brand_field(self):
+        page = self.client.get(self.receive_url)
+
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'id="btn-modify-stock"')
+        self.assertContains(page, 'Modificar')
+        self.assertContains(page, 'name="marca"')
+        self.assertContains(page, self.modify_url)
+
+    def test_modify_updates_brand_without_creating_brand_or_changing_stock(self):
+        marcas_iniciales = Marca.objects.count()
+        response = self.client.post(
+            self.modify_url,
+            self._payload(marca=self.marca_nueva.pk),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'], data)
+        self.producto.refresh_from_db()
+        self.assertEqual(self.producto.marca, self.marca_nueva)
+        self.assertEqual(Marca.objects.count(), marcas_iniciales)
+        self.stock.refresh_from_db()
+        self.assertEqual(self.stock.stock, 7)
+
+    def test_modify_moves_wrong_variant_to_correct_color_and_size(self):
+        response = self.client.post(
+            self.modify_url,
+            self._payload(
+                color=self.color_nuevo.pk,
+                talle=self.talle_nuevo.pk,
+            ),
+        )
+
+        data = response.json()
+        self.assertTrue(data['success'], data)
+        # Se reutiliza la misma variante: cambia color/talle, no se crea otra.
+        self.stock.refresh_from_db()
+        self.assertEqual(self.stock.color_id, self.color_nuevo.pk)
+        self.assertEqual(self.stock.talle_id, self.talle_nuevo.pk)
+        self.assertEqual(self.stock.stock, 7)
+        self.assertFalse(
+            ProductoStock.objects.filter(
+                producto=self.producto,
+                color=self.color_viejo,
+                talle=self.talle_viejo,
+            ).exists()
+        )
+        self.assertEqual(len(data['stocks']), 1)
+
+    def test_modify_merges_stock_when_correct_variant_already_exists(self):
+        destino = ProductoStock.objects.create(
+            producto=self.producto,
+            color=self.color_nuevo,
+            talle=self.talle_nuevo,
+            stock=3,
+        )
+
+        response = self.client.post(
+            self.modify_url,
+            self._payload(
+                color=self.color_nuevo.pk,
+                talle=self.talle_nuevo.pk,
+            ),
+        )
+
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertFalse(ProductoStock.objects.filter(pk=self.stock.pk).exists())
+        destino.refresh_from_db()
+        self.assertEqual(destino.stock, 10)
+        self.assertEqual(ProductoStock.objects.filter(producto=self.producto).count(), 1)
+
+    def test_ajax_lookup_includes_brand_and_variant_id(self):
+        response = self.client.get(
+            self.receive_url,
+            {'buscar_codigo': self.producto.codigo},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['producto']['marca_id'], self.marca_vieja.pk)
+        self.assertEqual(data['stocks'][0]['id'], self.stock.pk)
+
+    def test_receiving_stock_also_saves_selected_brand(self):
+        response = self.client.post(
+            self.receive_url,
+            {
+                'codigo': self.producto.codigo,
+                'color': self.color_viejo.pk,
+                'talle': self.talle_viejo.pk,
+                'marca': self.marca_nueva.pk,
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.producto.refresh_from_db()
+        self.assertEqual(self.producto.marca, self.marca_nueva)
+        self.assertEqual(data['producto']['marca_id'], self.marca_nueva.pk)
+
+
+class PanelDashboardMetricsTests(TestCase):
+    def setUp(self):
+        self.admin = get_user_model().objects.create_user(
+            username='dashboard-admin',
+            password='Test-Password-739!',
+            is_staff=True,
+        )
+        self.client.force_login(self.admin)
+        self.año_actual = timezone.now().year
+
+    def _crear_pedido(self, total, estado='pagado', anio=None, mes=1, dia=10):
+        pedido = Pedido.objects.create(
+            email='cliente@example.com',
+            nombre_completo='Cliente de prueba',
+            direccion='Calle de prueba 123',
+            total=Decimal(total),
+            estado_pago=estado,
+        )
+        if anio is not None:
+            Pedido.objects.filter(pk=pedido.pk).update(
+                fecha_creacion=datetime(anio, mes, dia, tzinfo=dt_timezone.utc),
+            )
+        return pedido
+
+    def test_dashboard_groups_sales_by_month_and_year_in_one_aggregation(self):
+        self._crear_pedido('100.00', anio=self.año_actual, mes=3)
+        self._crear_pedido('50.00', anio=self.año_actual, mes=3)
+        self._crear_pedido('25.00', anio=self.año_actual - 1, mes=3)
+        self._crear_pedido(
+            '999.00',
+            estado='pendiente',
+            anio=self.año_actual,
+            mes=4,
+        )
+
+        response = self.client.get(reverse('dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['ventas_totales'], Decimal('175.00'))
+        self.assertEqual(response.context['cantidad_pedidos'], 3)
+
+        actual = json.loads(response.context['forecast_actual_json'])
+        anterior = json.loads(response.context['tendencia_año_anterior_json'])
+        self.assertEqual(actual[2], 150.0)
+        self.assertEqual(anterior[2], 25.0)
+        self.assertEqual(actual[3], 0.0)
+

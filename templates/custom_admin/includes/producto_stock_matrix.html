@@ -1,0 +1,300 @@
+{% comment %}Matriz reutilizable de stock por color y talle (detalle y edición de producto).{% endcomment %}
+<div class="stock-matrix-wrap">
+	<div class="stock-matrix-head">
+		<div>
+			<h3 class="stock-matrix-title">Stock por color y talle</h3>
+			<p class="stock-matrix-subtitle">Unidades exactas de cada combinación. Los totales se calculan automáticamente.</p>
+		</div>
+		<div class="stock-matrix-total">
+			<span>Total del producto</span>
+			<strong>{{ stock_total }}</strong>
+			<small>unidades · {{ variant_count }} variante{{ variant_count|pluralize }}</small>
+		</div>
+	</div>
+
+	{% if rows %}
+	<div class="stock-matrix-scroll">
+		<table class="stock-matrix-table">
+			<thead>
+				<tr>
+					<th class="size-col">Talle</th>
+					{% for color in colores %}
+					<th class="color-col" title="{{ color.nombre }}">
+						<span class="color-dot" style="background-color: {{ color.hex_code|default:'#000000' }}"></span>
+						<span class="color-name">{{ color.nombre }}</span>
+					</th>
+					{% endfor %}
+					<th class="total-col">Total</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for row in rows %}
+				<tr>
+					<th class="size-col">
+						<span class="size-abbr">{{ row.talle.abbreviation|default:row.talle.nombre }}</span>
+						<span class="size-name">{{ row.talle.nombre }}</span>
+					</th>
+					{% for celda in row.celdas %}
+					<td class="color-col">
+						<input
+							type="number"
+							min="0"
+							step="1"
+							inputmode="numeric"
+							name="{{ celda.field_name }}"
+							value="{{ celda.stock }}"
+							class="stock-cell{% if celda.stock == 0 %} is-empty{% endif %}"
+							data-row-index="{{ forloop.parentloop.counter0 }}"
+							data-col-index="{{ forloop.counter0 }}"
+							aria-label="Stock {{ row.talle.nombre }} color {{ celda.color.nombre }}"
+						>
+					</td>
+					{% endfor %}
+					<td class="total-col"><span class="row-total" data-row-index="{{ forloop.counter0 }}">{{ row.total }}</span></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+			<tfoot>
+				<tr>
+					<th class="size-col">Total por color</th>
+					{% for total in totales_color %}
+					<td class="color-col total-color" data-col-index="{{ forloop.counter0 }}">{{ total }}</td>
+					{% endfor %}
+					<td class="total-col grand-total">{{ stock_total }}</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+	{% else %}
+	<div class="stock-matrix-empty">
+		<i class="fas fa-box-open"></i>
+		<p>Todavía no hay variantes de stock en este producto.</p>
+		<small>Guardá el producto con colores y talles para poder cargar las cantidades de cada combinación.</small>
+	</div>
+	{% endif %}
+</div>
+
+<style>
+	.stock-matrix-wrap {
+		background: #fff;
+		border: 1px solid #e2e8f0;
+		border-radius: 14px;
+		padding: 18px;
+		margin-top: 22px;
+		box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+	}
+	.stock-matrix-head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 16px;
+		flex-wrap: wrap;
+		margin-bottom: 14px;
+	}
+	.stock-matrix-title {
+		font-size: 1.05rem;
+		font-weight: 700;
+		color: #0f172a;
+		margin: 0 0 4px;
+	}
+	.stock-matrix-subtitle {
+		font-size: 0.85rem;
+		color: #64748b;
+		margin: 0;
+	}
+	.stock-matrix-total {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		line-height: 1.15;
+		background: #fef2f2;
+		border: 1px solid #fecaca;
+		border-radius: 10px;
+		padding: 8px 14px;
+	}
+	.stock-matrix-total span {
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: #991b1b;
+		font-weight: 700;
+	}
+	.stock-matrix-total strong {
+		font-size: 1.6rem;
+		color: #7f1d1d;
+	}
+	.stock-matrix-total small {
+		font-size: 0.72rem;
+		color: #b91c1c;
+	}
+	.stock-matrix-scroll {
+		overflow-x: auto;
+	}
+	.stock-matrix-table {
+		width: 100%;
+		min-width: 620px;
+		border-collapse: separate;
+		border-spacing: 0;
+		font-size: 0.85rem;
+	}
+	.stock-matrix-table th,
+	.stock-matrix-table td {
+		padding: 8px 10px;
+		border-bottom: 1px solid #e2e8f0;
+		text-align: center;
+		vertical-align: middle;
+		white-space: nowrap;
+	}
+	.stock-matrix-table thead th {
+		background: #f8fafc;
+		color: #475569;
+		font-size: 0.72rem;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		position: sticky;
+		top: 0;
+		z-index: 1;
+	}
+	.stock-matrix-table .size-col {
+		text-align: left;
+		position: sticky;
+		left: 0;
+		background: #fff;
+		z-index: 2;
+	}
+	.stock-matrix-table thead .size-col {
+		background: #f8fafc;
+		z-index: 3;
+	}
+	.size-abbr {
+		display: block;
+		font-weight: 800;
+		color: #0f172a;
+	}
+	.size-name {
+		display: block;
+		font-size: 0.68rem;
+		color: #94a3b8;
+	}
+	.color-col {
+		min-width: 78px;
+	}
+	.color-dot {
+		display: inline-block;
+		width: 11px;
+		height: 11px;
+		border-radius: 50%;
+		margin-right: 5px;
+		vertical-align: middle;
+		border: 1px solid rgba(15, 23, 42, 0.15);
+	}
+	.color-name {
+		vertical-align: middle;
+	}
+	.stock-cell {
+		width: 68px;
+		padding: 7px 6px;
+		text-align: center;
+		border: 1px solid #cbd5e1;
+		border-radius: 8px;
+		font-weight: 700;
+		color: #0f172a;
+		background: #fff;
+	}
+	.stock-cell:focus {
+		outline: 2px solid #7f1d1d;
+		outline-offset: 1px;
+		border-color: #7f1d1d;
+	}
+	.stock-cell.is-empty {
+		background: #f8fafc;
+		color: #94a3b8;
+		font-weight: 500;
+	}
+	.stock-matrix-table .total-col {
+		background: #f8fafc;
+		font-weight: 800;
+		color: #334155;
+	}
+	.stock-matrix-table tfoot td,
+	.stock-matrix-table tfoot th {
+		border-top: 2px solid #cbd5e1;
+		border-bottom: none;
+	}
+	.stock-matrix-table tfoot .total-color {
+		color: #475569;
+		font-weight: 700;
+	}
+	.stock-matrix-table .grand-total {
+		color: #7f1d1d;
+		font-size: 1rem;
+	}
+	.stock-matrix-empty {
+		text-align: center;
+		padding: 28px 16px;
+		color: #64748b;
+	}
+	.stock-matrix-empty i {
+		font-size: 1.8rem;
+		color: #cbd5e1;
+	}
+	.stock-matrix-empty p {
+		margin: 8px 0 2px;
+		font-weight: 600;
+	}
+	.stock-matrix-empty small {
+		font-size: 0.8rem;
+	}
+	@media (max-width: 640px) {
+		.stock-matrix-wrap {
+			padding: 12px;
+		}
+		.stock-matrix-total {
+			align-items: flex-start;
+		}
+	}
+</style>
+
+<script>
+	(function () {
+		document.querySelectorAll('.stock-matrix-wrap').forEach(function (wrap) {
+			const inputs = Array.from(wrap.querySelectorAll('.stock-cell'));
+			if (!inputs.length) return;
+
+			const rowTotals = Array.from(wrap.querySelectorAll('.row-total'));
+			const colTotals = Array.from(wrap.querySelectorAll('.total-color'));
+			const grandTotal = wrap.querySelector('.grand-total');
+			const badge = wrap.querySelector('.stock-matrix-total strong');
+
+			function refresh() {
+				const rows = new Map();
+				const cols = new Map();
+				let total = 0;
+
+				inputs.forEach(function (input) {
+					const value = Math.max(0, parseInt(input.value, 10) || 0);
+					const row = parseInt(input.dataset.rowIndex, 10);
+					const col = parseInt(input.dataset.colIndex, 10);
+					rows.set(row, (rows.get(row) || 0) + value);
+					cols.set(col, (cols.get(col) || 0) + value);
+					total += value;
+					input.classList.toggle('is-empty', value === 0);
+				});
+
+				rowTotals.forEach(function (el) {
+					el.textContent = rows.get(parseInt(el.dataset.rowIndex, 10)) || 0;
+				});
+				colTotals.forEach(function (el) {
+					el.textContent = cols.get(parseInt(el.dataset.colIndex, 10)) || 0;
+				});
+				if (grandTotal) grandTotal.textContent = total;
+				if (badge) badge.textContent = total;
+			}
+
+			inputs.forEach(function (input) {
+				input.addEventListener('input', refresh);
+			});
+			refresh();
+		});
+	})();
+</script>

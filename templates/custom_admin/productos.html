@@ -1,5 +1,6 @@
 {% extends 'custom_admin/base.html' %}
 {% load static %}
+{% load imagen_tags %}
 {% block title %}Gestión de Productos{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/productos_admin.css' %}" />
@@ -128,6 +129,26 @@
         margin-top: 2px;
         color: #666;
     }
+    .stock-total-badge {
+        display: inline-block;
+        min-width: 52px;
+        text-align: center;
+        padding: 4px 8px;
+        border-radius: 8px;
+        background: #fef2f2;
+        color: #7f1d1d;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-decoration: none;
+    }
+    .stock-total-badge:hover {
+        background: #fee2e2;
+        color: #7f1d1d;
+    }
+    .stock-total-badge.is-empty {
+        background: #f1f5f9;
+        color: #94a3b8;
+    }
 </style>
 {% endblock %}
 
@@ -135,7 +156,10 @@
 <div class="main-content">
 	<div class="header d-flex justify-content-between align-items-center mb-4">
 		<h1>Gestión de Productos</h1>
-		<a href="{% url 'agregar_producto' %}" class="btn btn-primary">+ Nuevo Producto</a>
+		<div class="d-flex gap-2">
+			<a href="{% url 'recibir_stock' %}" class="btn btn-outline-primary"><i class="fas fa-barcode me-1"></i> Recibir stock</a>
+			<a href="{% url 'agregar_producto' %}" class="btn btn-primary">+ Nuevo Producto</a>
+		</div>
 	</div>
 
     <!-- Barra de Filtros -->
@@ -204,6 +228,12 @@
                            Precio
                         </a>
                     </th>
+					<th>
+                        <a href="?sort=stock&direction={% if current_sort == 'stock' and current_direction == 'desc' %}asc{% else %}desc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}{% if search_query %}&buscar={{ search_query|urlencode }}{% endif %}"
+                           class="sortable {% if current_sort == 'stock' %}{{ current_direction }}{% endif %}">
+                           Stock
+                        </a>
+                    </th>
                     <th class="text-center"><span>Estado</span></th>
 					<th>
                         <a href="?sort=fecha&direction={% if current_sort == 'fecha' and current_direction == 'asc' %}desc{% else %}asc{% endif %}{% if current_cat %}&categoria={{ current_cat }}{% endif %}{% if current_marca %}&marca={{ current_marca }}{% endif %}{% if search_query %}&buscar={{ search_query|urlencode }}{% endif %}"
@@ -218,9 +248,9 @@
 				{% for producto in productos %}
 				<tr>
 					<td class="align-middle">
-						{% if producto.imagen %}
+						{% if producto.imagen.name %}
 						<img
-							src="{{ producto.imagen.url }}"
+							src="{{ producto.imagen|imagen_url }}"
 							alt="{{ producto.nombre }}"
 							class="product-img"
 						/>
@@ -232,6 +262,11 @@
 					<td class="align-middle"><span class="badge bg-light text-dark">{{ producto.categoria.nombre }}</span></td>
 					<td class="align-middle">{{ producto.marca.nombre|default:"Sin marca" }}</td>
 					<td class="align-middle"><strong>${{ producto.precio }}</strong></td>
+					<td class="align-middle">
+						<a href="{% url 'detalle_producto' producto.id %}" class="stock-total-badge {% if producto.stock_total == 0 %}is-empty{% endif %}" title="Ver stock por color y talle">
+							{{ producto.stock_total|default:0 }} u.
+						</a>
+					</td>
                     <td class="align-middle text-center">
                         <label class="switch">
                             <input type="checkbox" class="status-toggle" data-id="{{ producto.id }}" {% if producto.esta_activo %}checked{% endif %}>
@@ -244,6 +279,9 @@
 					<td class="align-middle text-muted">{{ producto.created_at|date:"d/m/Y" }}</td>
 					<td class="align-middle text-center">
 						<div class="btn-group">
+                            <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-sm btn-outline-info" title="Ver detalle y stock">
+                                <i class="fas fa-eye"></i>
+                            </a>
                             <a href="{% url 'editar_producto' producto.id %}" class="btn btn-sm btn-outline-primary" title="Editar">
                                 <i class="fas fa-edit"></i>
                             </a>
