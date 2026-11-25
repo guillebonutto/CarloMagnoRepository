@@ -1858,6 +1858,174 @@ def importar_datos_maestros(request):
         return HttpResponse(f"❌ Error al importar: {str(e)}")
 
 
+def _listar_impresoras_windows():
+    """Devuelve lista de nombres de impresoras instaladas en Windows."""
+    try:
+        import subprocess
+        res = subprocess.run(
+            ['powershell', '-NoProfile', '-Command', 'Get-Printer | Select-Object -ExpandProperty Name'],
+            capture_output=True, text=True, timeout=5
+        )
+        if res.returncode == 0:
+            return [line.strip() for line in res.stdout.splitlines() if line.strip()]
+    except Exception:
+        pass
+    return []
+
+
+def _enviar_raw_windows(printer_name, raw_bytes):
+    """Envía bytes RAW (TSPL) directamente al spooler de Windows sin diálogo."""
+    import ctypes
+    from ctypes import wintypes
+
+    winspool = ctypes.WinDLL('winspool.drv', use_last_error=True)
+
+    class DOC_INFO_1(ctypes.Structure):
+        _fields_ = [
+            ('pDocName', wintypes.LPWSTR),
+            ('pOutputFile', wintypes.LPWSTR),
+            ('pDatatype', wintypes.LPWSTR),
+        ]
+
+    hPrinter = wintypes.HANDLE()
+    if not winspool.OpenPrinterW(printer_name, ctypes.byref(hPrinter), None):
+        raise RuntimeError(f"No se pudo abrir la impresora '{printer_name}' (código {ctypes.get_last_error()}).")
+
+    try:
+        doc_info = DOC_INFO_1()
+        doc_info.pDocName = 'Etiquetas 50x25mm'
+        doc_info.pOutputFile = None
+        doc_info.pDatatype = 'RAW'
+
+        job_id = winspool.StartDocPrinterW(hPrinter, 1, ctypes.byref(doc_info))
+        if job_id == 0:
+            raise RuntimeError(f"StartDocPrinterW falló (código {ctypes.get_last_error()}).")
+        try:
+            if not winspool.StartPagePrinter(hPrinter):
+                raise RuntimeError(f"StartPagePrinter falló (código {ctypes.get_last_error()}).")
+            try:
+                written = wintypes.DWORD(0)
+                buf = ctypes.create_string_buffer(raw_bytes)
+                if not winspool.WritePrinter(hPrinter, buf, len(raw_bytes), ctypes.byref(written)):
+                    raise RuntimeError(f"WritePrinter falló (código {ctypes.get_last_error()}).")
+            finally:
+                winspool.EndPagePrinter(hPrinter)
+        finally:
+            winspool.EndDocPrinter(hPrinter)
+    finally:
+        winspool.ClosePrinter(hPrinter)
+
+
+def _tspl_escape(text):
+    return str(text or '').replace('"', "'").replace('\r', ' ').replace('\n', ' ')
+
+
+def _to_ean13(code):
+    s = str(code or '').strip().upper()
+    digits = ''.join(ch for ch in s if ch.isdigit())
+    if len(s) == 13 and s.isdigit():
+        return s
+    letters = ''.join(ch for ch in s if 'A' <= ch <= 'Z')[:3]
+    prefix = ''.join(str(ord(ch))[-2:] for ch in letters)
+    combined = ('779' + prefix + digits).ljust(12, '0')[:12]
+    total = sum(int(combined[i]) * (1 if i % 2 == 0 else 3) for i in range(12))
+    check = (10 - (total % 10)) % 10
+    return combined + str(check)
+
+
+def _generar_tspl_50x25(items, opts):
+    """Genera comandos TSPL para Xprinter XP-365B en papel troquelado 50x25mm (203 DPI = 8 dots/mm)."""
+    show_store = opts.get('show_store', True)
+    show_price = opts.get('show_price', True)
+    show_variant = opts.get('show_variant', True)
+    show_barcode = opts.get('show_barcode', True)
+    show_qr = opts.get('show_qr', True)
+    qr_mode = opts.get('qr_mode', 'full')
+    ox = int(round(float(opts.get('offset_x', 0) or 0) * 8))
+    oy = int(round(float(opts.get('offset_y', 0) or 0) * 8))
+
+    cmds = [
+        'SIZE 50 mm, 25 mm',
+        'GAP 2 mm, 0 mm',
+        'DIRECTION 1',
+        'DENSITY 8',
+        'SPEED 4',
+    ]
+
+    for item in items:
+        qty = max(1, int(item.get('qty', 1) or 1))
+        codigo = str(item.get('codigo') or 'CM-001')
+        nombre = _tspl_escape(item.get('nombre', ''))[:32]
+        marca = _tspl_escape(item.get('marca', ''))
+        precio = item.get('precio')
+        color = _tspl_escape(item.get('color', ''))
+        talle = _tspl_escape(item.get('talle', ''))
+        estilo = _tspl_escape(item.get('estilo', ''))
+        tipo = _tspl_escape(item.get('tipo', ''))
+
+        top_left = 'CARLO MAGNO' if show_store else marca
+        if show_store and marca and marca.lower() != 'carlo magno':
+            top_left = f'CARLO MAGNO - {marca}'
+
+        variant_parts = []
+        if color:
+            variant_parts.append(color)
+        if talle:
+            variant_parts.append(f'T.{talle}')
+        if estilo:
+            variant_parts.append(estilo)
+        if tipo:
+            variant_parts.append(tipo)
+        variant_str = ' / '.join(variant_parts)[:36]
+
+        cmds.append('CLS')
+        if top_left:
+            cmds.append(f'TEXT {12 + ox},{8 + oy},"1",0,1,1,"{_tspl_escape(top_left[:22])}"')
+        if show_price and precio is not None and precio != '':
+            try:
+                precio_txt = f"${int(round(float(precio))):,}".replace(',', '.')
+            except Exception:
+                precio_txt = f"${precio}"
+            cmds.append(f'TEXT {285 + ox},{8 + oy},"2",0,1,1,"{precio_txt}"')
+
+        cmds.append(f'TEXT {12 + ox},{28 + oy},"2",0,1,1,"{nombre}"')
+        if show_variant and variant_str:
+            cmds.append(f'TEXT {12 + ox},{52 + oy},"1",0,1,1,"{variant_str}"')
+
+        if show_barcode:
+            ean13 = _to_ean13(codigo)
+            cmds.append(f'BARCODE {12 + ox},{78 + oy},"EAN13",64,0,0,2,2,"{ean13}"')
+            cmds.append(f'TEXT {12 + ox},{148 + oy},"1",0,1,1,"{_tspl_escape(codigo)}"')
+        else:
+            cmds.append(f'TEXT {12 + ox},{100 + oy},"2",0,1,1,"{_tspl_escape(codigo)}"')
+
+        if show_qr:
+            if qr_mode == 'url' and item.get('id'):
+                qr_data = f"https://carlomagno.com.ar/productos/{item['id']}/"
+            elif qr_mode == 'full':
+                parts = [f"COD:{codigo}"]
+                if nombre:
+                    parts.append(f"PROD:{nombre}")
+                if marca:
+                    parts.append(f"MARCA:{marca}")
+                if color:
+                    parts.append(f"COLOR:{color}")
+                if talle:
+                    parts.append(f"TALLE:{talle}")
+                if estilo:
+                    parts.append(f"ESTILO:{estilo}")
+                if tipo:
+                    parts.append(f"TIPO:{tipo}")
+                qr_data = ' | '.join(parts)
+            else:
+                qr_data = codigo
+            cmds.append(f'QRCODE {295 + ox},{76 + oy},M,3,A,0,"{_tspl_escape(qr_data)}"')
+
+        cmds.append(f'PRINT {qty},1')
+
+    return ('\r\n'.join(cmds) + '\r\n').encode('ascii', errors='replace')
+
+
 @login_required(login_url='login')
 def imprimir_etiquetas(request):
     """Módulo para diseñar e imprimir etiquetas 50x25mm (Xprinter XP-365B)."""
@@ -1894,4 +2062,34 @@ def imprimir_etiquetas(request):
     return render(request, 'custom_admin/etiquetas.html', {
         'productos_json': json.dumps(productos_data, ensure_ascii=False),
         'total_productos': len(productos_data),
+        'talles': Talle.objects.all().order_by('order', 'name'),
+        'estilos': Estilo.objects.all().order_by('nombre'),
+        'tipos': Tipo.objects.all().order_by('nombre'),
     })
+
+
+@login_required(login_url='login')
+@require_POST
+def api_imprimir_etiquetas_directo(request):
+    """Envía etiquetas TSPL 50x25mm directamente a la Xprinter XP-365B sin diálogo del navegador."""
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        items = data.get('items') or []
+        if not items:
+            return JsonResponse({'success': False, 'error': 'La cola de impresión está vacía.'}, status=400)
+
+        printer_name = (data.get('printer') or '').strip()
+        if not printer_name:
+            impresoras = _listar_impresoras_windows()
+            printer_name = next(
+                (imp for imp in impresoras if '365' in imp.lower() or 'xprinter' in imp.lower()),
+                'Xprinter XP-365B'
+            )
+
+        opts = data.get('options') or {}
+        raw_tspl = _generar_tspl_50x25(items, opts)
+        _enviar_raw_windows(printer_name, raw_tspl)
+        total = sum(max(1, int(i.get('qty', 1) or 1)) for i in items)
+        return JsonResponse({'success': True, 'mensaje': f'Se enviaron {total} etiqueta(s) directo a {printer_name}.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

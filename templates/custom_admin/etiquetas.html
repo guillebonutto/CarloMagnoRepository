@@ -202,11 +202,8 @@
             <p class="text-muted mb-0">Módulo calibrado para impresora térmica <strong>Xprinter XP-365B</strong> con papel troquelado de 50×25 mm.</p>
         </div>
         <div class="d-flex gap-2">
-            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#driverHelp">
-                <i class="fas fa-circle-info me-1"></i> Config. Xprinter XP-365B
-            </button>
             <button type="button" class="btn btn-dark" id="btn-print-all" disabled>
-                <i class="fas fa-print me-1"></i> Imprimir (<span id="total-labels-count">0</span>)
+                <i class="fas fa-print me-1"></i> Imprimir directo (<span id="total-labels-count">0</span>)
             </button>
         </div>
     </div>
@@ -258,15 +255,45 @@
                         </div>
                         <div class="col-sm-3">
                             <label class="form-label small mb-1">Talle</label>
-                            <input type="text" id="custom-talle" class="form-control form-control-sm" placeholder="M">
+                            <div class="input-group input-group-sm">
+                                <select id="custom-talle" class="form-select">
+                                    <option value="">-- Talle --</option>
+                                    {% for t in talles %}
+                                        <option value="{{ t.abbreviation|default:t.name }}">{{ t.abbreviation|default:t.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-outline-secondary btn-quick-add" data-kind="talle" title="Agregar talle">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-sm-3">
                             <label class="form-label small mb-1">Estilo</label>
-                            <input type="text" id="custom-estilo" class="form-control form-control-sm" placeholder="Oversize">
+                            <div class="input-group input-group-sm">
+                                <select id="custom-estilo" class="form-select">
+                                    <option value="">-- Estilo --</option>
+                                    {% for e in estilos %}
+                                        <option value="{{ e.nombre }}">{{ e.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-outline-secondary btn-quick-add" data-kind="estilo" title="Agregar estilo">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-sm-3">
                             <label class="form-label small mb-1">Tipo (tela)</label>
-                            <input type="text" id="custom-tipo" class="form-control form-control-sm" placeholder="Algodón">
+                            <div class="input-group input-group-sm">
+                                <select id="custom-tipo" class="form-select">
+                                    <option value="">-- Tipo --</option>
+                                    {% for tp in tipos %}
+                                        <option value="{{ tp.nombre }}">{{ tp.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-outline-secondary btn-quick-add" data-kind="tipo" title="Agregar tipo">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-sm-3">
                             <label class="form-label small mb-1">Cantidad</label>
@@ -740,26 +767,46 @@
         });
     }
 
-    btnPrintAll.addEventListener('click', () => {
+    btnPrintAll.addEventListener('click', async () => {
         if (queue.length === 0) return;
-        let html = '';
-        let idx = 0;
-        const codes = [];
-        queue.forEach(item => {
-            for (let i = 0; i < item.qty; i++) {
-                const svgId = `print-bc-${idx}`;
-                const qrId = `print-qr-${idx}`;
-                idx++;
-                html += renderLabelHtml(item, svgId, qrId);
-                codes.push({ svgId, qrId, codigo: item.codigo, qrText: getQrContent(item) });
+        const originalHtml = btnPrintAll.innerHTML;
+        btnPrintAll.disabled = true;
+        btnPrintAll.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
+
+        try {
+            const resp = await fetch("{% url 'api_imprimir_etiquetas_directo' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    printer: '',
+                    items: queue,
+                    options: {
+                        show_store: optStore.checked,
+                        show_price: optPrice.checked,
+                        show_variant: optVariant.checked,
+                        show_barcode: optBarcode.checked,
+                        show_qr: optQr.checked,
+                        qr_mode: optQrMode.value,
+                        offset_x: optOffsetX.value,
+                        offset_y: optOffsetY.value
+                    }
+                })
+            });
+            const data = await resp.json();
+            if (!resp.ok || !data.success) {
+                alert('Error al imprimir: ' + (data.error || 'Error desconocido'));
+            } else {
+                alert(data.mensaje);
             }
-        });
-        printSheetEl.innerHTML = html;
-        codes.forEach(c => {
-            if (optBarcode.checked) applyBarcode(c.svgId, c.codigo);
-            if (optQr.checked) applyQr(c.qrId, c.qrText);
-        });
-        window.print();
+        } catch (err) {
+            alert('Error de conexión al enviar a la impresora: ' + err.message);
+        } finally {
+            btnPrintAll.innerHTML = originalHtml;
+            btnPrintAll.disabled = queue.length === 0;
+        }
     });
 
     // Creador manual de códigos de barras / etiquetas
@@ -855,6 +902,60 @@
             estilo,
             tipo,
         }, qty);
+    });
+
+    document.querySelectorAll('.btn-quick-add').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const kind = btn.dataset.kind;
+            const labels = { talle: 'Nuevo Talle (ej. XL)', estilo: 'Nuevo Estilo', tipo: 'Nuevo Tipo de tela' };
+            const urls = {
+                talle: "{% url 'api_agregar_talle' %}",
+                estilo: "{% url 'api_agregar_estilo' %}",
+                tipo: "{% url 'api_agregar_tipo' %}"
+            };
+            const selects = {
+                talle: customTalleEl,
+                estilo: customEstiloEl,
+                tipo: customTipoEl
+            };
+            const val = prompt(labels[kind]);
+            if (!val || !val.trim()) return;
+
+            const payload = kind === 'talle'
+                ? { name: val.trim(), abbreviation: val.trim().toUpperCase() }
+                : { nombre: val.trim() };
+
+            try {
+                const resp = await fetch(urls[kind], {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await resp.json();
+                if (!resp.ok || data.error) {
+                    alert(data.error || 'No se pudo agregar.');
+                    return;
+                }
+                const text = kind === 'talle'
+                    ? (data.abbreviation || data.name || val.trim())
+                    : (data.nombre || val.trim());
+                const sel = selects[kind];
+                const opt = document.createElement('option');
+                opt.value = text;
+                opt.textContent = text;
+                opt.selected = true;
+                sel.appendChild(opt);
+                if (!customCodeManual) {
+                    customCodeEl.value = buildAutoCode();
+                }
+                updatePreview();
+            } catch (err) {
+                alert('Error de conexión: ' + err.message);
+            }
+        });
     });
 
     btnClearQueue.addEventListener('click', () => {
