@@ -767,6 +767,109 @@
         });
     }
 
+    function tsplEscape(text) {
+        return String(text || '').replace(/"/g, "'").replace(/[\r\n]+/g, ' ');
+    }
+
+    function buildTspl58x34(items) {
+        const ox = Math.round(parseFloat(optOffsetX.value || 0) * 8);
+        const oy = Math.round(parseFloat(optOffsetY.value || 0) * 8);
+        const showStore = optStore.checked;
+        const showPrice = optPrice.checked;
+        const showVariant = optVariant.checked;
+        const showBarcode = optBarcode.checked;
+        const showQr = optQr.checked;
+
+        const cmds = [
+            'SIZE 58 mm, 34 mm',
+            'GAP 2 mm, 0 mm',
+            'REFERENCE 0,0',
+            'DIRECTION 0,0',
+            'SET TEAR ON',
+            'DENSITY 8',
+            'SPEED 4'
+        ];
+
+        items.forEach(item => {
+            const qty = Math.max(1, parseInt(item.qty, 10) || 1);
+            const codigo = String(item.codigo || 'CM-001');
+            const nombre = tsplEscape(item.nombre || '').slice(0, 32);
+            const marca = tsplEscape(item.marca || '');
+            const color = tsplEscape(item.color || '');
+            const talle = tsplEscape(item.talle || '');
+            const estilo = tsplEscape(item.estilo || '');
+            const tipo = tsplEscape(item.tipo || '');
+
+            let topLeft = showStore ? 'CARLO MAGNO' : marca;
+            if (showStore && marca && marca.toLowerCase() !== 'carlo magno') {
+                topLeft = `CARLO MAGNO - ${marca}`;
+            }
+
+            const variantParts = [];
+            if (color) variantParts.push(color);
+            if (talle) variantParts.push(`T.${talle}`);
+            if (estilo) variantParts.push(estilo);
+            if (tipo) variantParts.push(tipo);
+            const variantStr = variantParts.join(' / ').slice(0, 36);
+
+            cmds.push('CLS');
+            if (topLeft) {
+                cmds.push(`TEXT ${14 + ox},${10 + oy},"1",0,1,1,"${tsplEscape(topLeft.slice(0, 22))}"`);
+            }
+            if (showPrice && item.precio !== null && item.precio !== undefined && item.precio !== '') {
+                cmds.push(`TEXT ${345 + ox},${10 + oy},"2",0,1,1,"${formatPrice(item.precio)}"`);
+            }
+            cmds.push(`TEXT ${14 + ox},${34 + oy},"2",0,1,1,"${nombre}"`);
+            if (showVariant && variantStr) {
+                cmds.push(`TEXT ${14 + ox},${62 + oy},"1",0,1,1,"${variantStr}"`);
+            }
+
+            if (showBarcode) {
+                const ean13 = toEan13(codigo);
+                cmds.push(`BARCODE ${14 + ox},${105 + oy},"EAN13",84,0,0,2,2,"${ean13}"`);
+                cmds.push(`TEXT ${14 + ox},${195 + oy},"1",0,1,1,"${tsplEscape(codigo)}"`);
+            } else {
+                cmds.push(`TEXT ${14 + ox},${120 + oy},"2",0,1,1,"${tsplEscape(codigo)}"`);
+            }
+
+            if (showQr) {
+                const qrData = getQrContent(item);
+                cmds.push(`QRCODE ${340 + ox},${102 + oy},M,4,A,0,"${tsplEscape(qrData)}"`);
+            }
+            cmds.push(`PRINT ${qty},1`);
+        });
+
+        return new TextEncoder().encode(cmds.join('\r\n') + '\r\n');
+    }
+
+    let usbDevice = null;
+
+    async function printViaWebUsb(rawBytes) {
+        if (!navigator.usb) {
+            throw new Error('Tu navegador no soporta WebUSB. Usá Chrome o Edge.');
+        }
+        if (!usbDevice) {
+            const devices = await navigator.usb.getDevices();
+            usbDevice = devices.find(d => (d.productName || '').toLowerCase().includes('xprinter') || (d.productName || '').toLowerCase().includes('365')) || devices[0];
+            if (!usbDevice) {
+                usbDevice = await navigator.usb.requestDevice({ filters: [] });
+            }
+        }
+        if (!usbDevice.opened) {
+            await usbDevice.open();
+        }
+        if (usbDevice.configuration === null) {
+            await usbDevice.selectConfiguration(1);
+        }
+        const iface = usbDevice.configuration.interfaces[0];
+        await usbDevice.claimInterface(iface.interfaceNumber);
+        const epOut = iface.alternate.endpoints.find(ep => ep.direction === 'out');
+        if (!epOut) {
+            throw new Error('No se encontró endpoint de salida USB en la impresora.');
+        }
+        await usbDevice.transferOut(epOut.endpointNumber, rawBytes);
+    }
+
     btnPrintAll.addEventListener('click', async () => {
         if (queue.length === 0) return;
         const originalHtml = btnPrintAll.innerHTML;
@@ -774,6 +877,14 @@
         btnPrintAll.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
 
         try {
+            if (navigator.usb) {
+                const rawBytes = buildTspl58x34(queue);
+                await printViaWebUsb(rawBytes);
+                const total = queue.reduce((acc, it) => acc + it.qty, 0);
+                alert(`Se enviaron ${total} etiqueta(s) directo por USB.`);
+                return;
+            }
+
             const resp = await fetch("{% url 'api_imprimir_etiquetas_directo' %}", {
                 method: 'POST',
                 headers: {
@@ -802,7 +913,7 @@
                 alert(data.mensaje);
             }
         } catch (err) {
-            alert('Error de conexión al enviar a la impresora: ' + err.message);
+            alert('Error al imprimir: ' + err.message);
         } finally {
             btnPrintAll.innerHTML = originalHtml;
             btnPrintAll.disabled = queue.length === 0;
