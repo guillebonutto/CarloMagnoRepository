@@ -2046,7 +2046,7 @@ def imprimir_etiquetas(request):
                 'stock_id': s.id,
                 'color': s.color.nombre,
                 'color_hex': s.color.hex_code,
-                'talle': s.talle.abbreviation or s.talle.name,
+                'talle': s.talle.abbreviation or s.talle.nombre,
                 'stock': s.stock,
             })
         productos_data.append({
@@ -2064,7 +2064,7 @@ def imprimir_etiquetas(request):
     return render(request, 'custom_admin/etiquetas.html', {
         'productos_json': json.dumps(productos_data, ensure_ascii=False),
         'total_productos': len(productos_data),
-        'talles': Talle.objects.all().order_by('order', 'name'),
+        'talles': Talle.objects.all().order_by('order', 'nombre'),
         'estilos': Estilo.objects.all().order_by('nombre'),
         'tipos': Tipo.objects.all().order_by('nombre'),
     })

@@ -259,7 +259,7 @@
                                 <select id="custom-talle" class="form-select">
                                     <option value="">-- Talle --</option>
                                     {% for t in talles %}
-                                        <option value="{{ t.abbreviation|default:t.name }}">{{ t.abbreviation|default:t.name }}</option>
+                                        <option value="{{ t.abbreviation|default:t.nombre }}">{{ t.abbreviation|default:t.nombre }}</option>
                                     {% endfor %}
                                 </select>
                                 <button type="button" class="btn btn-outline-secondary btn-quick-add" data-kind="talle" title="Agregar talle">
