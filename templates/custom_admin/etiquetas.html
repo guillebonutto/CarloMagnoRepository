@@ -408,11 +408,12 @@
 {% endblock %}
 
 {% block extra_js %}
+<script id="productos-data" type="application/json">{{ productos_json|safe }}</script>
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 (function() {
-    const productos = {{ productos_json|safe }};
+    const productos = JSON.parse(document.getElementById('productos-data').textContent || '[]');
     const queue = []; // { key, codigo, nombre, precio, marca, color, talle, qty }
 
     const productListEl = document.getElementById('product-list');
