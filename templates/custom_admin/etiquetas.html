@@ -495,33 +495,50 @@
             return `${window.location.origin}/productos/${item.id}/`;
         }
         if (optQrMode.value === 'full') {
-            const lines = [`COD: ${item.codigo || ''}`];
-            if (item.nombre) lines.push(`PROD: ${item.nombre}`);
-            if (item.marca) lines.push(`MARCA: ${item.marca}`);
-            if (item.color) lines.push(`COLOR: ${item.color}`);
-            if (item.talle) lines.push(`TALLE: ${item.talle}`);
-            if (item.estilo) lines.push(`ESTILO: ${item.estilo}`);
-            if (item.tipo) lines.push(`TIPO: ${item.tipo}`);
+            const clean = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            const lines = [`COD:${clean(item.codigo)}`];
+            if (item.nombre) lines.push(`PROD:${clean(item.nombre).slice(0, 30)}`);
+            if (item.marca) lines.push(`MARCA:${clean(item.marca).slice(0, 20)}`);
+            if (item.color) lines.push(`COL:${clean(item.color).slice(0, 15)}`);
+            if (item.talle) lines.push(`T:${clean(item.talle).slice(0, 10)}`);
+            if (item.estilo) lines.push(`EST:${clean(item.estilo).slice(0, 18)}`);
+            if (item.tipo) lines.push(`TIPO:${clean(item.tipo).slice(0, 18)}`);
             if (item.precio !== null && item.precio !== undefined && item.precio !== '') {
-                lines.push(`PRECIO: ${formatPrice(item.precio)}`);
+                lines.push(`$:${formatPrice(item.precio)}`);
             }
-            return lines.join('\n');
+            return lines.join(' | ');
         }
-        return String(item.codigo || 'CM-0001');
+        return String(item.codigo || 'CM-001');
     }
 
-    function applyQr(qrId, text) {
+    function applyQr(qrId, text, fallbackCode) {
         const el = document.getElementById(qrId);
         if (!el || typeof QRCode === 'undefined') return;
         el.innerHTML = '';
-        new QRCode(el, {
-            text: String(text || '0000'),
-            width: 80,
-            height: 80,
-            colorDark: '#000000',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.L
-        });
+        try {
+            new QRCode(el, {
+                text: String(text || '0000'),
+                width: 80,
+                height: 80,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.L
+            });
+        } catch (e) {
+            el.innerHTML = '';
+            if (fallbackCode && fallbackCode !== text) {
+                try {
+                    new QRCode(el, {
+                        text: String(fallbackCode),
+                        width: 80,
+                        height: 80,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.L
+                    });
+                } catch (_) {}
+            }
+        }
     }
 
     function calcEan13CheckDigit(digits12) {
@@ -620,7 +637,7 @@
             applyBarcode('preview-barcode-svg', sample.codigo);
         }
         if (optQr.checked) {
-            applyQr('preview-qr-box', getQrContent(sample));
+            applyQr('preview-qr-box', getQrContent(sample), sample.codigo);
         }
         return document.getElementById('preview-label');
     }
