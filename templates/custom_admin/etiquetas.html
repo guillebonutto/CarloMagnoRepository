@@ -150,7 +150,8 @@
             margin: 0;
         }
 
-        html, body {
+        html,
+        body {
             margin: 0 !important;
             padding: 0 !important;
             background: #fff !important;
@@ -200,7 +201,8 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
         <div>
             <h2 class="mb-1"><i class="fas fa-barcode me-2"></i>Impresión de Etiquetas (58x34mm)</h2>
-            <p class="text-muted mb-0">Módulo calibrado para impresora térmica <strong>Xprinter XP-365B</strong> con papel troquelado de 58×34 mm.</p>
+            <p class="text-muted mb-0">Módulo calibrado para impresora térmica <strong>Xprinter XP-365B</strong> con
+                papel troquelado de 58×34 mm.</p>
         </div>
         <div class="d-flex gap-2">
             <button type="button" class="btn btn-outline-warning text-dark" id="btn-renew-all-codes">
@@ -216,8 +218,10 @@
         <div class="alert alert-info mb-0 small">
             <strong>Configuración recomendada en Windows / Chrome para Xprinter XP-365B:</strong>
             <ul class="mb-0 mt-1">
-                <li>En el cuadro de diálogo de impresión, seleccioná la impresora <strong>Xprinter XP-365B</strong>.</li>
-                <li>Tamaño de papel: <strong>50 x 25 mm</strong> (si no aparece, crealo en Preferencias de impresora &rarr; Nuevo tamaño: Ancho 50 mm, Alto 25 mm).</li>
+                <li>En el cuadro de diálogo de impresión, seleccioná la impresora <strong>Xprinter XP-365B</strong>.
+                </li>
+                <li>Tamaño de papel: <strong>50 x 25 mm</strong> (si no aparece, crealo en Preferencias de impresora
+                    &rarr; Nuevo tamaño: Ancho 50 mm, Alto 25 mm).</li>
                 <li>Márgenes: <strong>Ninguno</strong> &middot; Escala: <strong>100%</strong> (Predeterminado).</li>
                 <li>Desmarcá <strong>Encabezados y pies de página</strong>.</li>
             </ul>
@@ -230,7 +234,8 @@
             <!-- Creador manual de código de barras / QR -->
             <div class="card shadow-sm border-0 mb-3">
                 <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-                    <span class="fw-semibold"><i class="fas fa-plus-circle me-1"></i> Crear código de barras / etiqueta</span>
+                    <span class="fw-semibold"><i class="fas fa-plus-circle me-1"></i> Crear código de barras /
+                        etiqueta</span>
                     <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-gen-code">
                         <i class="fas fa-wand-magic-sparkles me-1"></i> Generar código
                     </button>
@@ -239,25 +244,31 @@
                     <div class="row g-2">
                         <div class="col-sm-5">
                             <label class="form-label small mb-1">Código *</label>
-                            <input type="text" id="custom-code" class="form-control form-control-sm" placeholder="Ej: CM-001234">
+                            <input type="text" id="custom-code" class="form-control form-control-sm"
+                                placeholder="Ej: CM-001234">
                         </div>
                         <div class="col-sm-7 position-relative">
                             <label class="form-label small mb-1">Nombre / Título *</label>
-                            <input type="text" id="custom-name" class="form-control form-control-sm" placeholder="Ej: Remera Oversize" autocomplete="off">
-                            <div id="custom-name-suggestions" class="list-group position-absolute w-100 shadow-sm" style="z-index: 1050; max-height: 210px; overflow-y: auto; display: none;"></div>
+                            <input type="text" id="custom-name" class="form-control form-control-sm"
+                                placeholder="Ej: Remera Oversize" autocomplete="off">
+                            <div id="custom-name-suggestions" class="list-group position-absolute w-100 shadow-sm"
+                                style="z-index: 1050; max-height: 210px; overflow-y: auto; display: none;"></div>
                         </div>
                         <div class="col-12" id="editing-product-banner" style="display: none;">
-                            <div class="alert alert-warning py-1 px-2 mb-0 d-flex justify-content-between align-items-center small">
+                            <div
+                                class="alert alert-warning py-1 px-2 mb-0 d-flex justify-content-between align-items-center small">
                                 <span>
                                     <i class="fas fa-pen me-1"></i>
                                     Artículo seleccionado: <strong id="editing-product-label"></strong>
                                     (código actual: <code id="editing-product-oldcode"></code>)
                                 </span>
                                 <div class="d-flex gap-1">
-                                    <button type="button" class="btn btn-sm btn-primary py-0 px-2" id="btn-save-product-code">
+                                    <button type="button" class="btn btn-sm btn-primary py-0 px-2"
+                                        id="btn-save-product-code">
                                         <i class="fas fa-save me-1"></i> Guardar código
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" id="btn-clear-selected" title="Desvincular">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                        id="btn-clear-selected" title="Desvincular">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </div>
@@ -265,15 +276,18 @@
                         </div>
                         <div class="col-sm-4">
                             <label class="form-label small mb-1">Precio</label>
-                            <input type="number" id="custom-price" class="form-control form-control-sm" placeholder="25000" min="0">
+                            <input type="number" id="custom-price" class="form-control form-control-sm"
+                                placeholder="25000" min="0">
                         </div>
                         <div class="col-sm-4">
                             <label class="form-label small mb-1">Marca</label>
-                            <input type="text" id="custom-marca" class="form-control form-control-sm" placeholder="Carlo Magno">
+                            <input type="text" id="custom-marca" class="form-control form-control-sm"
+                                placeholder="Carlo Magno">
                         </div>
                         <div class="col-sm-4">
                             <label class="form-label small mb-1">Color</label>
-                            <input type="text" id="custom-color" class="form-control form-control-sm" placeholder="Negro">
+                            <input type="text" id="custom-color" class="form-control form-control-sm"
+                                placeholder="Negro">
                         </div>
                         <div class="col-sm-3">
                             <label class="form-label small mb-1">Talle</label>
@@ -281,10 +295,12 @@
                                 <select id="custom-talle" class="form-select">
                                     <option value="">-- Talle --</option>
                                     {% for t in talles %}
-                                        <option value="{{ t.abbreviation|default:t.nombre }}">{{ t.abbreviation|default:t.nombre }}</option>
+                                    <option value="{{ t.abbreviation|default:t.nombre }}">{{
+                                        t.abbreviation|default:t.nombre }}</option>
                                     {% endfor %}
                                 </select>
-                                <button type="button" class="btn btn-outline-secondary btn-quick-add" data-kind="talle" title="Agregar talle">
+                                <button type="button" class="btn btn-outline-secondary btn-quick-add" data-kind="talle"
+                                    title="Agregar talle">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -295,10 +311,11 @@
                                 <select id="custom-estilo" class="form-select">
                                     <option value="">-- Estilo --</option>
                                     {% for e in estilos %}
-                                        <option value="{{ e.nombre }}">{{ e.nombre }}</option>
+                                    <option value="{{ e.nombre }}">{{ e.nombre }}</option>
                                     {% endfor %}
                                 </select>
-                                <button type="button" class="btn btn-outline-secondary btn-quick-add" data-kind="estilo" title="Agregar estilo">
+                                <button type="button" class="btn btn-outline-secondary btn-quick-add" data-kind="estilo"
+                                    title="Agregar estilo">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -309,10 +326,11 @@
                                 <select id="custom-tipo" class="form-select">
                                     <option value="">-- Tipo --</option>
                                     {% for tp in tipos %}
-                                        <option value="{{ tp.nombre }}">{{ tp.nombre }}</option>
+                                    <option value="{{ tp.nombre }}">{{ tp.nombre }}</option>
                                     {% endfor %}
                                 </select>
-                                <button type="button" class="btn btn-outline-secondary btn-quick-add" data-kind="tipo" title="Agregar tipo">
+                                <button type="button" class="btn btn-outline-secondary btn-quick-add" data-kind="tipo"
+                                    title="Agregar tipo">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -334,8 +352,10 @@
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white py-3">
                     <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" id="product-search" class="form-control border-start-0" placeholder="Buscar producto por nombre, código o marca...">
+                        <span class="input-group-text bg-light border-end-0"><i
+                                class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="product-search" class="form-control border-start-0"
+                            placeholder="Buscar producto por nombre, código o marca...">
                     </div>
                 </div>
                 <div class="card-body p-0 product-list-scroll" id="product-list">
@@ -398,11 +418,13 @@
                         </div>
                         <div class="col-6 mt-2">
                             <label class="form-label mb-0 text-muted">Ajuste vertical (mm)</label>
-                            <input type="number" step="0.5" min="-5" max="5" value="0" id="opt-offset-y" class="form-control form-control-sm">
+                            <input type="number" step="0.5" min="-5" max="5" value="0" id="opt-offset-y"
+                                class="form-control form-control-sm">
                         </div>
                         <div class="col-6 mt-2">
                             <label class="form-label mb-0 text-muted">Ajuste horizontal (mm)</label>
-                            <input type="number" step="0.5" min="-5" max="5" value="0" id="opt-offset-x" class="form-control form-control-sm">
+                            <input type="number" step="0.5" min="-5" max="5" value="0" id="opt-offset-x"
+                                class="form-control form-control-sm">
                         </div>
                     </div>
                 </div>
@@ -412,7 +434,8 @@
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
                     <span class="fw-semibold"><i class="fas fa-list-ol me-1"></i> Cola de impresión</span>
-                    <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none p-0" id="btn-clear-queue">Vaciar</button>
+                    <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none p-0"
+                        id="btn-clear-queue">Vaciar</button>
                 </div>
                 <div class="card-body p-0 queue-scroll" id="queue-list">
                     <div class="text-center text-muted py-4 small">
@@ -433,65 +456,65 @@
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
-(function() {
-    const productos = JSON.parse(document.getElementById('productos-data').textContent || '[]');
-    const queue = []; // { key, codigo, nombre, precio, marca, color, talle, qty }
+    (function () {
+        const productos = JSON.parse(document.getElementById('productos-data').textContent || '[]');
+        const queue = []; // { key, codigo, nombre, precio, marca, color, talle, qty }
 
-    const productListEl = document.getElementById('product-list');
-    const searchInput = document.getElementById('product-search');
-    const queueListEl = document.getElementById('queue-list');
-    const previewLabelEl = document.getElementById('preview-label');
-    const printSheetEl = document.getElementById('print-sheet');
-    const totalCountEl = document.getElementById('total-labels-count');
-    const btnPrintAll = document.getElementById('btn-print-all');
-    const btnClearQueue = document.getElementById('btn-clear-queue');
+        const productListEl = document.getElementById('product-list');
+        const searchInput = document.getElementById('product-search');
+        const queueListEl = document.getElementById('queue-list');
+        const previewLabelEl = document.getElementById('preview-label');
+        const printSheetEl = document.getElementById('print-sheet');
+        const totalCountEl = document.getElementById('total-labels-count');
+        const btnPrintAll = document.getElementById('btn-print-all');
+        const btnClearQueue = document.getElementById('btn-clear-queue');
 
-    const optStore = document.getElementById('opt-store');
-    const optPrice = document.getElementById('opt-price');
-    const optVariant = document.getElementById('opt-variant');
-    const optBarcode = document.getElementById('opt-barcode');
-    const optQr = document.getElementById('opt-qr');
-    const optQrMode = document.getElementById('opt-qr-mode');
-    const optOffsetX = document.getElementById('opt-offset-x');
-    const optOffsetY = document.getElementById('opt-offset-y');
+        const optStore = document.getElementById('opt-store');
+        const optPrice = document.getElementById('opt-price');
+        const optVariant = document.getElementById('opt-variant');
+        const optBarcode = document.getElementById('opt-barcode');
+        const optQr = document.getElementById('opt-qr');
+        const optQrMode = document.getElementById('opt-qr-mode');
+        const optOffsetX = document.getElementById('opt-offset-x');
+        const optOffsetY = document.getElementById('opt-offset-y');
 
-    function formatPrice(val) {
-        return '$' + Number(val || 0).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-    }
-
-    function escapeHtml(str) {
-        return String(str || '').replace(/[&<>"']/g, s => ({
-            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-        }[s]));
-    }
-
-    function renderLabelHtml(item, svgId, qrId) {
-        const showStore = optStore.checked;
-        const showPrice = optPrice.checked;
-        const showVariant = optVariant.checked;
-        const showBarcode = optBarcode.checked;
-        const showQr = optQr.checked;
-        const ox = parseFloat(optOffsetX.value || 0);
-        const oy = parseFloat(optOffsetY.value || 0);
-
-        const variantParts = [];
-        if (item.color) variantParts.push(item.color);
-        if (item.talle) variantParts.push('Talle ' + item.talle);
-        if (item.estilo) variantParts.push(item.estilo);
-        if (item.tipo) variantParts.push(item.tipo);
-        const variantText = item.variantText || variantParts.join(' · ');
-
-        const brandParts = [];
-        if (showStore) brandParts.push('CARLO MAGNO');
-        if (item.marca && (!showStore || item.marca.toLowerCase() !== 'carlo magno')) {
-            brandParts.push(item.marca);
+        function formatPrice(val) {
+            return '$' + Number(val || 0).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
-        const topLeft = brandParts.join(' · ');
-        const styleAttr = (ox !== 0 || oy !== 0)
-            ? `style="transform: translate(${ox}mm, ${oy}mm);"`
-            : '';
 
-        return `
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, s => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[s]));
+        }
+
+        function renderLabelHtml(item, svgId, qrId) {
+            const showStore = optStore.checked;
+            const showPrice = optPrice.checked;
+            const showVariant = optVariant.checked;
+            const showBarcode = optBarcode.checked;
+            const showQr = optQr.checked;
+            const ox = parseFloat(optOffsetX.value || 0);
+            const oy = parseFloat(optOffsetY.value || 0);
+
+            const variantParts = [];
+            if (item.color) variantParts.push(item.color);
+            if (item.talle) variantParts.push('Talle ' + item.talle);
+            if (item.estilo) variantParts.push(item.estilo);
+            if (item.tipo) variantParts.push(item.tipo);
+            const variantText = item.variantText || variantParts.join(' · ');
+
+            const brandParts = [];
+            if (showStore) brandParts.push('CARLO MAGNO');
+            if (item.marca && (!showStore || item.marca.toLowerCase() !== 'carlo magno')) {
+                brandParts.push(item.marca);
+            }
+            const topLeft = brandParts.join(' · ');
+            const styleAttr = (ox !== 0 || oy !== 0)
+                ? `style="transform: translate(${ox}mm, ${oy}mm);"`
+                : '';
+
+            return `
             <div class="label-50x25" ${styleAttr}>
                 <div>
                     <div class="label-header">
@@ -510,187 +533,187 @@
                 </div>
             </div>
         `;
-    }
-
-    function getQrContent(item) {
-        if (optQrMode.value === 'url' && item.id) {
-            return `${window.location.origin}/productos/${item.id}/`;
         }
-        if (optQrMode.value === 'full') {
-            const clean = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-            const lines = [`COD:${clean(item.codigo)}`];
-            if (item.nombre) lines.push(`PROD:${clean(item.nombre).slice(0, 30)}`);
-            if (item.marca) lines.push(`MARCA:${clean(item.marca).slice(0, 20)}`);
-            if (item.color) lines.push(`COL:${clean(item.color).slice(0, 15)}`);
-            if (item.talle) lines.push(`T:${clean(item.talle).slice(0, 10)}`);
-            if (item.estilo) lines.push(`EST:${clean(item.estilo).slice(0, 18)}`);
-            if (item.tipo) lines.push(`TIPO:${clean(item.tipo).slice(0, 18)}`);
-            if (item.precio !== null && item.precio !== undefined && item.precio !== '') {
-                lines.push(`$:${formatPrice(item.precio)}`);
+
+        function getQrContent(item) {
+            if (optQrMode.value === 'url' && item.id) {
+                return `${window.location.origin}/productos/${item.id}/`;
             }
-            return lines.join(' | ');
+            if (optQrMode.value === 'full') {
+                const clean = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                const lines = [`COD:${clean(item.codigo)}`];
+                if (item.nombre) lines.push(`PROD:${clean(item.nombre).slice(0, 30)}`);
+                if (item.marca) lines.push(`MARCA:${clean(item.marca).slice(0, 20)}`);
+                if (item.color) lines.push(`COL:${clean(item.color).slice(0, 15)}`);
+                if (item.talle) lines.push(`T:${clean(item.talle).slice(0, 10)}`);
+                if (item.estilo) lines.push(`EST:${clean(item.estilo).slice(0, 18)}`);
+                if (item.tipo) lines.push(`TIPO:${clean(item.tipo).slice(0, 18)}`);
+                if (item.precio !== null && item.precio !== undefined && item.precio !== '') {
+                    lines.push(`$:${formatPrice(item.precio)}`);
+                }
+                return lines.join(' | ');
+            }
+            return String(item.codigo || 'CM-001');
         }
-        return String(item.codigo || 'CM-001');
-    }
 
-    function applyQr(qrId, text, fallbackCode) {
-        const el = document.getElementById(qrId);
-        if (!el || typeof QRCode === 'undefined') return;
-        el.innerHTML = '';
-        try {
-            new QRCode(el, {
-                text: String(text || '0000'),
-                width: 80,
-                height: 80,
-                colorDark: '#000000',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.L
-            });
-        } catch (e) {
+        function applyQr(qrId, text, fallbackCode) {
+            const el = document.getElementById(qrId);
+            if (!el || typeof QRCode === 'undefined') return;
             el.innerHTML = '';
-            if (fallbackCode && fallbackCode !== text) {
-                try {
-                    new QRCode(el, {
-                        text: String(fallbackCode),
-                        width: 80,
-                        height: 80,
-                        colorDark: '#000000',
-                        colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.L
-                    });
-                } catch (_) {}
+            try {
+                new QRCode(el, {
+                    text: String(text || '0000'),
+                    width: 80,
+                    height: 80,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+            } catch (e) {
+                el.innerHTML = '';
+                if (fallbackCode && fallbackCode !== text) {
+                    try {
+                        new QRCode(el, {
+                            text: String(fallbackCode),
+                            width: 80,
+                            height: 80,
+                            colorDark: '#000000',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.L
+                        });
+                    } catch (_) { }
+                }
             }
         }
-    }
 
-    function calcEan13CheckDigit(digits12) {
-        let sum = 0;
-        for (let i = 0; i < 12; i++) {
-            sum += parseInt(digits12[i], 10) * (i % 2 === 0 ? 1 : 3);
+        function calcEan13CheckDigit(digits12) {
+            let sum = 0;
+            for (let i = 0; i < 12; i++) {
+                sum += parseInt(digits12[i], 10) * (i % 2 === 0 ? 1 : 3);
+            }
+            return (10 - (sum % 10)) % 10;
         }
-        return (10 - (sum % 10)) % 10;
-    }
 
-    function toEan13(code) {
-        const str = String(code || '').trim().toUpperCase();
-        const onlyDigits = str.replace(/\D/g, '');
-        if (/^\d{13}$/.test(str)) return str;
-        // Codificar prefijo alfabético (ej. AMB -> 657766) + dígitos para EAN-13 único
-        const letters = str.replace(/[^A-Z]/g, '').slice(0, 3);
-        let prefix = '';
-        for (let i = 0; i < letters.length; i++) {
-            prefix += String(letters.charCodeAt(i)).slice(-2);
+        function toEan13(code) {
+            const str = String(code || '').trim().toUpperCase();
+            const onlyDigits = str.replace(/\D/g, '');
+            if (/^\d{13}$/.test(str)) return str;
+            // Codificar prefijo alfabético (ej. AMB -> 657766) + dígitos para EAN-13 único
+            const letters = str.replace(/[^A-Z]/g, '').slice(0, 3);
+            let prefix = '';
+            for (let i = 0; i < letters.length; i++) {
+                prefix += String(letters.charCodeAt(i)).slice(-2);
+            }
+            const combined = ('779' + prefix + onlyDigits).replace(/\D/g, '');
+            const base12 = combined.padEnd(12, '0').slice(0, 12);
+            return base12 + calcEan13CheckDigit(base12);
         }
-        const combined = ('779' + prefix + onlyDigits).replace(/\D/g, '');
-        const base12 = combined.padEnd(12, '0').slice(0, 12);
-        return base12 + calcEan13CheckDigit(base12);
-    }
 
-    function applyBarcode(svgId, code) {
-        const svg = document.getElementById(svgId);
-        if (!svg || typeof JsBarcode === 'undefined') return;
-        const ean13 = toEan13(code);
-        try {
-            JsBarcode(svg, ean13, {
-                format: 'EAN13',
-                width: 1.35,
-                height: 26,
-                displayValue: false,
-                margin: 0
+        function applyBarcode(svgId, code) {
+            const svg = document.getElementById(svgId);
+            if (!svg || typeof JsBarcode === 'undefined') return;
+            const ean13 = toEan13(code);
+            try {
+                JsBarcode(svg, ean13, {
+                    format: 'EAN13',
+                    width: 1.35,
+                    height: 26,
+                    displayValue: false,
+                    margin: 0
+                });
+            } catch (e) {
+                // Fallback si hay error inesperado
+            }
+        }
+
+        function getCustomDraft() {
+            const codigo = document.getElementById('custom-code').value.trim();
+            const nombre = document.getElementById('custom-name').value.trim();
+            const precioRaw = document.getElementById('custom-price').value.trim();
+            const marca = document.getElementById('custom-marca').value.trim();
+            const color = document.getElementById('custom-color').value.trim();
+            const talle = document.getElementById('custom-talle').value.trim();
+            const estilo = document.getElementById('custom-estilo').value.trim();
+            const tipo = document.getElementById('custom-tipo').value.trim();
+            if (!codigo && !nombre && !precioRaw && !marca && !color && !talle && !estilo && !tipo) {
+                return null;
+            }
+            return {
+                codigo: codigo || 'CM-0001',
+                nombre: nombre || 'Nombre del producto',
+                precio: precioRaw !== '' ? parseFloat(precioRaw) : null,
+                marca,
+                color,
+                talle,
+                estilo,
+                tipo,
+            };
+        }
+
+        function updatePreview() {
+            const draft = getCustomDraft();
+            const sample = draft || queue[0] || (productos[0] ? {
+                id: productos[0].id,
+                codigo: productos[0].codigo,
+                nombre: productos[0].nombre,
+                precio: productos[0].precio,
+                marca: productos[0].marca,
+                estilo: productos[0].estilo,
+                tipo: productos[0].tipo,
+                color: productos[0].variantes[0]?.color || 'Negro',
+                talle: productos[0].variantes[0]?.talle || 'M',
+            } : {
+                codigo: 'CM-0001',
+                nombre: 'Remera Carlo Magno',
+                precio: 25000,
+                marca: 'Carlo Magno',
+                color: 'Negro',
+                talle: 'M',
+                estilo: 'Oversize',
+                tipo: 'Algodón',
             });
-        } catch (e) {
-            // Fallback si hay error inesperado
+
+            const previewEl = document.getElementById('preview-label');
+            previewEl.outerHTML = renderLabelHtml(sample, 'preview-barcode-svg', 'preview-qr-box').replace(
+                'class="label-50x25"',
+                'id="preview-label" class="label-50x25"'
+            );
+            if (optBarcode.checked) {
+                applyBarcode('preview-barcode-svg', sample.codigo);
+            }
+            if (optQr.checked) {
+                applyQr('preview-qr-box', getQrContent(sample), sample.codigo);
+            }
+            return document.getElementById('preview-label');
         }
-    }
 
-    function getCustomDraft() {
-        const codigo = document.getElementById('custom-code').value.trim();
-        const nombre = document.getElementById('custom-name').value.trim();
-        const precioRaw = document.getElementById('custom-price').value.trim();
-        const marca = document.getElementById('custom-marca').value.trim();
-        const color = document.getElementById('custom-color').value.trim();
-        const talle = document.getElementById('custom-talle').value.trim();
-        const estilo = document.getElementById('custom-estilo').value.trim();
-        const tipo = document.getElementById('custom-tipo').value.trim();
-        if (!codigo && !nombre && !precioRaw && !marca && !color && !talle && !estilo && !tipo) {
-            return null;
+        function addToQueue(item, qty) {
+            qty = parseInt(qty, 10) || 1;
+            if (qty <= 0) return;
+            const existing = queue.find(q => q.key === item.key);
+            if (existing) {
+                existing.qty += qty;
+            } else {
+                queue.push({ ...item, qty });
+            }
+            renderQueue();
         }
-        return {
-            codigo: codigo || 'CM-0001',
-            nombre: nombre || 'Nombre del producto',
-            precio: precioRaw !== '' ? parseFloat(precioRaw) : null,
-            marca,
-            color,
-            talle,
-            estilo,
-            tipo,
-        };
-    }
 
-    function updatePreview() {
-        const draft = getCustomDraft();
-        const sample = draft || queue[0] || (productos[0] ? {
-            id: productos[0].id,
-            codigo: productos[0].codigo,
-            nombre: productos[0].nombre,
-            precio: productos[0].precio,
-            marca: productos[0].marca,
-            estilo: productos[0].estilo,
-            tipo: productos[0].tipo,
-            color: productos[0].variantes[0]?.color || 'Negro',
-            talle: productos[0].variantes[0]?.talle || 'M',
-        } : {
-            codigo: 'CM-0001',
-            nombre: 'Remera Carlo Magno',
-            precio: 25000,
-            marca: 'Carlo Magno',
-            color: 'Negro',
-            talle: 'M',
-            estilo: 'Oversize',
-            tipo: 'Algodón',
-        });
+        function renderQueue() {
+            const total = queue.reduce((acc, it) => acc + it.qty, 0);
+            totalCountEl.textContent = total;
+            btnPrintAll.disabled = total === 0;
 
-        const previewEl = document.getElementById('preview-label');
-        previewEl.outerHTML = renderLabelHtml(sample, 'preview-barcode-svg', 'preview-qr-box').replace(
-            'class="label-50x25"',
-            'id="preview-label" class="label-50x25"'
-        );
-        if (optBarcode.checked) {
-            applyBarcode('preview-barcode-svg', sample.codigo);
-        }
-        if (optQr.checked) {
-            applyQr('preview-qr-box', getQrContent(sample), sample.codigo);
-        }
-        return document.getElementById('preview-label');
-    }
-
-    function addToQueue(item, qty) {
-        qty = parseInt(qty, 10) || 1;
-        if (qty <= 0) return;
-        const existing = queue.find(q => q.key === item.key);
-        if (existing) {
-            existing.qty += qty;
-        } else {
-            queue.push({ ...item, qty });
-        }
-        renderQueue();
-    }
-
-    function renderQueue() {
-        const total = queue.reduce((acc, it) => acc + it.qty, 0);
-        totalCountEl.textContent = total;
-        btnPrintAll.disabled = total === 0;
-
-        if (queue.length === 0) {
-            queueListEl.innerHTML = `
+            if (queue.length === 0) {
+                queueListEl.innerHTML = `
                 <div class="text-center text-muted py-4 small">
                     Agregá productos o variantes desde la izquierda para armar la tanda de impresión.
                 </div>`;
-            updatePreview();
-            return;
-        }
+                updatePreview();
+                return;
+            }
 
-        queueListEl.innerHTML = queue.map((it, idx) => `
+            queueListEl.innerHTML = queue.map((it, idx) => `
             <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
                 <div class="me-2" style="min-width: 0;">
                     <div class="fw-semibold small text-truncate">${escapeHtml(it.nombre)}</div>
@@ -707,43 +730,43 @@
             </div>
         `).join('');
 
-        queueListEl.querySelectorAll('.queue-qty').forEach(inp => {
-            inp.addEventListener('change', e => {
-                const i = parseInt(e.target.dataset.idx, 10);
-                const val = Math.max(1, parseInt(e.target.value, 10) || 1);
-                queue[i].qty = val;
-                renderQueue();
+            queueListEl.querySelectorAll('.queue-qty').forEach(inp => {
+                inp.addEventListener('change', e => {
+                    const i = parseInt(e.target.dataset.idx, 10);
+                    const val = Math.max(1, parseInt(e.target.value, 10) || 1);
+                    queue[i].qty = val;
+                    renderQueue();
+                });
             });
-        });
 
-        queueListEl.querySelectorAll('.queue-remove').forEach(btn => {
-            btn.addEventListener('click', e => {
-                const i = parseInt(e.currentTarget.dataset.idx, 10);
-                queue.splice(i, 1);
-                renderQueue();
+            queueListEl.querySelectorAll('.queue-remove').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    const i = parseInt(e.currentTarget.dataset.idx, 10);
+                    queue.splice(i, 1);
+                    renderQueue();
+                });
             });
-        });
 
-        updatePreview();
-    }
-
-    function renderProducts(filterText = '') {
-        const q = filterText.trim().toLowerCase();
-        const filtered = productos.filter(p =>
-            !q ||
-            p.nombre.toLowerCase().includes(q) ||
-            p.codigo.toLowerCase().includes(q) ||
-            (p.marca && p.marca.toLowerCase().includes(q))
-        );
-
-        if (filtered.length === 0) {
-            productListEl.innerHTML = '<div class="text-center text-muted py-4">No se encontraron productos.</div>';
-            return;
+            updatePreview();
         }
 
-        productListEl.innerHTML = filtered.slice(0, 80).map(p => {
-            const variantesHtml = p.variantes.length > 0
-                ? p.variantes.map(v => `
+        function renderProducts(filterText = '') {
+            const q = filterText.trim().toLowerCase();
+            const filtered = productos.filter(p =>
+                !q ||
+                p.nombre.toLowerCase().includes(q) ||
+                p.codigo.toLowerCase().includes(q) ||
+                (p.marca && p.marca.toLowerCase().includes(q))
+            );
+
+            if (filtered.length === 0) {
+                productListEl.innerHTML = '<div class="text-center text-muted py-4">No se encontraron productos.</div>';
+                return;
+            }
+
+            productListEl.innerHTML = filtered.slice(0, 80).map(p => {
+                const variantesHtml = p.variantes.length > 0
+                    ? p.variantes.map(v => `
                     <div class="d-flex align-items-center justify-content-between py-1 px-2 bg-light rounded mb-1 small">
                         <div>
                             <span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:${escapeHtml(v.color_hex || '#6c757d')};border:1px solid #ccc;"></span>
@@ -760,7 +783,7 @@
                         </div>
                     </div>
                 `).join('')
-                : `<div class="d-flex justify-content-between align-items-center py-1 px-2 bg-light rounded small">
+                    : `<div class="d-flex justify-content-between align-items-center py-1 px-2 bg-light rounded small">
                         <span class="text-muted">Sin variantes cargadas</span>
                         <div class="btn-group btn-group-sm">
                             <button type="button" class="btn btn-outline-dark btn-add-var" data-pid="${p.id}" data-color="" data-talle="" data-qty="1">+1</button>
@@ -768,7 +791,7 @@
                         </div>
                    </div>`;
 
-            return `
+                return `
                 <div class="p-3 border-bottom">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div>
@@ -780,462 +803,464 @@
                     ${variantesHtml}
                 </div>
             `;
-        }).join('');
+            }).join('');
 
-        productListEl.querySelectorAll('.btn-add-var').forEach(btn => {
-            btn.addEventListener('click', e => {
-                const b = e.currentTarget;
-                const pid = parseInt(b.dataset.pid, 10);
-                const p = productos.find(x => x.id === pid);
-                if (!p) return;
-                const color = b.dataset.color || '';
-                const talle = b.dataset.talle || '';
-                const qty = parseInt(b.dataset.qty, 10) || 1;
-                addToQueue({
-                    id: p.id,
-                    key: `${p.id}|${color}|${talle}`,
-                    codigo: p.codigo,
-                    nombre: p.nombre,
-                    precio: p.precio,
-                    marca: p.marca,
-                    estilo: p.estilo,
-                    tipo: p.tipo,
-                    color,
-                    talle,
-                }, qty);
+            productListEl.querySelectorAll('.btn-add-var').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    const b = e.currentTarget;
+                    const pid = parseInt(b.dataset.pid, 10);
+                    const p = productos.find(x => x.id === pid);
+                    if (!p) return;
+                    const color = b.dataset.color || '';
+                    const talle = b.dataset.talle || '';
+                    const qty = parseInt(b.dataset.qty, 10) || 1;
+                    addToQueue({
+                        id: p.id,
+                        key: `${p.id}|${color}|${talle}`,
+                        codigo: p.codigo,
+                        nombre: p.nombre,
+                        precio: p.precio,
+                        marca: p.marca,
+                        estilo: p.estilo,
+                        tipo: p.tipo,
+                        color,
+                        talle,
+                    }, qty);
+                });
             });
-        });
-    }
-
-    function tsplEscape(text) {
-        return String(text || '').replace(/"/g, "'").replace(/[\r\n]+/g, ' ');
-    }
-
-    function buildTspl58x34(items) {
-        const ox = Math.round(parseFloat(optOffsetX.value || 0) * 8);
-        const oy = Math.round(parseFloat(optOffsetY.value || 0) * 8);
-        const showStore = optStore.checked;
-        const showPrice = optPrice.checked;
-        const showVariant = optVariant.checked;
-        const showBarcode = optBarcode.checked;
-        const showQr = optQr.checked;
-
-        const cmds = [
-            'SIZE 58 mm, 34 mm',
-            'GAP 2 mm, 0 mm',
-            'REFERENCE 0,0',
-            'DIRECTION 0,0',
-            'SET TEAR ON',
-            'DENSITY 8',
-            'SPEED 4'
-        ];
-
-        items.forEach(item => {
-            const qty = Math.max(1, parseInt(item.qty, 10) || 1);
-            const codigo = String(item.codigo || 'CM-001');
-            const nombre = tsplEscape(item.nombre || '').slice(0, 32);
-            const marca = tsplEscape(item.marca || '');
-            const color = tsplEscape(item.color || '');
-            const talle = tsplEscape(item.talle || '');
-            const estilo = tsplEscape(item.estilo || '');
-            const tipo = tsplEscape(item.tipo || '');
-
-            let topLeft = showStore ? 'CARLO MAGNO' : marca;
-            if (showStore && marca && marca.toLowerCase() !== 'carlo magno') {
-                topLeft = `CARLO MAGNO - ${marca}`;
-            }
-
-            const variantParts = [];
-            if (color) variantParts.push(color);
-            if (talle) variantParts.push(`T.${talle}`);
-            if (estilo) variantParts.push(estilo);
-            if (tipo) variantParts.push(tipo);
-            const variantStr = variantParts.join(' / ').slice(0, 36);
-
-            cmds.push('CLS');
-            if (topLeft) {
-                cmds.push(`TEXT ${14 + ox},${10 + oy},"1",0,1,1,"${tsplEscape(topLeft.slice(0, 22))}"`);
-            }
-            if (showPrice && item.precio !== null && item.precio !== undefined && item.precio !== '') {
-                cmds.push(`TEXT ${345 + ox},${10 + oy},"2",0,1,1,"${formatPrice(item.precio)}"`);
-            }
-            cmds.push(`TEXT ${14 + ox},${34 + oy},"2",0,1,1,"${nombre}"`);
-            if (showVariant && variantStr) {
-                cmds.push(`TEXT ${14 + ox},${62 + oy},"1",0,1,1,"${variantStr}"`);
-            }
-
-            if (showBarcode) {
-                const ean13 = toEan13(codigo);
-                cmds.push(`BARCODE ${14 + ox},${105 + oy},"EAN13",84,0,0,2,2,"${ean13}"`);
-                cmds.push(`TEXT ${14 + ox},${195 + oy},"1",0,1,1,"${tsplEscape(codigo)}"`);
-            } else {
-                cmds.push(`TEXT ${14 + ox},${120 + oy},"2",0,1,1,"${tsplEscape(codigo)}"`);
-            }
-
-            if (showQr) {
-                const qrData = getQrContent(item);
-                cmds.push(`QRCODE ${340 + ox},${102 + oy},M,4,A,0,"${tsplEscape(qrData)}"`);
-            }
-            cmds.push(`PRINT ${qty},1`);
-        });
-
-        return new TextEncoder().encode(cmds.join('\r\n') + '\r\n');
-    }
-
-    let usbDevice = null;
-
-    async function printViaWebUsb(rawBytes) {
-        if (!navigator.usb) {
-            throw new Error('Tu navegador no soporta WebUSB. Usá Chrome o Edge.');
         }
-        if (!usbDevice) {
-            const devices = await navigator.usb.getDevices();
-            usbDevice = devices.find(d => {
-                const n = (d.productName || '').toLowerCase();
-                return n.includes('xprinter') || n.includes('365') || n.includes('printer-80');
-            }) || devices[0];
+
+        function tsplEscape(text) {
+            return String(text || '').replace(/"/g, "'").replace(/[\r\n]+/g, ' ');
+        }
+
+        function buildTspl58x34(items) {
+            const ox = Math.round(parseFloat(optOffsetX.value || 0) * 8);
+            const oy = Math.round(parseFloat(optOffsetY.value || 0) * 8);
+            const oy = Math.round((parseFloat(optOffsetY.value || 0) - 4) * 8);
+            const showStore = optStore.checked;
+            const showPrice = optPrice.checked;
+            const showVariant = optVariant.checked;
+            const showBarcode = optBarcode.checked;
+            const showQr = optQr.checked;
+
+            const cmds = [
+                'SIZE 58 mm, 34 mm',
+                'GAP 2 mm, 0 mm',
+                'OFFSET 0 mm',
+                'REFERENCE 0,0',
+                'DIRECTION 0,0',
+                'SET TEAR ON',
+                'DENSITY 8',
+                'SPEED 4'
+            ];
+
+            items.forEach(item => {
+                const qty = Math.max(1, parseInt(item.qty, 10) || 1);
+                const codigo = String(item.codigo || 'CM-001');
+                const nombre = tsplEscape(item.nombre || '').slice(0, 32);
+                const marca = tsplEscape(item.marca || '');
+                const color = tsplEscape(item.color || '');
+                const talle = tsplEscape(item.talle || '');
+                const estilo = tsplEscape(item.estilo || '');
+                const tipo = tsplEscape(item.tipo || '');
+
+                let topLeft = showStore ? 'CARLO MAGNO' : marca;
+                if (showStore && marca && marca.toLowerCase() !== 'carlo magno') {
+                    topLeft = `CARLO MAGNO - ${marca}`;
+                }
+
+                const variantParts = [];
+                if (color) variantParts.push(color);
+                if (talle) variantParts.push(`T.${talle}`);
+                if (estilo) variantParts.push(estilo);
+                if (tipo) variantParts.push(tipo);
+                const variantStr = variantParts.join(' / ').slice(0, 36);
+
+                cmds.push('CLS');
+                if (topLeft) {
+                    cmds.push(`TEXT ${14 + ox},${10 + oy},"1",0,1,1,"${tsplEscape(topLeft.slice(0, 22))}"`);
+                }
+                if (showPrice && item.precio !== null && item.precio !== undefined && item.precio !== '') {
+                    cmds.push(`TEXT ${345 + ox},${10 + oy},"2",0,1,1,"${formatPrice(item.precio)}"`);
+                }
+                cmds.push(`TEXT ${14 + ox},${34 + oy},"2",0,1,1,"${nombre}"`);
+                if (showVariant && variantStr) {
+                    cmds.push(`TEXT ${14 + ox},${62 + oy},"1",0,1,1,"${variantStr}"`);
+                }
+
+                if (showBarcode) {
+                    const ean13 = toEan13(codigo);
+                    cmds.push(`BARCODE ${14 + ox},${105 + oy},"EAN13",84,0,0,2,2,"${ean13}"`);
+                    cmds.push(`TEXT ${14 + ox},${195 + oy},"1",0,1,1,"${tsplEscape(codigo)}"`);
+                } else {
+                    cmds.push(`TEXT ${14 + ox},${120 + oy},"2",0,1,1,"${tsplEscape(codigo)}"`);
+                }
+
+                if (showQr) {
+                    const qrData = getQrContent(item);
+                    cmds.push(`QRCODE ${340 + ox},${102 + oy},M,4,A,0,"${tsplEscape(qrData)}"`);
+                }
+                cmds.push(`PRINT ${qty},1`);
+            });
+
+            return new TextEncoder().encode(cmds.join('\r\n') + '\r\n');
+        }
+
+        let usbDevice = null;
+
+        async function printViaWebUsb(rawBytes) {
+            if (!navigator.usb) {
+                throw new Error('Tu navegador no soporta WebUSB. Usá Chrome o Edge.');
+            }
             if (!usbDevice) {
-                usbDevice = await navigator.usb.requestDevice({ filters: [] });
+                const devices = await navigator.usb.getDevices();
+                usbDevice = devices.find(d => {
+                    const n = (d.productName || '').toLowerCase();
+                    return n.includes('xprinter') || n.includes('365') || n.includes('printer-80');
+                }) || devices[0];
+                if (!usbDevice) {
+                    usbDevice = await navigator.usb.requestDevice({ filters: [] });
+                }
             }
-        }
-        if (!usbDevice.opened) {
-            await usbDevice.open();
-        }
-        if (usbDevice.configuration === null) {
-            await usbDevice.selectConfiguration(1);
-        }
-        const iface = usbDevice.configuration.interfaces[0];
-        await usbDevice.claimInterface(iface.interfaceNumber);
-        const epOut = iface.alternate.endpoints.find(ep => ep.direction === 'out');
-        if (!epOut) {
-            throw new Error('No se encontró endpoint de salida USB en la impresora.');
-        }
-        await usbDevice.transferOut(epOut.endpointNumber, rawBytes);
-    }
-
-    btnPrintAll.addEventListener('click', async () => {
-        if (queue.length === 0) return;
-        const originalHtml = btnPrintAll.innerHTML;
-        btnPrintAll.disabled = true;
-        btnPrintAll.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Imprimiendo...';
-
-        try {
-            const rawBytes = buildTspl58x34(queue);
-            const rawTspl = new TextDecoder().decode(rawBytes);
-
-            const resp = await fetch('http://127.0.0.1:9100/imprimir', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ raw_tspl: rawTspl })
-            });
-            const data = await resp.json();
-            if (!resp.ok || !data.success) {
-                alert('Error al imprimir: ' + (data.error || 'Error desconocido'));
-            } else {
-                alert(data.mensaje);
+            if (!usbDevice.opened) {
+                await usbDevice.open();
             }
-        } catch (err) {
-            alert('No se pudo conectar con el agente de impresión local (http://127.0.0.1:9100). Verificá que agente_impresion.py esté ejecutándose en la PC.');
-        } finally {
-            btnPrintAll.innerHTML = originalHtml;
-            btnPrintAll.disabled = queue.length === 0;
+            if (usbDevice.configuration === null) {
+                await usbDevice.selectConfiguration(1);
+            }
+            const iface = usbDevice.configuration.interfaces[0];
+            await usbDevice.claimInterface(iface.interfaceNumber);
+            const epOut = iface.alternate.endpoints.find(ep => ep.direction === 'out');
+            if (!epOut) {
+                throw new Error('No se encontró endpoint de salida USB en la impresora.');
+            }
+            await usbDevice.transferOut(epOut.endpointNumber, rawBytes);
         }
-    });
 
-    // Creador manual de códigos de barras / etiquetas
-    const customCodeEl = document.getElementById('custom-code');
-    const customNameEl = document.getElementById('custom-name');
-    const customPriceEl = document.getElementById('custom-price');
-    const customMarcaEl = document.getElementById('custom-marca');
-    const customColorEl = document.getElementById('custom-color');
-    const customTalleEl = document.getElementById('custom-talle');
-    const customEstiloEl = document.getElementById('custom-estilo');
-    const customTipoEl = document.getElementById('custom-tipo');
-    const customQtyEl = document.getElementById('custom-qty');
-    const suggestionsEl = document.getElementById('custom-name-suggestions');
-    const editingBannerEl = document.getElementById('editing-product-banner');
-    const editingLabelEl = document.getElementById('editing-product-label');
-    const editingOldCodeEl = document.getElementById('editing-product-oldcode');
-    let selectedProduct = null;
+        btnPrintAll.addEventListener('click', async () => {
+            if (queue.length === 0) return;
+            const originalHtml = btnPrintAll.innerHTML;
+            btnPrintAll.disabled = true;
+            btnPrintAll.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Imprimiendo...';
 
-    function selectExistingProduct(p) {
-        selectedProduct = p;
-        customNameEl.value = p.nombre || '';
-        customPriceEl.value = p.precio != null ? p.precio : '';
-        customMarcaEl.value = p.marca || '';
-        customColorEl.value = p.variantes[0]?.color || '';
-        customTalleEl.value = p.variantes[0]?.talle || '';
-        customEstiloEl.value = p.estilo || '';
-        customTipoEl.value = p.tipo || '';
+            try {
+                const rawBytes = buildTspl58x34(queue);
+                const rawTspl = new TextDecoder().decode(rawBytes);
 
-        customCodeManual = false;
-        customCodeEl.value = buildAutoCode();
+                const resp = await fetch('http://127.0.0.1:9100/imprimir', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ raw_tspl: rawTspl })
+                });
+                const data = await resp.json();
+                if (!resp.ok || !data.success) {
+                    alert('Error al imprimir: ' + (data.error || 'Error desconocido'));
+                } else {
+                    alert(data.mensaje);
+                }
+            } catch (err) {
+                alert('No se pudo conectar con el agente de impresión local (http://127.0.0.1:9100). Verificá que agente_impresion.py esté ejecutándose en la PC.');
+            } finally {
+                btnPrintAll.innerHTML = originalHtml;
+                btnPrintAll.disabled = queue.length === 0;
+            }
+        });
 
-        editingLabelEl.textContent = p.nombre;
-        editingOldCodeEl.textContent = p.codigo;
-        editingBannerEl.style.display = 'block';
-        suggestionsEl.style.display = 'none';
-        updatePreview();
-    }
+        // Creador manual de códigos de barras / etiquetas
+        const customCodeEl = document.getElementById('custom-code');
+        const customNameEl = document.getElementById('custom-name');
+        const customPriceEl = document.getElementById('custom-price');
+        const customMarcaEl = document.getElementById('custom-marca');
+        const customColorEl = document.getElementById('custom-color');
+        const customTalleEl = document.getElementById('custom-talle');
+        const customEstiloEl = document.getElementById('custom-estilo');
+        const customTipoEl = document.getElementById('custom-tipo');
+        const customQtyEl = document.getElementById('custom-qty');
+        const suggestionsEl = document.getElementById('custom-name-suggestions');
+        const editingBannerEl = document.getElementById('editing-product-banner');
+        const editingLabelEl = document.getElementById('editing-product-label');
+        const editingOldCodeEl = document.getElementById('editing-product-oldcode');
+        let selectedProduct = null;
 
-    customNameEl.addEventListener('input', () => {
-        const q = customNameEl.value.trim().toLowerCase();
-        if (q.length < 2) {
+        function selectExistingProduct(p) {
+            selectedProduct = p;
+            customNameEl.value = p.nombre || '';
+            customPriceEl.value = p.precio != null ? p.precio : '';
+            customMarcaEl.value = p.marca || '';
+            customColorEl.value = p.variantes[0]?.color || '';
+            customTalleEl.value = p.variantes[0]?.talle || '';
+            customEstiloEl.value = p.estilo || '';
+            customTipoEl.value = p.tipo || '';
+
+            customCodeManual = false;
+            customCodeEl.value = buildAutoCode();
+
+            editingLabelEl.textContent = p.nombre;
+            editingOldCodeEl.textContent = p.codigo;
+            editingBannerEl.style.display = 'block';
             suggestionsEl.style.display = 'none';
-            return;
+            updatePreview();
         }
-        const matches = productos.filter(p =>
-            p.nombre.toLowerCase().includes(q) ||
-            (p.codigo && p.codigo.toLowerCase().includes(q))
-        ).slice(0, 12);
 
-        if (matches.length === 0) {
-            suggestionsEl.style.display = 'none';
-            return;
-        }
-        suggestionsEl.innerHTML = matches.map(p => `
+        customNameEl.addEventListener('input', () => {
+            const q = customNameEl.value.trim().toLowerCase();
+            if (q.length < 2) {
+                suggestionsEl.style.display = 'none';
+                return;
+            }
+            const matches = productos.filter(p =>
+                p.nombre.toLowerCase().includes(q) ||
+                (p.codigo && p.codigo.toLowerCase().includes(q))
+            ).slice(0, 12);
+
+            if (matches.length === 0) {
+                suggestionsEl.style.display = 'none';
+                return;
+            }
+            suggestionsEl.innerHTML = matches.map(p => `
             <button type="button" class="list-group-item list-group-item-action py-1 px-2 small d-flex justify-content-between align-items-center suggestion-item" data-pid="${p.id}">
                 <span class="text-truncate me-2">${escapeHtml(p.nombre)}</span>
                 <span class="badge bg-secondary">${escapeHtml(p.codigo)}</span>
             </button>
         `).join('');
-        suggestionsEl.style.display = 'block';
+            suggestionsEl.style.display = 'block';
 
-        suggestionsEl.querySelectorAll('.suggestion-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const pid = parseInt(btn.dataset.pid, 10);
-                const prod = productos.find(x => x.id === pid);
-                if (prod) selectExistingProduct(prod);
+            suggestionsEl.querySelectorAll('.suggestion-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const pid = parseInt(btn.dataset.pid, 10);
+                    const prod = productos.find(x => x.id === pid);
+                    if (prod) selectExistingProduct(prod);
+                });
             });
         });
-    });
 
-    document.addEventListener('click', e => {
-        if (!customNameEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
-            suggestionsEl.style.display = 'none';
-        }
-    });
+        document.addEventListener('click', e => {
+            if (!customNameEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
+                suggestionsEl.style.display = 'none';
+            }
+        });
 
-    document.getElementById('btn-clear-selected').addEventListener('click', () => {
-        selectedProduct = null;
-        editingBannerEl.style.display = 'none';
-    });
+        document.getElementById('btn-clear-selected').addEventListener('click', () => {
+            selectedProduct = null;
+            editingBannerEl.style.display = 'none';
+        });
 
-    document.getElementById('btn-save-product-code').addEventListener('click', async () => {
-        if (!selectedProduct) return;
-        const nuevoCodigo = customCodeEl.value.trim();
-        if (!nuevoCodigo) {
-            alert('Ingresá un código válido antes de guardar.');
-            return;
-        }
-        try {
-            const resp = await fetch("{% url 'api_actualizar_codigo_producto' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    producto_id: selectedProduct.id,
-                    codigo: nuevoCodigo
-                })
-            });
-            const data = await resp.json();
-            if (!resp.ok || !data.success) {
-                alert(data.error || 'No se pudo actualizar el código.');
+        document.getElementById('btn-save-product-code').addEventListener('click', async () => {
+            if (!selectedProduct) return;
+            const nuevoCodigo = customCodeEl.value.trim();
+            if (!nuevoCodigo) {
+                alert('Ingresá un código válido antes de guardar.');
                 return;
             }
-            selectedProduct.codigo = data.codigo;
-            editingOldCodeEl.textContent = data.codigo;
-            renderProducts(searchInput.value);
-            alert(data.mensaje);
-        } catch (err) {
-            alert('Error de conexión: ' + err.message);
-        }
-    });
-
-    let customCodeManual = false;
-    let autoSeq = 1;
-
-    function alphaPos(str) {
-        const clean = String(str || '')
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^A-Za-z]/g, '')
-            .toUpperCase();
-        if (!clean) return null;
-        const num = (clean.charCodeAt(0) - 65) + 1;
-        return String(Math.max(1, Math.min(26, num))).padStart(3, '0');
-    }
-
-    function variantAlphaCode() {
-        const estiloCode = alphaPos(customEstiloEl.value.trim());
-        const tipoCode = alphaPos(customTipoEl.value.trim());
-
-        if (estiloCode && tipoCode) return `${estiloCode}-${tipoCode}`;
-        if (estiloCode) return estiloCode;
-        if (tipoCode) return tipoCode;
-        return String(autoSeq).padStart(3, '0');
-    }
-
-    function buildAutoCode() {
-        const source = (customNameEl.value.trim() || customMarcaEl.value.trim() || 'CM');
-        const base = source
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^A-Za-z]/g, '')
-            .toUpperCase()
-            .slice(0, 3)
-            .padEnd(3, 'X');
-        return `${base}-${variantAlphaCode()}`;
-    }
-
-    customCodeEl.addEventListener('input', () => {
-        customCodeManual = customCodeEl.value.trim().length > 0;
-        updatePreview();
-    });
-
-    [customNameEl, customPriceEl, customMarcaEl, customColorEl, customTalleEl, customEstiloEl, customTipoEl].forEach(el => {
-        el.addEventListener('input', () => {
-            if (!customCodeManual) {
-                customCodeEl.value = buildAutoCode();
-            }
-            updatePreview();
-        });
-        el.addEventListener('change', updatePreview);
-    });
-
-    document.getElementById('btn-gen-code').addEventListener('click', () => {
-        customCodeManual = false;
-        autoSeq++;
-        customCodeEl.value = buildAutoCode();
-        updatePreview();
-        customCodeEl.focus();
-    });
-
-    document.getElementById('btn-add-custom').addEventListener('click', () => {
-        const codigo = customCodeEl.value.trim();
-        const nombre = customNameEl.value.trim();
-        if (!codigo || !nombre) {
-            alert('Completá al menos el Código y el Nombre para crear la etiqueta.');
-            return;
-        }
-        const precioRaw = customPriceEl.value.trim();
-        const marca = customMarcaEl.value.trim();
-        const color = customColorEl.value.trim();
-        const talle = customTalleEl.value.trim();
-        const estilo = customEstiloEl.value.trim();
-        const tipo = customTipoEl.value.trim();
-        const qty = parseInt(customQtyEl.value, 10) || 1;
-        addToQueue({
-            key: `custom|${codigo}|${nombre}|${marca}|${color}|${talle}|${estilo}|${tipo}`,
-            codigo,
-            nombre,
-            precio: precioRaw !== '' ? parseFloat(precioRaw) : null,
-            marca,
-            color,
-            talle,
-            estilo,
-            tipo,
-        }, qty);
-    });
-
-    document.querySelectorAll('.btn-quick-add').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const kind = btn.dataset.kind;
-            const labels = { talle: 'Nuevo Talle (ej. XL)', estilo: 'Nuevo Estilo', tipo: 'Nuevo Tipo de tela' };
-            const urls = {
-                talle: "{% url 'api_agregar_talle' %}",
-                estilo: "{% url 'api_agregar_estilo' %}",
-                tipo: "{% url 'api_agregar_tipo' %}"
-            };
-            const selects = {
-                talle: customTalleEl,
-                estilo: customEstiloEl,
-                tipo: customTipoEl
-            };
-            const val = prompt(labels[kind]);
-            if (!val || !val.trim()) return;
-
-            const payload = kind === 'talle'
-                ? { name: val.trim(), abbreviation: val.trim().toUpperCase() }
-                : { nombre: val.trim() };
-
             try {
-                const resp = await fetch(urls[kind], {
+                const resp = await fetch("{% url 'api_actualizar_codigo_producto' %}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}'
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        producto_id: selectedProduct.id,
+                        codigo: nuevoCodigo
+                    })
                 });
                 const data = await resp.json();
-                if (!resp.ok || data.error) {
-                    alert(data.error || 'No se pudo agregar.');
+                if (!resp.ok || !data.success) {
+                    alert(data.error || 'No se pudo actualizar el código.');
                     return;
                 }
-                const text = kind === 'talle'
-                    ? (data.abbreviation || data.name || val.trim())
-                    : (data.nombre || val.trim());
-                const sel = selects[kind];
-                const opt = document.createElement('option');
-                opt.value = text;
-                opt.textContent = text;
-                opt.selected = true;
-                sel.appendChild(opt);
-                if (!customCodeManual) {
-                    customCodeEl.value = buildAutoCode();
-                }
-                updatePreview();
+                selectedProduct.codigo = data.codigo;
+                editingOldCodeEl.textContent = data.codigo;
+                renderProducts(searchInput.value);
+                alert(data.mensaje);
             } catch (err) {
                 alert('Error de conexión: ' + err.message);
             }
         });
-    });
 
-    document.getElementById('btn-renew-all-codes').addEventListener('click', async () => {
-        if (!confirm('¿Renovar solo los códigos de productos que tienen "(ver)" según el criterio actual (Nombre + Estilo + Tipo)?')) {
-            return;
+        let customCodeManual = false;
+        let autoSeq = 1;
+
+        function alphaPos(str) {
+            const clean = String(str || '')
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^A-Za-z]/g, '')
+                .toUpperCase();
+            if (!clean) return null;
+            const num = (clean.charCodeAt(0) - 65) + 1;
+            return String(Math.max(1, Math.min(26, num))).padStart(3, '0');
         }
-        const btn = document.getElementById('btn-renew-all-codes');
-        const orig = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Renovando...';
-        try {
-            const resp = await fetch("{% url 'api_renovar_todos_codigos' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
+
+        function variantAlphaCode() {
+            const estiloCode = alphaPos(customEstiloEl.value.trim());
+            const tipoCode = alphaPos(customTipoEl.value.trim());
+
+            if (estiloCode && tipoCode) return `${estiloCode}-${tipoCode}`;
+            if (estiloCode) return estiloCode;
+            if (tipoCode) return tipoCode;
+            return String(autoSeq).padStart(3, '0');
+        }
+
+        function buildAutoCode() {
+            const source = (customNameEl.value.trim() || customMarcaEl.value.trim() || 'CM');
+            const base = source
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^A-Za-z]/g, '')
+                .toUpperCase()
+                .slice(0, 3)
+                .padEnd(3, 'X');
+            return `${base}-${variantAlphaCode()}`;
+        }
+
+        customCodeEl.addEventListener('input', () => {
+            customCodeManual = customCodeEl.value.trim().length > 0;
+            updatePreview();
+        });
+
+        [customNameEl, customPriceEl, customMarcaEl, customColorEl, customTalleEl, customEstiloEl, customTipoEl].forEach(el => {
+            el.addEventListener('input', () => {
+                if (!customCodeManual) {
+                    customCodeEl.value = buildAutoCode();
                 }
+                updatePreview();
             });
-            const data = await resp.json();
-            if (!resp.ok || !data.success) {
-                alert(data.error || 'No se pudieron renovar los códigos.');
+            el.addEventListener('change', updatePreview);
+        });
+
+        document.getElementById('btn-gen-code').addEventListener('click', () => {
+            customCodeManual = false;
+            autoSeq++;
+            customCodeEl.value = buildAutoCode();
+            updatePreview();
+            customCodeEl.focus();
+        });
+
+        document.getElementById('btn-add-custom').addEventListener('click', () => {
+            const codigo = customCodeEl.value.trim();
+            const nombre = customNameEl.value.trim();
+            if (!codigo || !nombre) {
+                alert('Completá al menos el Código y el Nombre para crear la etiqueta.');
                 return;
             }
-            alert(data.mensaje);
-            window.location.reload();
-        } catch (err) {
-            alert('Error de conexión: ' + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = orig;
-        }
-    });
+            const precioRaw = customPriceEl.value.trim();
+            const marca = customMarcaEl.value.trim();
+            const color = customColorEl.value.trim();
+            const talle = customTalleEl.value.trim();
+            const estilo = customEstiloEl.value.trim();
+            const tipo = customTipoEl.value.trim();
+            const qty = parseInt(customQtyEl.value, 10) || 1;
+            addToQueue({
+                key: `custom|${codigo}|${nombre}|${marca}|${color}|${talle}|${estilo}|${tipo}`,
+                codigo,
+                nombre,
+                precio: precioRaw !== '' ? parseFloat(precioRaw) : null,
+                marca,
+                color,
+                talle,
+                estilo,
+                tipo,
+            }, qty);
+        });
 
-    btnClearQueue.addEventListener('click', () => {
-        queue.length = 0;
-        renderQueue();
-    });
+        document.querySelectorAll('.btn-quick-add').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const kind = btn.dataset.kind;
+                const labels = { talle: 'Nuevo Talle (ej. XL)', estilo: 'Nuevo Estilo', tipo: 'Nuevo Tipo de tela' };
+                const urls = {
+                    talle: "{% url 'api_agregar_talle' %}",
+                    estilo: "{% url 'api_agregar_estilo' %}",
+                    tipo: "{% url 'api_agregar_tipo' %}"
+                };
+                const selects = {
+                    talle: customTalleEl,
+                    estilo: customEstiloEl,
+                    tipo: customTipoEl
+                };
+                const val = prompt(labels[kind]);
+                if (!val || !val.trim()) return;
 
-    searchInput.addEventListener('input', e => renderProducts(e.target.value));
-    [optStore, optPrice, optVariant, optBarcode, optQr, optQrMode, optOffsetX, optOffsetY].forEach(el => {
-        el.addEventListener('change', updatePreview);
-        el.addEventListener('input', updatePreview);
-    });
+                const payload = kind === 'talle'
+                    ? { name: val.trim(), abbreviation: val.trim().toUpperCase() }
+                    : { nombre: val.trim() };
 
-    renderProducts();
-    updatePreview();
-})();
+                try {
+                    const resp = await fetch(urls[kind], {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok || data.error) {
+                        alert(data.error || 'No se pudo agregar.');
+                        return;
+                    }
+                    const text = kind === 'talle'
+                        ? (data.abbreviation || data.name || val.trim())
+                        : (data.nombre || val.trim());
+                    const sel = selects[kind];
+                    const opt = document.createElement('option');
+                    opt.value = text;
+                    opt.textContent = text;
+                    opt.selected = true;
+                    sel.appendChild(opt);
+                    if (!customCodeManual) {
+                        customCodeEl.value = buildAutoCode();
+                    }
+                    updatePreview();
+                } catch (err) {
+                    alert('Error de conexión: ' + err.message);
+                }
+            });
+        });
+
+        document.getElementById('btn-renew-all-codes').addEventListener('click', async () => {
+            if (!confirm('¿Renovar solo los códigos de productos que tienen "(ver)" según el criterio actual (Nombre + Estilo + Tipo)?')) {
+                return;
+            }
+            const btn = document.getElementById('btn-renew-all-codes');
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Renovando...';
+            try {
+                const resp = await fetch("{% url 'api_renovar_todos_codigos' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                const data = await resp.json();
+                if (!resp.ok || !data.success) {
+                    alert(data.error || 'No se pudieron renovar los códigos.');
+                    return;
+                }
+                alert(data.mensaje);
+                window.location.reload();
+            } catch (err) {
+                alert('Error de conexión: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            }
+        });
+
+        btnClearQueue.addEventListener('click', () => {
+            queue.length = 0;
+            renderQueue();
+        });
+
+        searchInput.addEventListener('input', e => renderProducts(e.target.value));
+        [optStore, optPrice, optVariant, optBarcode, optQr, optQrMode, optOffsetX, optOffsetY].forEach(el => {
+            el.addEventListener('change', updatePreview);
+            el.addEventListener('input', updatePreview);
+        });
+
+        renderProducts();
+        updatePreview();
+    })();
 </script>
 {% endblock %}
