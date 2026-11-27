@@ -203,6 +203,9 @@
             <p class="text-muted mb-0">Módulo calibrado para impresora térmica <strong>Xprinter XP-365B</strong> con papel troquelado de 58×34 mm.</p>
         </div>
         <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-warning text-dark" id="btn-renew-all-codes">
+                <i class="fas fa-arrows-rotate me-1"></i> Renovar códigos (ver)
+            </button>
             <button type="button" class="btn btn-dark" id="btn-print-all" disabled>
                 <i class="fas fa-print me-1"></i> Imprimir directo (<span id="total-labels-count">0</span>)
             </button>
@@ -238,9 +241,27 @@
                             <label class="form-label small mb-1">Código *</label>
                             <input type="text" id="custom-code" class="form-control form-control-sm" placeholder="Ej: CM-001234">
                         </div>
-                        <div class="col-sm-7">
+                        <div class="col-sm-7 position-relative">
                             <label class="form-label small mb-1">Nombre / Título *</label>
-                            <input type="text" id="custom-name" class="form-control form-control-sm" placeholder="Ej: Remera Oversize">
+                            <input type="text" id="custom-name" class="form-control form-control-sm" placeholder="Ej: Remera Oversize" autocomplete="off">
+                            <div id="custom-name-suggestions" class="list-group position-absolute w-100 shadow-sm" style="z-index: 1050; max-height: 210px; overflow-y: auto; display: none;"></div>
+                        </div>
+                        <div class="col-12" id="editing-product-banner" style="display: none;">
+                            <div class="alert alert-warning py-1 px-2 mb-0 d-flex justify-content-between align-items-center small">
+                                <span>
+                                    <i class="fas fa-pen me-1"></i>
+                                    Artículo seleccionado: <strong id="editing-product-label"></strong>
+                                    (código actual: <code id="editing-product-oldcode"></code>)
+                                </span>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-primary py-0 px-2" id="btn-save-product-code">
+                                        <i class="fas fa-save me-1"></i> Guardar código
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" id="btn-clear-selected" title="Desvincular">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-sm-4">
                             <label class="form-label small mb-1">Precio</label>
@@ -931,6 +952,107 @@
     const customEstiloEl = document.getElementById('custom-estilo');
     const customTipoEl = document.getElementById('custom-tipo');
     const customQtyEl = document.getElementById('custom-qty');
+    const suggestionsEl = document.getElementById('custom-name-suggestions');
+    const editingBannerEl = document.getElementById('editing-product-banner');
+    const editingLabelEl = document.getElementById('editing-product-label');
+    const editingOldCodeEl = document.getElementById('editing-product-oldcode');
+    let selectedProduct = null;
+
+    function selectExistingProduct(p) {
+        selectedProduct = p;
+        customNameEl.value = p.nombre || '';
+        customPriceEl.value = p.precio != null ? p.precio : '';
+        customMarcaEl.value = p.marca || '';
+        customColorEl.value = p.variantes[0]?.color || '';
+        customTalleEl.value = p.variantes[0]?.talle || '';
+        customEstiloEl.value = p.estilo || '';
+        customTipoEl.value = p.tipo || '';
+
+        customCodeManual = false;
+        customCodeEl.value = buildAutoCode();
+
+        editingLabelEl.textContent = p.nombre;
+        editingOldCodeEl.textContent = p.codigo;
+        editingBannerEl.style.display = 'block';
+        suggestionsEl.style.display = 'none';
+        updatePreview();
+    }
+
+    customNameEl.addEventListener('input', () => {
+        const q = customNameEl.value.trim().toLowerCase();
+        if (q.length < 2) {
+            suggestionsEl.style.display = 'none';
+            return;
+        }
+        const matches = productos.filter(p =>
+            p.nombre.toLowerCase().includes(q) ||
+            (p.codigo && p.codigo.toLowerCase().includes(q))
+        ).slice(0, 12);
+
+        if (matches.length === 0) {
+            suggestionsEl.style.display = 'none';
+            return;
+        }
+        suggestionsEl.innerHTML = matches.map(p => `
+            <button type="button" class="list-group-item list-group-item-action py-1 px-2 small d-flex justify-content-between align-items-center suggestion-item" data-pid="${p.id}">
+                <span class="text-truncate me-2">${escapeHtml(p.nombre)}</span>
+                <span class="badge bg-secondary">${escapeHtml(p.codigo)}</span>
+            </button>
+        `).join('');
+        suggestionsEl.style.display = 'block';
+
+        suggestionsEl.querySelectorAll('.suggestion-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const pid = parseInt(btn.dataset.pid, 10);
+                const prod = productos.find(x => x.id === pid);
+                if (prod) selectExistingProduct(prod);
+            });
+        });
+    });
+
+    document.addEventListener('click', e => {
+        if (!customNameEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
+            suggestionsEl.style.display = 'none';
+        }
+    });
+
+    document.getElementById('btn-clear-selected').addEventListener('click', () => {
+        selectedProduct = null;
+        editingBannerEl.style.display = 'none';
+    });
+
+    document.getElementById('btn-save-product-code').addEventListener('click', async () => {
+        if (!selectedProduct) return;
+        const nuevoCodigo = customCodeEl.value.trim();
+        if (!nuevoCodigo) {
+            alert('Ingresá un código válido antes de guardar.');
+            return;
+        }
+        try {
+            const resp = await fetch("{% url 'api_actualizar_codigo_producto' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    producto_id: selectedProduct.id,
+                    codigo: nuevoCodigo
+                })
+            });
+            const data = await resp.json();
+            if (!resp.ok || !data.success) {
+                alert(data.error || 'No se pudo actualizar el código.');
+                return;
+            }
+            selectedProduct.codigo = data.codigo;
+            editingOldCodeEl.textContent = data.codigo;
+            renderProducts(searchInput.value);
+            alert(data.mensaje);
+        } catch (err) {
+            alert('Error de conexión: ' + err.message);
+        }
+    });
 
     let customCodeManual = false;
     let autoSeq = 1;
@@ -1068,6 +1190,37 @@
                 alert('Error de conexión: ' + err.message);
             }
         });
+    });
+
+    document.getElementById('btn-renew-all-codes').addEventListener('click', async () => {
+        if (!confirm('¿Renovar solo los códigos de productos que tienen "(ver)" según el criterio actual (Nombre + Estilo + Tipo)?')) {
+            return;
+        }
+        const btn = document.getElementById('btn-renew-all-codes');
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Renovando...';
+        try {
+            const resp = await fetch("{% url 'api_renovar_todos_codigos' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            });
+            const data = await resp.json();
+            if (!resp.ok || !data.success) {
+                alert(data.error || 'No se pudieron renovar los códigos.');
+                return;
+            }
+            alert(data.mensaje);
+            window.location.reload();
+        } catch (err) {
+            alert('Error de conexión: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
     });
 
     btnClearQueue.addEventListener('click', () => {

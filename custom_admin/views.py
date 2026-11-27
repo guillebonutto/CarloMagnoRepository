@@ -2095,3 +2095,97 @@ def api_imprimir_etiquetas_directo(request):
         return JsonResponse({'success': True, 'mensaje': f'Se enviaron {total} etiqueta(s) directo a {printer_name}.'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required(login_url='login')
+@require_POST
+def api_actualizar_codigo_producto(request):
+    """Actualiza el código de artículo de un producto existente desde el módulo de etiquetas."""
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        producto_id = data.get('producto_id')
+        nuevo_codigo = (data.get('codigo') or '').strip()
+        if not producto_id or not nuevo_codigo:
+            return JsonResponse({'success': False, 'error': 'Falta producto_id o código.'}, status=400)
+
+        producto = get_object_or_404(Producto, pk=producto_id)
+        if Producto.objects.filter(codigo=nuevo_codigo).exclude(pk=producto.pk).exists():
+            return JsonResponse({'success': False, 'error': f'Ya existe otro producto con el código {nuevo_codigo}.'}, status=400)
+
+        producto.codigo = nuevo_codigo
+        producto.save(update_fields=['codigo'])
+        return JsonResponse({
+            'success': True,
+            'codigo': producto.codigo,
+            'mensaje': f'Código de "{producto.nombre}" actualizado a {producto.codigo}.'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def _solo_letras_sin_acentos(texto):
+    norm = unicodedata.normalize('NFD', str(texto or ''))
+    sin_acentos = ''.join(ch for ch in norm if unicodedata.category(ch) != 'Mn')
+    return ''.join(ch for ch in sin_acentos if 'A' <= ch.upper() <= 'Z').upper()
+
+
+def _alpha_pos_3(texto):
+    letras = _solo_letras_sin_acentos(texto)
+    if not letras:
+        return None
+    pos = max(1, min(26, (ord(letras[0]) - 65) + 1))
+    return f"{pos:03d}"
+
+
+@login_required(login_url='login')
+@require_POST
+def api_renovar_todos_codigos(request):
+    """Regenera solo el código de los productos que tienen '(ver)' según el criterio actual."""
+    try:
+        productos = list(Producto.objects.select_related('marca', 'estilo', 'tipo').order_by('id'))
+        usados = {
+            p.codigo for p in productos
+            if p.codigo and '(ver)' not in p.codigo.lower()
+        }
+        actualizados = 0
+
+        with transaction.atomic():
+            for p in productos:
+                tiene_ver = '(ver)' in (p.codigo or '').lower() or '(ver)' in (p.nombre or '').lower()
+                if not tiene_ver:
+                    continue
+
+                fuente = p.nombre or (p.marca.nombre if p.marca else 'CM')
+                base = _solo_letras_sin_acentos(fuente)[:3].ljust(3, 'X')
+                est_code = _alpha_pos_3(p.estilo.nombre if p.estilo else '')
+                tip_code = _alpha_pos_3(p.tipo.nombre if p.tipo else '')
+
+                if est_code and tip_code:
+                    candidato = f"{base}-{est_code}-{tip_code}"
+                elif est_code:
+                    candidato = f"{base}-{est_code}"
+                elif tip_code:
+                    candidato = f"{base}-{tip_code}"
+                else:
+                    candidato = f"{base}-001"
+
+                codigo_final = candidato
+                sufijo = 2
+                while codigo_final in usados:
+                    codigo_final = f"{candidato}-{sufijo}"
+                    sufijo += 1
+                usados.add(codigo_final)
+
+                if p.codigo != codigo_final:
+                    p.codigo = codigo_final
+                    p.save(update_fields=['codigo'])
+                    actualizados += 1
+
+        return JsonResponse({
+            'success': True,
+            'actualizados': actualizados,
+            'total': len(productos),
+            'mensaje': f'Se renovaron {actualizados} producto(s) con "(ver)".'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

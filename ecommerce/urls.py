@@ -201,6 +201,8 @@ urlpatterns = [
     # Etiquetas (Xprinter XP-365B 50x25mm)
     path('panel/etiquetas/', admin_views.imprimir_etiquetas, name='imprimir_etiquetas'),
     path('panel/etiquetas/api/imprimir/', admin_views.api_imprimir_etiquetas_directo, name='api_imprimir_etiquetas_directo'),
+    path('panel/etiquetas/api/actualizar-codigo/', admin_views.api_actualizar_codigo_producto, name='api_actualizar_codigo_producto'),
+    path('panel/etiquetas/api/renovar-todos/', admin_views.api_renovar_todos_codigos, name='api_renovar_todos_codigos'),
     path('health/', admin_views.health_check, name='health_check'),
     path('importar-datos-maestros/', admin_views.importar_datos_maestros, name='importar_datos'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
