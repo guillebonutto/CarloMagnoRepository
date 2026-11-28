@@ -16,7 +16,7 @@
 	<div class="colors-grid">
 		{% for color in colores %}
 		<div class="color-card">
-			<div class="color-preview" data-color-hex="{{ color.hex_code }}">🎨</div>
+			<div class="color-preview" data-color-hex="{{ color.hex_code }}" data-color-name="{{ color.nombre }}">🎨</div>
 			<div class="color-info">
 				<h3>{{ color.nombre }}</h3>
 				<span class="hex-code">{{ color.hex_code }}</span>
@@ -42,9 +42,26 @@
 </div>
 {% load static %}
 <script>
-    // Aplicar colores desde data-attributes para evitar errores de parser CSS en el template
+    // Aplicar colores desde data-attributes (incluyendo rayas/patrones según el nombre)
+    const STRIPE_COLORS = [
+        ['blanc', '#ffffff'], ['negr', '#111111'], ['gris', '#808080'],
+        ['celest', '#7dd3fc'], ['azul', '#1d4ed8'], ['roj', '#dc2626'],
+        ['bord', '#7f1d1d'], ['verd', '#16a34a'], ['amarill', '#eab308'],
+        ['naranj', '#f97316'], ['ros', '#f472b6'], ['violet', '#7c3aed'],
+        ['beig', '#d6c6a5'], ['marron', '#78350f'], ['marrón', '#78350f']
+    ];
     document.querySelectorAll('[data-color-hex]').forEach(el => {
-        el.style.backgroundColor = el.dataset.colorHex;
+        const baseHex = el.dataset.colorHex || '#cccccc';
+        const name = (el.dataset.colorName || '').toLowerCase();
+        const isStriped = /rayas?|rallas?|franjas?|listad/.test(name);
+        if (isStriped) {
+            const afterCon = name.split(/con|y|\(/).slice(1).join(' ') || name;
+            const match = STRIPE_COLORS.find(([prefix]) => afterCon.includes(prefix));
+            const stripeHex = match ? match[1] : '#ffffff';
+            el.style.background = `repeating-linear-gradient(135deg, ${baseHex} 0px, ${baseHex} 14px, ${stripeHex} 14px, ${stripeHex} 22px)`;
+        } else {
+            el.style.backgroundColor = baseHex;
+        }
     });
 </script>
 <script src="{% static 'js/panel.js' %}"></script>

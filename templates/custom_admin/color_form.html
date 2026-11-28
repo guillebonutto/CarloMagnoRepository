@@ -29,13 +29,17 @@
 			</div>
 
 			<div class="form-group">
-				<label for="{{ form.description.id_for_label }}">Código Hexadecimal *</label>
-				{{ form.hex_code }} {{ form.hex_code.errors }}
+				<label for="{{ form.hex_code.id_for_label }}">Código Hexadecimal *</label>
+				<div style="display: flex; align-items: center; gap: 10px;">
+					{{ form.hex_code }}
+					<input type="color" id="color-picker-sync" style="width: 48px; height: 38px; border: 1px solid #ced4da; border-radius: 6px; cursor: pointer; padding: 2px;">
+				</div>
+				<small id="hex-color-name-hint" style="display: block; margin-top: 6px; color: #555; font-weight: 500;"></small>
+				{{ form.hex_code.errors }}
 			</div>
 
-			<div class="form-group">
-				<label for="{{ form.order.id_for_label }}">Órden de visualización *</label>
-				{{ form.order }} {{ form.order.errors }}
+			<div style="display: none;">
+				{{ form.order }}
 			</div>
 
 			<div class="form-actions">
@@ -47,4 +51,96 @@
 </div>
 {% load static %}
 <script src="{% static 'js/panel.js' %}"></script>
+<script>
+(function () {
+	const nombreInput = document.getElementById('{{ form.nombre.id_for_label }}');
+	const hexInput = document.getElementById('{{ form.hex_code.id_for_label }}');
+	const picker = document.getElementById('color-picker-sync');
+	const hint = document.getElementById('hex-color-name-hint');
+	if (!hexInput || !picker) return;
+
+	const PALETTE = [
+		['Negro', '#111111'], ['Blanco', '#ffffff'], ['Gris Oscuro', '#4a4a4a'],
+		['Gris', '#808080'], ['Gris Claro', '#d3d3d3'], ['Azul Marino', '#1e3a8a'],
+		['Azul', '#1d4ed8'], ['Celeste', '#7dd3fc'], ['Turquesa', '#14b8a6'],
+		['Rojo', '#dc2626'], ['Bordó', '#7f1d1d'], ['Rosa', '#f472b6'],
+		['Verde Oscuro', '#14532d'], ['Verde Oliva', '#6b8e23'], ['Verde', '#16a34a'],
+		['Amarillo', '#eab308'], ['Mostaza', '#d97706'], ['Naranja', '#f97316'],
+		['Violeta', '#7c3aed'], ['Lila', '#c084fc'], ['Beige', '#ede8d0'],
+		['Crema', '#fef3c7'], ['Camel', '#c19a6b'], ['Marrón', '#78350f']
+	];
+
+	function hexToRgb(h) {
+		const clean = (h || '').replace('#', '');
+		if (clean.length !== 6) return null;
+		return [parseInt(clean.slice(0,2), 16), parseInt(clean.slice(2,4), 16), parseInt(clean.slice(4,6), 16)];
+	}
+
+	function rgbToHsl(r, g, b) {
+		r /= 255; g /= 255; b /= 255;
+		const max = Math.max(r, g, b), min = Math.min(r, g, b);
+		let h = 0, s = 0, l = (max + min) / 2;
+		if (max !== min) {
+			const d = max - min;
+			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+			if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+			else if (max === g) h = ((b - r) / d + 2) / 6;
+			else h = ((r - g) / d + 4) / 6;
+		}
+		return [h * 360, s * 100, l * 100];
+	}
+
+	function closestColorName(hex) {
+		const rgb = hexToRgb(hex);
+		if (!rgb) return '';
+		const [hue, sat, light] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+		if (light <= 7 || (sat <= 12 && light <= 16)) return 'Negro';
+		if (light >= 94 && sat <= 15) return 'Blanco';
+		if (sat <= 12) return light < 38 ? 'Gris Oscuro' : (light > 72 ? 'Gris Claro' : 'Gris');
+		let best = PALETTE[0][0], bestDist = Infinity;
+		for (const [name, pHex] of PALETTE) {
+			const pRgb = hexToRgb(pHex);
+			const [pHue, pSat, pLight] = rgbToHsl(pRgb[0], pRgb[1], pRgb[2]);
+			if (pSat <= 12) continue;
+			const dh = Math.min(Math.abs(hue - pHue), 360 - Math.abs(hue - pHue)) / 180;
+			const ds = Math.abs(sat - pSat) / 100;
+			const dl = Math.abs(light - pLight) / 100;
+			const d = dh * dh * 5 + ds * ds * 1.5 + dl * dl * 1.2;
+			if (d < bestDist) { bestDist = d; best = name; }
+		}
+		let label = best;
+		if (!/oscuro|claro/i.test(label)) {
+			if (light < 20) label += ' Oscuro';
+			else if (light > 76) label += ' Claro';
+		}
+		return label;
+	}
+
+	function updateHint(hex) {
+		const name = closestColorName(hex);
+		if (hint) hint.textContent = name ? `Color aproximado: ${name} (${hex.toUpperCase()})` : '';
+	}
+
+	if (/^#[0-9a-fA-F]{6}$/.test(hexInput.value.trim())) {
+		picker.value = hexInput.value.trim();
+		updateHint(picker.value);
+	}
+
+	hexInput.addEventListener('input', () => {
+		const v = hexInput.value.trim();
+		if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+			picker.value = v;
+			updateHint(v);
+		}
+	});
+
+	picker.addEventListener('input', () => {
+		hexInput.value = picker.value.toUpperCase();
+		updateHint(picker.value);
+		if (nombreInput && !nombreInput.value.trim()) {
+			nombreInput.value = closestColorName(picker.value);
+		}
+	});
+})();
+</script>
 {% endblock %}

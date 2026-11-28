@@ -693,13 +693,24 @@ def eliminar_categoria(request, pk):
         'type': 'categoría'
     })
 
+def _hex_luminance(hex_code):
+    h = (hex_code or '').lstrip('#')
+    if len(h) != 6:
+        return 999999
+    try:
+        r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+        return 0.299 * r + 0.587 * g + 0.114 * b
+    except ValueError:
+        return 999999
+
+
 # Gestión de colores
 @login_required(login_url='login')
 def colores(request):
     if not request.user.is_staff:
         return redirect('home')
     
-    colores = Color.objects.all()
+    colores = sorted(Color.objects.all(), key=lambda c: _hex_luminance(c.hex_code))
     return render(request, 'custom_admin/colores.html', {'colores': colores})
 
 @login_required(login_url='login')

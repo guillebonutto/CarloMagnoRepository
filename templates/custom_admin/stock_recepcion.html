@@ -120,14 +120,18 @@
 							<span class="field-micro-label">Color</span>
 							<button type="button" class="link-quick-add" id="btn-quick-add-color">+ Color</button>
 						</div>
-						{{ form.color }}
+						<div class="content-select" data-searchable="true">
+							{{ form.color }}
+						</div>
 					</div>
 					<div>
 						<div class="section-label-with-action">
 							<span class="field-micro-label">Estilo / Corte</span>
 							<button type="button" class="link-quick-add" id="btn-quick-add-estilo">+ Estilo</button>
 						</div>
-						{{ form.estilo }}
+						<div class="content-select" data-searchable="true">
+							{{ form.estilo }}
+						</div>
 					</div>
 				</div>
 
@@ -137,7 +141,9 @@
 						<span class="field-micro-label">Tipo de Tela / Composición</span>
 						<button type="button" class="link-quick-add" id="btn-quick-add-tipo">+ Tela</button>
 					</div>
-					{{ form.tipo }}
+					<div class="content-select" data-searchable="true">
+						{{ form.tipo }}
+					</div>
 				</div>
 
 				<!-- Marca del Producto Escaneado -->
@@ -145,7 +151,9 @@
 					<div class="section-label-with-action">
 						<label for="{{ form.marca.id_for_label }}" class="field-micro-label">Marca</label>
 					</div>
-					{{ form.marca }}
+					<div class="content-select" data-searchable="true">
+						{{ form.marca }}
+					</div>
 				</div>
 
 				<!-- Precio del Producto Escaneado -->
@@ -1098,5 +1106,302 @@
 			alert('Error de conexión al registrar el producto.');
 		}
 	});
+</script>
+<style>
+	.content-select {
+		position: relative;
+		width: 100%;
+	}
+	.content-select-trigger {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		cursor: pointer;
+		padding: 7px 38px 7px 14px;
+		height: 40px;
+		background: #f0f0f0;
+		color: #555;
+		font-size: 0.92em;
+		font-family: 'Quicksand', sans-serif;
+		border: 2px solid rgba(0, 0, 0, 0.2);
+		border-radius: 20px;
+		position: relative;
+		transition: all 0.25s ease;
+		user-select: none;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.content-select-trigger:hover,
+	.content-select.open .content-select-trigger {
+		background: #B1E8CD;
+		border-color: #2AC176;
+		box-shadow: 0 0 0 3px rgba(42, 193, 118, 0.2);
+	}
+	.content-select i.cs-arrow {
+		position: absolute;
+		right: 16px;
+		top: calc(50% - 8px);
+		width: 12px;
+		height: 12px;
+		display: block;
+		border-left: 3px solid #2AC176;
+		border-bottom: 3px solid #2AC176;
+		transform: rotate(-45deg);
+		transition: all 0.25s ease;
+		pointer-events: none;
+	}
+	.content-select:hover i.cs-arrow { margin-top: 2px; }
+	.content-select.open i.cs-arrow { transform: rotate(135deg); top: calc(50% - 4px); }
+	.content-select-dropdown {
+		display: none;
+		position: absolute;
+		top: calc(100% + 4px);
+		left: 0;
+		right: 0;
+		background: #ffffff;
+		border: 2px solid #2AC176;
+		border-radius: 12px;
+		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+		z-index: 1050;
+		overflow: hidden;
+	}
+	.content-select.open .content-select-dropdown { display: block; }
+	.content-select-search {
+		width: 100%;
+		border: none;
+		border-bottom: 1px solid #e2e8f0;
+		padding: 8px 12px;
+		font-size: 0.88em;
+		outline: none;
+		background: #f8fafc;
+	}
+	.content-select-options {
+		max-height: 190px;
+		overflow-y: auto;
+		list-style: none;
+		margin: 0;
+		padding: 4px 0;
+	}
+	.content-select-option {
+		padding: 7px 12px;
+		font-size: 0.88em;
+		cursor: pointer;
+		color: #333;
+		transition: background 0.15s ease;
+	}
+	.content-select-option:hover,
+	.content-select-option.selected {
+		background: #B1E8CD;
+		color: #0f5132;
+		font-weight: 600;
+	}
+	.content-select-empty {
+		padding: 8px 12px;
+		font-size: 0.85em;
+		color: #888;
+		text-align: center;
+	}
+</style>
+<script>
+	const COLOR_HEX_BY_ID = {
+		{% for c in form.color.field.queryset %}
+		"{{ c.id }}": "{{ c.hex_code|default:'' }}",
+		{% endfor %}
+	};
+	(function () {
+		function isLightHex(hex) {
+			const h = (hex || '').replace('#', '');
+			if (h.length !== 6) return true;
+			const r = parseInt(h.slice(0, 2), 16);
+			const g = parseInt(h.slice(2, 4), 16);
+			const b = parseInt(h.slice(4, 6), 16);
+			return (0.299 * r + 0.587 * g + 0.114 * b) > 155;
+		}
+
+		function initSearchableSelect(wrapper) {
+			const select = wrapper.querySelector('select');
+			if (!select) return;
+
+			const trigger = document.createElement('div');
+			trigger.className = 'content-select-trigger';
+			const triggerText = document.createElement('span');
+			trigger.appendChild(triggerText);
+
+			const arrow = document.createElement('i');
+			arrow.className = 'cs-arrow';
+
+			const dropdown = document.createElement('div');
+			dropdown.className = 'content-select-dropdown';
+
+			const search = document.createElement('input');
+			search.type = 'text';
+			search.className = 'content-select-search';
+			search.placeholder = 'Buscar...';
+
+			const list = document.createElement('ul');
+			list.className = 'content-select-options';
+
+			dropdown.appendChild(search);
+			dropdown.appendChild(list);
+			wrapper.appendChild(trigger);
+			wrapper.appendChild(arrow);
+			wrapper.appendChild(dropdown);
+			select.style.display = 'none';
+
+			function syncTrigger() {
+				const selectedOpt = select.options[select.selectedIndex];
+				triggerText.textContent = selectedOpt ? selectedOpt.textContent : '';
+			}
+
+			function renderOptions(filter = '') {
+				const q = filter.trim().toLowerCase();
+				list.innerHTML = '';
+				let count = 0;
+				Array.from(select.options).forEach(opt => {
+					if (q && !opt.textContent.toLowerCase().includes(q)) return;
+					const li = document.createElement('li');
+					li.className = 'content-select-option' + (opt.value === select.value ? ' selected' : '');
+					li.textContent = opt.textContent;
+					const optHex = select.id === '{{ form.color.id_for_label }}' ? COLOR_HEX_BY_ID[opt.value] : '';
+					if (optHex) {
+						li.style.backgroundColor = optHex;
+						li.style.color = isLightHex(optHex) ? '#111111' : '#ffffff';
+					}
+					li.addEventListener('click', e => {
+						e.stopPropagation();
+						select.value = opt.value;
+						select.dispatchEvent(new Event('change', { bubbles: true }));
+						syncTrigger();
+						wrapper.classList.remove('open');
+					});
+					list.appendChild(li);
+					count++;
+				});
+				if (count === 0) {
+					const empty = document.createElement('li');
+					empty.className = 'content-select-empty';
+					empty.textContent = 'Sin resultados';
+					list.appendChild(empty);
+				}
+			}
+
+			trigger.addEventListener('click', e => {
+				e.stopPropagation();
+				const isOpen = wrapper.classList.contains('open');
+				document.querySelectorAll('.content-select.open').forEach(el => el.classList.remove('open'));
+				if (!isOpen) {
+					wrapper.classList.add('open');
+					search.value = '';
+					renderOptions();
+					setTimeout(() => search.focus(), 10);
+				}
+			});
+
+			search.addEventListener('click', e => e.stopPropagation());
+			search.addEventListener('input', () => renderOptions(search.value));
+			select.addEventListener('change', syncTrigger);
+
+			new MutationObserver(() => {
+				syncTrigger();
+				if (wrapper.classList.contains('open')) renderOptions(search.value);
+			}).observe(select, { childList: true });
+
+			syncTrigger();
+		}
+
+		document.querySelectorAll('.content-select[data-searchable="true"]').forEach(initSearchableSelect);
+		document.addEventListener('click', () => {
+			document.querySelectorAll('.content-select.open').forEach(el => el.classList.remove('open'));
+		});
+
+		// Auto-actualizar "Color visual" según el nombre del color
+		const colorNombreInput = document.getElementById('quick-color-nombre');
+		const colorHexInput = document.getElementById('quick-color-hex');
+		if (colorNombreInput && colorHexInput) {
+			const COLOR_MAP = {
+				'negro': '#111111', 'blanco': '#ffffff', 'gris': '#808080', 'gris oscuro': '#4a4a4a',
+				'gris claro': '#d3d3d3', 'plata': '#c0c0c0', 'azul': '#1d4ed8', 'azul marino': '#1e3a8a',
+				'marino': '#1e3a8a', 'azul francia': '#2563eb', 'celeste': '#7dd3fc', 'turquesa': '#14b8a6',
+				'rojo': '#dc2626', 'bordo': '#7f1d1d', 'bordó': '#7f1d1d', 'vino': '#722f37',
+				'granate': '#800000', 'rosa': '#f472b6', 'fucsia': '#d946ef', 'magenta': '#db2777',
+				'verde': '#16a34a', 'verde oscuro': '#14532d', 'verde oliva': '#65a30d', 'oliva': '#6b8e23',
+				'verde militar': '#4b5320', 'amarillo': '#eab308', 'mostaza': '#d97706', 'naranja': '#f97316',
+				'violeta': '#7c3aed', 'morado': '#6b21a8', 'lila': '#c084fc', 'purpura': '#9333ea',
+				'beige': '#d6c6a5', 'crema': '#fef3c7', 'crudo': '#f5f5dc', 'arena': '#e6d5b8',
+				'camel': '#c19a6b', 'marron': '#78350f', 'marrón': '#78350f', 'chocolate': '#4e2715',
+				'cafe': '#6f4e37', 'café': '#6f4e37', 'coral': '#fb7185', 'salmón': '#fa8072', 'salmon': '#fa8072'
+			};
+			function applyInputBg(hex) {
+				colorNombreInput.style.backgroundColor = hex;
+				colorNombreInput.style.color = isLightHex(hex) ? '#111111' : '#ffffff';
+			}
+			function rgbToHsl(r, g, b) {
+				r /= 255; g /= 255; b /= 255;
+				const max = Math.max(r, g, b), min = Math.min(r, g, b);
+				let h = 0, s = 0, l = (max + min) / 2;
+				if (max !== min) {
+					const d = max - min;
+					s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+					if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+					else if (max === g) h = ((b - r) / d + 2) / 6;
+					else h = ((r - g) / d + 4) / 6;
+				}
+				return [h * 360, s * 100, l * 100];
+			}
+			function closestColorName(hex) {
+				const h = (hex || '').replace('#', '');
+				if (h.length !== 6) return '';
+				const r = parseInt(h.slice(0,2), 16), g = parseInt(h.slice(2,4), 16), b = parseInt(h.slice(4,6), 16);
+				const [hue, sat, light] = rgbToHsl(r, g, b);
+				if (light <= 7 || (sat <= 12 && light <= 16)) return 'Negro';
+				if (light >= 94 && sat <= 15) return 'Blanco';
+				if (sat <= 12) return light < 38 ? 'Gris oscuro' : (light > 72 ? 'Gris claro' : 'Gris');
+				let best = '', bestDist = Infinity;
+				for (const [name, pHex] of Object.entries(COLOR_MAP)) {
+					const ph = pHex.replace('#', '');
+					const pr = parseInt(ph.slice(0,2), 16), pg = parseInt(ph.slice(2,4), 16), pb = parseInt(ph.slice(4,6), 16);
+					const [pHue, pSat, pLight] = rgbToHsl(pr, pg, pb);
+					if (pSat <= 12) continue;
+					const dh = Math.min(Math.abs(hue - pHue), 360 - Math.abs(hue - pHue)) / 180;
+					const ds = Math.abs(sat - pSat) / 100;
+					const dl = Math.abs(light - pLight) / 100;
+					const d = dh * dh * 5 + ds * ds * 1.5 + dl * dl * 1.2;
+					if (d < bestDist) { bestDist = d; best = name; }
+				}
+				if (!best) return '';
+				let label = best.charAt(0).toUpperCase() + best.slice(1);
+				if (!/oscuro|claro/i.test(label)) {
+					if (light < 20) label += ' oscuro';
+					else if (light > 76) label += ' claro';
+				}
+				return label;
+			}
+			colorNombreInput.addEventListener('input', () => {
+				const key = colorNombreInput.value.trim().toLowerCase();
+				if (!key) {
+					colorNombreInput.style.backgroundColor = '';
+					colorNombreInput.style.color = '';
+					return;
+				}
+				if (COLOR_MAP[key]) {
+					colorHexInput.value = COLOR_MAP[key];
+					applyInputBg(COLOR_MAP[key]);
+					return;
+				}
+				const partial = Object.keys(COLOR_MAP).find(k => key.includes(k));
+				if (partial) {
+					colorHexInput.value = COLOR_MAP[partial];
+					applyInputBg(COLOR_MAP[partial]);
+				}
+			});
+			colorHexInput.addEventListener('input', () => {
+				applyInputBg(colorHexInput.value);
+				const suggested = closestColorName(colorHexInput.value);
+				if (suggested) colorNombreInput.value = suggested;
+			});
+		}
+	})();
 </script>
 {% endblock %}
